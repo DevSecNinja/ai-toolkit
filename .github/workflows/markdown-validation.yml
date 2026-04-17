@@ -21,11 +21,11 @@ jobs:
     
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: Lint markdown files
         continue-on-error: true
-        uses: articulate/actions-markdownlint@v1
+        uses: articulate/actions-markdownlint@17b8abe7407cd17590c006ecc837c35e1ac3ed83 # v1
         with:
           config: .markdownlint.json
           files: '**/*.md'
@@ -37,11 +37,11 @@ jobs:
     
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: Check links in markdown files
         continue-on-error: true
-        uses: gaurav-nelson/github-action-markdown-link-check@v1
+        uses: gaurav-nelson/github-action-markdown-link-check@5c5dfc0ac2e225883c0e5f03a85311ec2830d368 # v1
         with:
           use-quiet-mode: 'yes'
           use-verbose-mode: 'no'
@@ -53,7 +53,7 @@ jobs:
     
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: Run validation script
         run: |
