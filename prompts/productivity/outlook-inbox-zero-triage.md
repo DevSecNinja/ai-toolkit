@@ -181,3 +181,7 @@ Keep the Teams message under 1500 chars when possible — if proposed drafts/RSV
 ## Credits
 
 Designed for Microsoft Copilot / Cowork with M365 tools (Outlook + Teams + Calendar). Originally built for a personal Inbox-zero workflow with Dutch/English mixed mail.
+
+## Feedback
+
+Have suggestions or found an issue with this prompt? [Click here to provide feedback](https://github.com/DevSecNinja/gpt-prompts/issues/new?title=Feedback%3A%20%5Bproductivity%5D%20Outlook%20Inbox-Zero%20Triage%20Pass&body=%23%23%20Feedback%20for%3A%20Outlook%20Inbox-Zero%20Triage%20Pass%0A%0A%2A%2APrompt%20location%2A%2A%3A%20%5Bprompts%2Fproductivity%2Foutlook-inbox-zero-triage.md%5D%28https%3A%2F%2Fgithub.com%2FDevSecNinja%2Fgpt-prompts%2Fblob%2Fmain%2Fprompts%2Fproductivity%2Foutlook-inbox-zero-triage.md%29%0A%0A%2A%2ACategory%2A%2A%3A%20productivity%0A%2A%2APrompt%20name%2A%2A%3A%20outlook-inbox-zero-triage%0A%0A---%0A%0A%3C%21--%20Please%20provide%20your%20feedback%20below%20--%3E%0A%0A&labels=enhancement).
