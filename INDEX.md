@@ -2,7 +2,7 @@
 
 > Auto-generated index of all available prompts
 
-Last updated: 2026-05-05 14:43:06 UTC
+Last updated: 2026-06-03 08:15:15 UTC
 
 ## 📂 Prompts
 
@@ -23,6 +23,7 @@ Last updated: 2026-05-05 14:43:06 UTC
 ### 📁 Productivity
 
 - **[Email Follow-up Tracker](/prompts/productivity/email-follow-up-tracker.md)** - Identifies sent emails that require follow-up by analyzing your sent items for questions, requests, or scheduling proposals that haven't received direct replies within a specified date range.
+- **[Focus Time Blocker](/prompts/productivity/focus-time-blocker.md)** - Analyzes your calendar for the day, identifies free gaps between existing meetings, and creatively arranges at least 2 hours of focus time as calendar events — flexible on block sizes and morning-preferred, while protecting lunch.
 - **[OOO Task Handoff Planner](/prompts/productivity/ooo-task-handoff-planner.md)** - Scans your recent emails to identify tasks requiring action before, during, or after an out-of-office period, then groups them into prioritized handoff buckets with delegates and deadlines.
 - **[Outlook Inbox-Zero Triage Pass](/prompts/productivity/outlook-inbox-zero-triage.md)** - Designed to bring the Inbox back to zero in one pass without sending anything or deleting anything. The agent classifies each mail using a strict rule order, surfaces calendar invites with an RSVP proposal grounded in your role and calendar conflicts, proposes language-matched placeholder replies for human asks (so you can review and confirm before the assistant sends them in an interactive turn), tags the original mail with `🦞 Draft Ready` so the inbox view shows which mails have a reply waiting, scans the Sent folder for stale threads waiting on others, and reports back over Teams.
 
