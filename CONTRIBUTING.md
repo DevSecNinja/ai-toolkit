@@ -63,6 +63,10 @@ Before submitting:
 3. Refine based on the output
 4. Include example use cases from your testing
 
+> **Tip:** After adding or editing a prompt, regenerate the
+> [APM](/docs/apm.md) primitives with `bash scripts/generate-apm-primitives.sh`
+> and commit the updated `.apm/prompts/` files alongside your prompt.
+
 ## 🚀 Submission Process
 
 1. **Fork** this repository

@@ -51,6 +51,19 @@ An organized repository of reusable GPT prompts to supercharge your AI interacti
 - **[Copilot Onboarding](/.github/prompts/copilot-onboarding.prompt.md)** - Onboard this repository to Copilot
 <!-- INDEX_END -->
 
+## 📦 Install via APM
+
+This collection is an [APM (Agent Package Manager)](https://microsoft.github.io/apm/)
+**producer**. Install every prompt as native commands in your AI harness
+(GitHub Copilot, Claude Code, Cursor, OpenCode, Gemini, Windsurf):
+
+```bash
+apm install DevSecNinja/gpt-prompts
+```
+
+See the [APM Producer Guide](/docs/apm.md) for how these artifacts are produced
+and consumed.
+
 ## 🤝 Contributing
 
 Want to share your favorite prompts? Contributions are welcome!

@@ -2,7 +2,7 @@
 
 > Auto-generated index of all available prompts
 
-Last updated: 2026-06-04 07:18:08 UTC
+Last updated: 2026-06-20 20:10:45 UTC
 
 ## 📂 Prompts
 
