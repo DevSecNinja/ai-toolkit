@@ -57,16 +57,26 @@ the [APM CLI](https://microsoft.github.io/apm/getting-started/installation/):
 apm install DevSecNinja/gpt-prompts
 ```
 
-`apm install` deploys each prompt to every detected harness, for example:
+`apm install` deploys each prompt to every detected harness. Each prompt keeps
+its `<category>-<name>` command name (e.g. `coding-code-review-assistant`), for
+example:
 
 | Harness | Where the prompt lands | How to invoke |
 |---------|------------------------|---------------|
-| GitHub Copilot | `.github/prompts/<name>.prompt.md` | prompts picker |
-| Claude Code | `.claude/commands/<name>.md` | `/<name>` |
-| Cursor | `.cursor/commands/<name>.md` | `/<name>` |
-| OpenCode | `.opencode/commands/<name>.md` | `/<name>` |
-| Gemini | `.gemini/commands/<name>.toml` | `/<name>` |
-| Windsurf | `.windsurf/workflows/<name>.md` | workflows menu |
+| GitHub Copilot | `.github/prompts/<category>-<name>.prompt.md` | prompts picker |
+| Claude Code | `.claude/commands/<category>-<name>.md` | `/<category>-<name>` |
+| Cursor | `.cursor/commands/<category>-<name>.md` | `/<category>-<name>` |
+| OpenCode | `.opencode/commands/<category>-<name>.md` | `/<category>-<name>` |
+| Gemini | `.gemini/commands/<category>-<name>.toml` | `/<category>-<name>` |
+| Windsurf | `.windsurf/workflows/<category>-<name>.md` | workflows menu |
+
+## 🏷️ Versioning
+
+The `version` field in `apm.yml` tracks the repository's GitHub releases. When a
+release is published, the [Sync APM Version](../.github/workflows/sync-apm-version.yml)
+workflow writes the release tag (with any leading `v` stripped) into `apm.yml`
+and commits it back to `main`, so the APM package version always matches the
+latest release. To bump the version, cut a GitHub release.
 
 ## ➕ Adding or updating a prompt
 

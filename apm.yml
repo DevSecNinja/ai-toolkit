@@ -9,6 +9,8 @@
 # The installable prompt primitives live under .apm/prompts/ and are generated
 # from the browsable prompts/ collection by scripts/generate-apm-primitives.sh.
 name: gpt-prompts
+# Kept in sync with the latest GitHub release tag by the Sync APM Version
+# workflow (.github/workflows/sync-apm-version.yml). Cut a release to bump it.
 version: 1.0.0
 description: A curated collection of high-quality, reusable GPT prompts as installable APM primitives.
 author: DevSecNinja

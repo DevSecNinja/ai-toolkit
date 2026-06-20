@@ -1,0 +1,50 @@
+name: Sync APM Version
+
+on:
+  release:
+    types: [published, edited]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to set in apm.yml (e.g. 1.2.3)"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  sync-version:
+    name: Sync APM manifest version
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          ref: main
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Determine version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "version=${{ github.event.inputs.version }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "version=${{ github.event.release.tag_name }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Sync apm.yml version
+        run: |
+          bash scripts/sync-apm-version.sh "${{ steps.version.outputs.version }}"
+
+      - name: Commit and push if changed
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          if git diff --quiet apm.yml; then
+            echo "apm.yml already up to date"
+            exit 0
+          fi
+          git add apm.yml
+          git commit -m "chore: Sync apm.yml version with release ${{ steps.version.outputs.version }} [skip ci]"
+          git push origin HEAD:main
