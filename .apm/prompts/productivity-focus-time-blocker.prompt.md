@@ -1,18 +1,16 @@
-# Focus Time Blocker
+---
+description: "Analyzes your calendar for the day, identifies free gaps between existing meetings, and creatively arranges at least 2 hours of focus time as calendar events — respecting your timezone and working hours, flexible on block sizes and morning-preferred, while protecting lunch."
+category: "productivity"
+title: "Focus Time Blocker"
+model: "claude-opus-4-7"
+platform: "Microsoft Copilot (Cowork / Microsoft 365)"
+tags: ["productivity", "calendar-management", "focus-time", "deep-work", "time-blocking", "microsoft-365"]
+example: |
+  Run this at the start of the workday — or schedule it as a recurring 6 AM task — to automatically defend deep-work time on a meeting-heavy calendar. Especially useful for knowledge workers, engineers, and sellers whose calendars get filled by recurring syncs and 1:1s, and who want a tool to carve out heads-down time without manually hunting for gaps. Because it honors timezone and working hours, blocks always land inside the real workday — no after-hours focus time.
+notes: |
+  - **Timezone aware**: The prompt explicitly checks your config
+---
 
-## Description
-
-Analyzes your calendar for the day, identifies free gaps between existing meetings, and creatively arranges at least 2 hours of focus time as calendar events — respecting your timezone and working hours, flexible on block sizes and morning-preferred, while protecting lunch.
-
-## AI Model
-
-- Platform: Microsoft Copilot (Cowork / Microsoft 365)
-- Model: Claude Opus 4.7
-- Version: claude-opus-4-7
-
-## Prompt
-
-``` text
 Plan focus blocks on my calendar for today. Check my calendar for the day and find free time slots between existing meetings.
 
 First, check my timezone and working hours settings, and follow both:
@@ -25,21 +23,3 @@ Prefer mornings when possible since focus tends to be better earlier in the day,
 Avoid scheduling over lunch (around 12:00-13:00, but lunch blocks might shift).
 Create the focus blocks as calendar events titled "Focus Time" with show-as set to "busy" so others see I'm unavailable.
 Do not invite anyone.
-```
-
-## Example Use Case
-
-Run this at the start of the workday — or schedule it as a recurring 6 AM task — to automatically defend deep-work time on a meeting-heavy calendar. Especially useful for knowledge workers, engineers, and sellers whose calendars get filled by recurring syncs and 1:1s, and who want a tool to carve out heads-down time without manually hunting for gaps. Because it honors timezone and working hours, blocks always land inside the real workday — no after-hours focus time.
-
-## Tags
-
-- productivity
-- calendar-management
-- focus-time
-- deep-work
-- time-blocking
-- microsoft-365
-
-## Notes
-
-- **Timezone aware**: The prompt explicitly checks your config

@@ -1,0 +1,126 @@
+# 📦 APM Producer Guide
+
+This repository (`ai-toolkit`) is an [**APM (Agent Package Manager)**](https://microsoft.github.io/apm/)
+**producer**. Its primitives can be installed directly into any supported AI
+coding harness — GitHub Copilot, Claude Code, Cursor, OpenCode, Gemini and
+Windsurf — as native, parameterized commands.
+
+> APM is Microsoft's open package manager for *agentic primitives* (prompts,
+> instructions, agents, skills, hooks and MCP servers). See the official
+> [producer documentation](https://microsoft.github.io/apm/producer/).
+
+## 🧩 Source of truth: `.apm/`
+
+`.apm/` is the **single source of truth**. Primitives are authored directly
+there in native APM format — there is no second "browsable" tree to keep in
+sync. The human-facing [`INDEX.md`](../INDEX.md) and the README index are
+*generated from* `.apm/`.
+
+Today the toolkit ships **prompt primitives**
+([`*.prompt.md`](https://microsoft.github.io/apm/producer/author-primitives/prompts/))
+under [`.apm/prompts/`](../.apm/prompts/). The structure is built to grow into
+`.apm/instructions/`, `.apm/agents/`, `.apm/hooks/` and `.apm/skills/` — just add
+the folder and author the primitive.
+
+| File / directory | Role |
+|------------------|------|
+| `apm.yml` | The producer manifest — package name, version and what ships. |
+| `.apm/prompts/*.prompt.md` | The prompt primitives (**source of truth**). |
+| `scripts/generate-index.sh` | Generates `INDEX.md` + README index **from** `.apm/`. |
+| `INDEX.md` / README index | Generated, human-browsable catalog. |
+
+### Primitive frontmatter
+
+Each `.apm/prompts/<category>-<name>.prompt.md` carries YAML frontmatter. Two
+keys drive everything:
+
+- `description` — APM-preserved; shown in command pickers (required).
+- `category` — repo-only; groups the generated index.
+
+Optional repo-only keys (`title`, `tags`, `model`, `platform`, `example`,
+`notes`) enrich the index and the future site. Note that APM only preserves a
+[fixed set of keys](https://microsoft.github.io/apm/producer/author-primitives/prompts/)
+(`description`, `input`, `allowed-tools`, `model`, `argument-hint`) at consumer
+install time — extra keys are retained in this repo but dropped from the
+installed command. The body after the frontmatter is the prompt, delivered
+verbatim to the harness.
+
+The command name is the filename: `coding-code-review-assistant.prompt.md` is
+exposed as `coding-code-review-assistant`. The `<category>-` prefix avoids
+cross-category collisions in the flat command namespace.
+
+## 🛠️ Generating the index
+
+```bash
+bash tests/validate-prompts.sh   # validate the .apm primitives
+bash scripts/generate-index.sh   # regenerate INDEX.md + README index
+```
+
+The [Generate Index](../.github/workflows/generate-index.yml) workflow runs this
+automatically whenever a primitive changes and commits the refreshed index.
+
+## 📥 How to consume these primitives
+
+```bash
+apm install DevSecNinja/ai-toolkit
+```
+
+> **Note:** `apm install <owner>/<repo>` resolves by **GitHub repository name**.
+> For `DevSecNinja/ai-toolkit` to work, the GitHub repo must be named
+> `ai-toolkit` (matching `apm.yml`'s `name`). Until the repo is renamed, install
+> from the current repository name.
+
+`apm install` deploys each prompt to every detected harness, keeping its
+`<category>-<name>` command name:
+
+| Harness | Where the prompt lands | How to invoke |
+|---------|------------------------|---------------|
+| GitHub Copilot | `.github/prompts/<category>-<name>.prompt.md` | prompts picker |
+| Claude Code | `.claude/commands/<category>-<name>.md` | `/<category>-<name>` |
+| Cursor | `.cursor/commands/<category>-<name>.md` | `/<category>-<name>` |
+| OpenCode | `.opencode/commands/<category>-<name>.md` | `/<category>-<name>` |
+| Gemini | `.gemini/commands/<category>-<name>.toml` | `/<category>-<name>` |
+| Windsurf | `.windsurf/workflows/<category>-<name>.md` | workflows menu |
+
+## 🏷️ Versioning
+
+Versioning is driven by [release-please](https://github.com/googleapis/release-please)
+via the central `DevSecNinja/.github` reusable workflow
+([`.github/workflows/release-please.yml`](../.github/workflows/release-please.yml)).
+
+The flow:
+
+1. Every push to `main` opens or updates a `chore(main): release vX.Y.Z` PR,
+   with the next [semver](https://semver.org/) computed from
+   [Conventional Commits](https://www.conventionalcommits.org/) since the last tag.
+2. Merging that PR bumps `.release-please-manifest.json`, **`apm.yml`'s `version:`
+   field** (via the `extra-files` entry in
+   [`release-please-config.json`](../release-please-config.json)) and
+   `CHANGELOG.md`, then creates the `vX.Y.Z` tag and the GitHub Release.
+
+Because `apm.yml` is bumped *inside the release PR*, the tagged commit always
+carries the matching version — so **pinned installs (`@1.2.3`) resolve to a tree
+whose `apm.yml` says `1.2.3`**. (This replaces the earlier post-release sync
+workflow, which bumped `apm.yml` *after* tagging and left the tag tree stale.)
+
+> The `# x-release-please-version` annotation on the `version:` line in `apm.yml`
+> is what the generic updater keys off — keep it intact.
+
+To force a specific version, add a `Release-As: X.Y.Z` footer to any commit on
+`main`. See the org
+[release-please onboarding guide](https://github.com/DevSecNinja/.github/blob/main/docs/release-please-onboarding.md)
+for prerequisites (GitHub App install, the `RELEASE_PLEASE_APP_ID` variable and
+`RELEASE_PLEASE_APP_PRIVATE_KEY` secret, and the "Allow GitHub Actions to create
+and approve pull requests" setting).
+
+## ➕ Adding or updating a primitive
+
+Author the primitive directly under `.apm/` (see
+[`PROMPT_TEMPLATE.md`](../PROMPT_TEMPLATE.md) for the prompt frontmatter), then:
+
+```bash
+bash tests/validate-prompts.sh   # validate
+bash scripts/generate-index.sh   # refresh INDEX.md / README
+```
+
+Commit the primitive together with the regenerated index files.

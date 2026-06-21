@@ -20,7 +20,7 @@ The message should:
 3. **Key Features**: List 3-5 bullet points about what the prompt does using clear, non-technical language
 4. **Usage Instructions**: Explain how to use the prompt (which AI platform, any special settings)
 5. **Value Proposition**: Mention when/why someone would use this
-6. **Repository Link**: Include the path to the prompt file in the gpt-prompts repository
+6. **Repository Link**: Include the path to the prompt file in the ai-toolkit repository
 7. **Call to Action**: Invite feedback or suggestions
 
 ## Style Guidelines
@@ -50,7 +50,7 @@ Hey team!
 
 [When/why to use this]
 
-If you want to try it out, it's in my gpt-prompts repo: `https://github.com/DevSecNinja/gpt-prompts/`
+If you want to try it out, it's in my ai-toolkit repo: `https://github.com/DevSecNinja/ai-toolkit/`
 
 Let me know if you find it useful or have any suggestions to improve it!
 ```

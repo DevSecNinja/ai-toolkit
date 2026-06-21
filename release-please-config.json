@@ -1,0 +1,25 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "release-type": "simple",
+  "include-component-in-tag": false,
+  "include-v-in-tag": true,
+  "skip-github-release": false,
+  "bump-minor-pre-major": false,
+  "bump-patch-for-minor-pre-major": false,
+  "draft": false,
+  "draft-pull-request": true,
+  "prerelease": false,
+  "packages": {
+    ".": {
+      "release-type": "simple",
+      "package-name": "ai-toolkit",
+      "changelog-path": "CHANGELOG.md",
+      "extra-files": [
+        {
+          "type": "generic",
+          "path": "apm.yml"
+        }
+      ]
+    }
+  }
+}
