@@ -2,9 +2,9 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Pre-commit: Run All Files",
+            "label": "Lefthook: Run pre-commit",
             "type": "shell",
-            "command": "pre-commit run --all-files",
+            "command": "mise exec -- lefthook run pre-commit --all-files",
             "group": "test",
             "problemMatcher": [],
             "presentation": {

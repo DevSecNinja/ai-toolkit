@@ -1,0 +1,18 @@
+# Git hooks managed by lefthook (https://lefthook.dev).
+# Mirrors the repo's CI quality gates so issues are caught before they reach CI.
+# lefthook is pinned in .mise.toml; install the hooks with:
+#   mise exec -- lefthook install
+
+[pre-commit]
+parallel = false
+
+# Must-pass gate: every .apm/ primitive and repo-local prompt is well-formed.
+[pre-commit.commands.validate-prompts]
+run = "bash tests/validate-prompts.sh"
+
+# Regenerate INDEX.md / README index from .apm/ and re-stage the result, so the
+# generated index never drifts from the primitives (the common contributor miss).
+[pre-commit.commands.generate-index]
+run = "bash scripts/generate-index.sh"
+glob = [".apm/prompts/*.prompt.md"]
+stage_fixed = true

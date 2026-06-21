@@ -1,0 +1,5 @@
+# renovate: datasource=github-releases depName=jdx/mise
+min_version = "2026.6.11"
+
+[tools]
+lefthook = "2.1.9"
