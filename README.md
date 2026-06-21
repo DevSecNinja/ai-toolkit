@@ -54,6 +54,12 @@ An organized, reusable toolkit of AI primitives to supercharge your AI coding ha
 
 - **[Commit And Release](/.apm/skills/commit-and-release/SKILL.md)** - Use when asked to commit, write a commit message, stage files, open a pull request, or cut a release in a DevSecNinja repo. Guides Conventional Commit messages, Conventional-Commit PR titles (repos squash-merge), the pre-commit/validate workflow, and the release-please release flow.
 
+## 🧑‍✈️ Agents
+
+> Invocable specialist personas deployed to each harness's agents directory
+
+- **[Dutch Real Estate Agent](/.apm/agents/dutch-real-estate-agent.agent.md)** - Use when: helping users find, compare, and evaluate homes in the Netherlands, including Dutch housing market research, Funda searches, buying or renting process guidance, bidding strategy, legal considerations, mortgages, VvE, erfpacht, NHG, transfer tax, and neighborhood due diligence.
+
 ## 🤖 GitHub Copilot Prompts
 
 > Prompts optimized for use with GitHub Copilot in this repository

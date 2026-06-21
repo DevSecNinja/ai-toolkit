@@ -20,17 +20,19 @@ The toolkit ships **prompt primitives**
 ([`*.prompt.md`](https://microsoft.github.io/apm/producer/author-primitives/prompts/))
 under [`.apm/prompts/`](../.apm/prompts/), **instruction primitives**
 ([`*.instructions.md`](https://microsoft.github.io/apm/producer/author-primitives/instructions-and-agents/))
-under [`.apm/instructions/`](../.apm/instructions/), and **skill primitives**
+under [`.apm/instructions/`](../.apm/instructions/), **agent primitives**
+([`*.agent.md`](https://microsoft.github.io/apm/producer/author-primitives/instructions-and-agents/))
+under [`.apm/agents/`](../.apm/agents/), and **skill primitives**
 ([`SKILL.md`](https://microsoft.github.io/apm/producer/author-primitives/skills/))
 under [`.apm/skills/<name>/`](../.apm/skills/). The structure is built to grow
-further into `.apm/agents/` and `.apm/hooks/` — just add the folder and author the
-primitive.
+further into `.apm/hooks/` — just add the folder and author the primitive.
 
 | File / directory | Role |
 |------------------|------|
 | `apm.yml` | The producer manifest — package name, version, MCP servers, and what ships. |
 | `.apm/prompts/*.prompt.md` | The prompt primitives (**source of truth**). |
 | `.apm/instructions/*.instructions.md` | The instruction primitives — long-lived behavior rules (**source of truth**). |
+| `.apm/agents/*.agent.md` | The agent primitives — invocable specialist personas (**source of truth**). |
 | `.apm/skills/<name>/SKILL.md` | The skill primitives — model-invoked procedures (**source of truth**). |
 | `scripts/generate-index.sh` | Generates `INDEX.md` + README index **from** `.apm/`. |
 | `INDEX.md` / README index | Generated, human-browsable catalog. |
