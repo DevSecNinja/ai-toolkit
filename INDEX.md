@@ -2,7 +2,7 @@
 
 > Auto-generated index of all available APM primitives
 
-Last updated: 2026-06-21 07:25:02 UTC
+Last updated: 2026-06-21 07:25:20 UTC
 
 ## 📂 Prompts
 
