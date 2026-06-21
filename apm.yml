@@ -14,7 +14,7 @@ name: ai-toolkit
 # `extra-files` entry in release-please-config.json). The annotation on the
 # line below is what the generic updater keys off — keep it intact.
 version: 0.0.0 # x-release-please-version
-description: A curated, multi-harness toolkit of AI primitives (prompts today; instructions, agents and hooks next) installable via APM.
+description: A curated, multi-harness toolkit of AI primitives (prompts, instructions, agents and hooks) installable via APM.
 author: DevSecNinja
 dependencies:
   apm: []
