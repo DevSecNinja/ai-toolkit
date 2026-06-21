@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.3.0](https://github.com/DevSecNinja/ai-toolkit/compare/v0.2.0...v0.3.0) (2026-06-21)
+
+
+### Features
+
+* add commit-and-release skill primitive ([#23](https://github.com/DevSecNinja/ai-toolkit/issues/23)) ([e009983](https://github.com/DevSecNinja/ai-toolkit/commit/e00998393f240de1cbaf1ec7a054f294a4365263))
+* declare GitHub and Microsoft Learn MCP servers ([#24](https://github.com/DevSecNinja/ai-toolkit/issues/24)) ([19fd62b](https://github.com/DevSecNinja/ai-toolkit/commit/19fd62beaf1ea1f429e8a6c16b099c6e33163cba))
+* migrate Dutch Real Estate Agent into .apm/ as an agent primitive ([#25](https://github.com/DevSecNinja/ai-toolkit/issues/25)) ([c662d36](https://github.com/DevSecNinja/ai-toolkit/commit/c662d36fcda29b24ba5b1472117b4f3a0e46769e))
+
 ## [0.2.0](https://github.com/DevSecNinja/ai-toolkit/compare/v0.1.1...v0.2.0) (2026-06-21)
 
 
