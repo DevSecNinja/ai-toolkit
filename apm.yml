@@ -10,9 +10,10 @@
 # INDEX.md and the README index are generated FROM .apm/ by
 # scripts/generate-index.sh (the browsable view is derived, not duplicated).
 name: ai-toolkit
-# Kept in sync with the latest GitHub release tag by the Sync APM Version
-# workflow (.github/workflows/sync-apm-version.yml). Cut a release to bump it.
-version: 1.0.0
+# Bumped automatically by release-please inside the release PR (see the
+# `extra-files` entry in release-please-config.json). The annotation on the
+# line below is what the generic updater keys off — keep it intact.
+version: 1.0.0 # x-release-please-version
 description: A curated, multi-harness toolkit of AI primitives (prompts today; instructions, agents and hooks next) installable via APM.
 author: DevSecNinja
 dependencies:

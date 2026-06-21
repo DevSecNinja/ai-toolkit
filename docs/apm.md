@@ -84,16 +84,34 @@ apm install DevSecNinja/ai-toolkit
 
 ## 🏷️ Versioning
 
-The `version` field in `apm.yml` tracks the repository's GitHub releases. When a
-release is published, the [Sync APM Version](../.github/workflows/sync-apm-version.yml)
-workflow writes the release tag (leading `v` stripped) into `apm.yml` and commits
-it back to `main`.
+Versioning is driven by [release-please](https://github.com/googleapis/release-please)
+via the central `DevSecNinja/.github` reusable workflow
+([`.github/workflows/release-please.yml`](../.github/workflows/release-please.yml)).
 
-> **Caveat:** the bump lands on `main` *after* the release is cut, so the tag's
-> tree still carries the previous version. `apm install` from `main`/latest is
-> always correct; if you rely on **pinned** installs (`@1.2.3`), bump `apm.yml`
-> *before* tagging — e.g. via `workflow_dispatch` on the Sync APM Version
-> workflow — so the tagged commit already holds the right version.
+The flow:
+
+1. Every push to `main` opens or updates a `chore(main): release vX.Y.Z` PR,
+   with the next [semver](https://semver.org/) computed from
+   [Conventional Commits](https://www.conventionalcommits.org/) since the last tag.
+2. Merging that PR bumps `.release-please-manifest.json`, **`apm.yml`'s `version:`
+   field** (via the `extra-files` entry in
+   [`release-please-config.json`](../release-please-config.json)) and
+   `CHANGELOG.md`, then creates the `vX.Y.Z` tag and the GitHub Release.
+
+Because `apm.yml` is bumped *inside the release PR*, the tagged commit always
+carries the matching version — so **pinned installs (`@1.2.3`) resolve to a tree
+whose `apm.yml` says `1.2.3`**. (This replaces the earlier post-release sync
+workflow, which bumped `apm.yml` *after* tagging and left the tag tree stale.)
+
+> The `# x-release-please-version` annotation on the `version:` line in `apm.yml`
+> is what the generic updater keys off — keep it intact.
+
+To force a specific version, add a `Release-As: X.Y.Z` footer to any commit on
+`main`. See the org
+[release-please onboarding guide](https://github.com/DevSecNinja/.github/blob/main/docs/release-please-onboarding.md)
+for prerequisites (GitHub App install, the `RELEASE_PLEASE_APP_ID` variable and
+`RELEASE_PLEASE_APP_PRIVATE_KEY` secret, and the "Allow GitHub Actions to create
+and approve pull requests" setting).
 
 ## ➕ Adding or updating a primitive
 

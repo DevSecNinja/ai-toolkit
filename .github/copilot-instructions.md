@@ -25,12 +25,13 @@ in native APM format. `INDEX.md` and the README index are **generated from**
 │   └── prompts/                # Prompt primitives (SOURCE OF TRUTH)
 │       └── <category>-<name>.prompt.md
 ├── apm.yml                     # APM producer manifest (name, version, includes)
+├── release-please-config.json  # release-please config (bumps apm.yml via extra-files)
+├── .release-please-manifest.json
 ├── .github/
 │   ├── prompts/                # Repo-local Copilot prompts (not shipped in the package)
 │   └── workflows/              # CI/CD automation
 ├── scripts/
-│   ├── generate-index.sh       # Generates INDEX.md + README index FROM .apm/
-│   └── sync-apm-version.sh     # Syncs apm.yml version with a GitHub release tag
+│   └── generate-index.sh       # Generates INDEX.md + README index FROM .apm/
 ├── tests/
 │   └── validate-prompts.sh     # Validates .apm/ primitives + .github/prompts
 ├── docs/apm.md                 # APM producer guide
@@ -75,9 +76,10 @@ bash scripts/generate-index.sh   # regenerate INDEX.md + README index (~1s)
   `README.md` (`[skip ci]`).
 - **Markdown Validation** (`markdown-validation.yml`): markdownlint + link check
   (informational) and `validate-prompts.sh` (MUST pass).
-- **Sync APM Version** (`sync-apm-version.yml`): on `release: published`/`edited`
-  (or `workflow_dispatch`), runs `sync-apm-version.sh` to write the release tag
-  into `apm.yml` and commits it to `main`.
+- **Release Please** (`release-please.yml`): on push to `main` (or
+  `workflow_dispatch`), calls the central `DevSecNinja/.github` reusable workflow
+  to open/update a release PR. Merging it bumps `apm.yml` (via the config's
+  `extra-files`) + `CHANGELOG.md`, tags `vX.Y.Z`, and publishes the GitHub Release.
 - **Welcome** (`welcome.yml`): greets first-time contributors.
 
 ## Adding or modifying a primitive

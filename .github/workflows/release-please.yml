@@ -1,0 +1,41 @@
+---
+name: Release Please
+
+# Drives semver bumping + CHANGELOG.md generation via the central
+# DevSecNinja/.github reusable workflow. On every push to main this opens
+# (or updates) a `chore(main): release vX.Y.Z` PR computed from
+# Conventional Commits. Merging that PR bumps the manifest, apm.yml
+# version (via the config's extra-files) and CHANGELOG.md, then creates
+# the `vX.Y.Z` tag and the GitHub Release.
+#
+# The release PR is opened by the DevSecNinja Release Please GitHub App
+# (not GITHUB_TOKEN) so required CI checks fire on it — see
+# DevSecNinja/.github docs/release-please-onboarding.md.
+#
+# Reusable workflow:
+#   https://github.com/DevSecNinja/.github/blob/main/.github/workflows/release-please.yml
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-please
+  cancel-in-progress: false
+
+jobs:
+  release-please:
+    # renovate: datasource=github-tags depName=DevSecNinja/.github
+    uses: DevSecNinja/.github/.github/workflows/release-please.yml@c1725a7573e1cb5277889d925901b477ee814352 # v1.7.0
+    permissions:
+      contents: write
+      pull-requests: write
+    with:
+      app-id: ${{ vars.RELEASE_PLEASE_APP_ID }}
+    secrets:
+      app-private-key: ${{ secrets.RELEASE_PLEASE_APP_PRIVATE_KEY }}
