@@ -1,57 +1,22 @@
-# [Prompt Title]
+---
+# APM prompt primitive — authored directly under .apm/prompts/<category>-<name>.prompt.md
+# `description` and `category` are required. Other keys are optional and enrich
+# the generated index / future site.
+description: "Brief 1-2 sentence summary of what this prompt does (shown in command pickers)."
+category: "coding"            # groups the index; matches the filename prefix
+title: "Prompt Title"          # human-readable title for the index
+model: "claude-opus-4-7"       # optional: preferred model slug (APM-preserved)
+platform: "GitHub Copilot"     # optional: platform it was designed/tested for
+tags: ["tag1", "tag2", "tag3"]
+example: |
+  Describe when and how to use this prompt effectively.
+notes: |
+  Any additional context, variations, or tips for using this prompt.
+---
 
-## Description
-
-[Brief 1-2 sentence description of what this prompt does]
-
-## AI Model
-
-[Specify the AI model this prompt was designed for or tested with. Examples:
-
-- **Platform**: ChatGPT, Claude, GitHub Copilot, Microsoft Security Copilot, Google Gemini, etc.
-- **Model**: GPT-4, GPT-4 Turbo, Claude Sonnet 4.5, Claude Opus, etc.
-- **Version**: Specific version number if applicable
-
-You can use this format:
-
-- Platform: ChatGPT
-- Model: GPT-4 Turbo
-- Version: gpt-4-turbo-2024-04-09
-
-Or a simpler format:
-
-- Claude Sonnet 4.5
-]
-
-## Prompt
-
-``` text
-[Your complete prompt goes here. Be specific and clear about:
+[Your complete prompt goes here. Everything after the frontmatter is delivered
+verbatim to the harness. Be specific and clear about:
 - The role or expertise the AI should take
 - The task or output expected
 - Any specific format or structure requirements
 - Guidelines or constraints]
-```
-
-## Example Use Case
-
-[Describe when and how to use this prompt effectively]
-
-## Tags
-
-- [tag1]
-- [tag2]
-- [tag3]
-
-## Credits
-
-[Attribution for the prompt creator(s) or sources. Examples:
-
-- Created by: [Your Name]
-- Inspired by: [Source]
-- Contributors: [Names]
-]
-
-## Notes
-
-[Any additional context, variations, or tips for using this prompt]

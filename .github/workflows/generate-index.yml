@@ -1,14 +1,14 @@
-name: Generate Prompt Index
+name: Generate Index
 
 on:
   push:
     branches: [ main ]
     paths:
-      - 'prompts/**/*.md'
+      - '.apm/prompts/**'
       - '.github/prompts/**/*.md'
   pull_request:
     paths:
-      - 'prompts/**/*.md'
+      - '.apm/prompts/**'
       - '.github/prompts/**/*.md'
   workflow_dispatch:
 
@@ -17,9 +17,9 @@ permissions:
 
 jobs:
   generate-index:
-    name: Generate Prompt Index
+    name: Generate Index
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
@@ -30,22 +30,18 @@ jobs:
         run: |
           bash scripts/generate-index.sh
 
-      - name: Generate APM primitives
-        run: |
-          bash scripts/generate-apm-primitives.sh
-
       - name: Check for changes
         id: git-check
         run: |
-          git diff --exit-code INDEX.md README.md .apm/prompts || echo "changed=true" >> $GITHUB_OUTPUT
+          git diff --exit-code INDEX.md README.md || echo "changed=true" >> $GITHUB_OUTPUT
 
       - name: Commit and push if changed
         if: steps.git-check.outputs.changed == 'true'
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add INDEX.md README.md .apm/prompts
-          git commit -m "docs: Update prompt index [skip ci]"
+          git add INDEX.md README.md
+          git commit -m "docs: Update index [skip ci]"
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             branch="${{ github.head_ref }}"
           else

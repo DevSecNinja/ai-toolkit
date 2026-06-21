@@ -1,18 +1,19 @@
 # APM (Agent Package Manager) producer manifest.
 # https://microsoft.github.io/apm/producer/
 #
-# This manifest turns the repository into an APM producer. Consumers can run
-#   apm install DevSecNinja/gpt-prompts
-# to deploy the prompts in this collection as native slash commands / prompts in
-# their AI harness (GitHub Copilot, Claude, Cursor, OpenCode, Gemini, Windsurf).
+# This repository is an APM producer. Consumers can run
+#   apm install DevSecNinja/ai-toolkit
+# to deploy these primitives as native commands / prompts in their AI harness
+# (GitHub Copilot, Claude, Cursor, OpenCode, Gemini, Windsurf).
 #
-# The installable prompt primitives live under .apm/prompts/ and are generated
-# from the browsable prompts/ collection by scripts/generate-apm-primitives.sh.
-name: gpt-prompts
+# .apm/ is the single source of truth — primitives are authored directly there.
+# INDEX.md and the README index are generated FROM .apm/ by
+# scripts/generate-index.sh (the browsable view is derived, not duplicated).
+name: ai-toolkit
 # Kept in sync with the latest GitHub release tag by the Sync APM Version
 # workflow (.github/workflows/sync-apm-version.yml). Cut a release to bump it.
 version: 1.0.0
-description: A curated collection of high-quality, reusable GPT prompts as installable APM primitives.
+description: A curated, multi-harness toolkit of AI primitives (prompts today; instructions, agents and hooks next) installable via APM.
 author: DevSecNinja
 dependencies:
   apm: []

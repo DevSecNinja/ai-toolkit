@@ -1,90 +1,70 @@
 #!/bin/bash
 
-# Script to validate prompt files have required sections
-# Required sections: Title (# heading), Description, Prompt
-# Category is derived from folder location, not required in file
+# Validate APM primitives in .apm/ and repo-local prompts in .github/prompts/.
+#
+# .apm/ is the single source of truth. Each primitive must:
+#   - start with YAML frontmatter (--- ... ---)
+#   - declare a non-empty `description` (APM-preserved, required for discoverability)
+#   - declare a `category` (used to group the generated index)
+#   - have a non-empty body after the frontmatter (delivered to the harness)
 
-set -e
-
-# Enable globstar for ** pattern matching and nullglob to handle no matches
+set -euo pipefail
 shopt -s globstar nullglob
 
 EXIT_CODE=0
 
-echo "🔍 Validating prompt structure..."
+echo "🔍 Validating APM primitives..."
 echo ""
 
-# Function to check if file has YAML frontmatter
 has_frontmatter() {
   head -n 1 "$1" | grep -q "^---$"
 }
 
-# Check prompts directory
-for file in prompts/**/*.md .github/prompts/**/*.md; do
-  # Skip if not a regular file (nullglob prevents literal pattern iteration)
+# Print the body (everything after the closing frontmatter ---).
+body_after_frontmatter() {
+  awk 'BEGIN{n=0} /^---$/{n++; next} n>=2{print}' "$1"
+}
+
+for file in .apm/prompts/**/*.prompt.md; do
   [ -f "$file" ] || continue
-  
   echo "Checking $file..."
-  
   FILE_VALID=1
-  
-  # Check if file is in .github/prompts directory
-  if [[ "$file" == .github/prompts/* ]]; then
-    # Files in .github/prompts should use YAML frontmatter format
-    if has_frontmatter "$file"; then
-      # Validate frontmatter format
-      if ! grep -q "^description:" "$file"; then
-        echo "❌ Missing 'description' field in frontmatter in $file"
-        EXIT_CODE=1
-        FILE_VALID=0
-      fi
-      
-      # Frontmatter files don't require traditional markdown sections
-      # The content after frontmatter is the prompt itself
-    else
-      echo "❌ File in .github/prompts must use YAML frontmatter format in $file"
-      EXIT_CODE=1
-      FILE_VALID=0
-    fi
+
+  if ! has_frontmatter "$file"; then
+    echo "❌ Missing YAML frontmatter in $file"; EXIT_CODE=1; FILE_VALID=0
   else
-    # Files in prompts/ directory should use traditional markdown format
-    if has_frontmatter "$file"; then
-      echo "❌ Files in prompts/ directory should not use YAML frontmatter in $file"
-      EXIT_CODE=1
-      FILE_VALID=0
+    if ! grep -q "^description:" "$file"; then
+      echo "❌ Missing 'description' field in frontmatter in $file"; EXIT_CODE=1; FILE_VALID=0
     fi
-    
-    # Validate traditional markdown format
-    # Check for required headers
-    if ! grep -q "^# " "$file"; then
-      echo "❌ Missing title (# heading) in $file"
-      EXIT_CODE=1
-      FILE_VALID=0
+    if ! grep -q "^category:" "$file"; then
+      echo "❌ Missing 'category' field in frontmatter in $file"; EXIT_CODE=1; FILE_VALID=0
     fi
-    
-    if ! grep -q "^## Description" "$file"; then
-      echo "❌ Missing Description section in $file"
-      EXIT_CODE=1
-      FILE_VALID=0
-    fi
-    
-    if ! grep -q "^## Prompt" "$file"; then
-      echo "❌ Missing Prompt section in $file"
-      EXIT_CODE=1
-      FILE_VALID=0
+    if [ -z "$(body_after_frontmatter "$file" | tr -d '[:space:]')" ]; then
+      echo "❌ Empty prompt body in $file"; EXIT_CODE=1; FILE_VALID=0
     fi
   fi
-  
-  if [ $FILE_VALID -eq 1 ]; then
+
+  [ $FILE_VALID -eq 1 ] && echo "✅ $file is valid"
+  echo ""
+done
+
+# Repo-local Copilot prompts (not part of the shipped package).
+for file in .github/prompts/**/*.md; do
+  [ -f "$file" ] || continue
+  echo "Checking $file..."
+  if has_frontmatter "$file" && grep -q "^description:" "$file"; then
     echo "✅ $file is valid"
+  else
+    echo "❌ File in .github/prompts must use YAML frontmatter with a description in $file"
+    EXIT_CODE=1
   fi
   echo ""
 done
 
 if [ $EXIT_CODE -eq 0 ]; then
-  echo "✅ All prompts are properly structured!"
+  echo "✅ All primitives are properly structured!"
 else
-  echo "❌ Some prompts are missing required sections"
+  echo "❌ Some primitives are missing required fields"
 fi
 
 exit $EXIT_CODE

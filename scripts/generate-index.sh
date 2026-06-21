@@ -1,138 +1,94 @@
 #!/bin/bash
 
-# Script to generate INDEX.md from all prompt files
-# Scans prompts/ and .github/prompts/ directories
+# Script to generate INDEX.md from the APM primitives in .apm/.
+#
+# .apm/ is the single source of truth. Each .apm/prompts/<category>-<name>.prompt.md
+# carries `title`, `category` and `description` in its YAML frontmatter. This
+# script reads those, groups by category, and writes INDEX.md plus the
+# auto-generated block in README.md.
 
-set -e
+set -euo pipefail
+shopt -s nullglob
 
 echo "📑 Generating prompt index..."
 
-# Create the header
-cat > INDEX.md << EOF
-# 📑 Prompt Index
+# Extract a single scalar frontmatter field (handles quoted values).
+get_field() {
+  awk -v key="$2" '
+    NR==1 && $0!="---" { exit }
+    NR==1 { infm=1; next }
+    infm && $0=="---" { exit }
+    infm {
+      if ($0 ~ "^" key ":") {
+        sub("^" key ": *", "")
+        gsub(/^["'\'']|["'\'']$/, "")
+        print
+        exit
+      }
+    }
+  ' "$1"
+}
 
-> Auto-generated index of all available prompts
+# Title-case a slug like "home-assistant" -> "Home Assistant".
+titlecase() {
+  echo "$1" | sed 's/-/ /g' | awk '{ for (i=1;i<=NF;i++){ $i=toupper(substr($i,1,1)) substr($i,2) } print }'
+}
+
+cat > INDEX.md << EOF
+# 📑 Primitive Index
+
+> Auto-generated index of all available APM primitives
 
 Last updated: $(TZ=UTC date '+%Y-%m-%d %H:%M:%S %Z')
 
 EOF
 
-# Function to check if file has YAML frontmatter
-has_frontmatter() {
-  head -n 1 "$1" | grep -q "^---$"
-}
-
-# Function to extract description from YAML frontmatter
-get_frontmatter_description() {
-  awk '
-    BEGIN { in_frontmatter=0; description="" }
-    NR==1 && /^---$/ { in_frontmatter=1; next }
-    in_frontmatter && /^---$/ { exit }
-    in_frontmatter && /^description:/ {
-      sub(/^description: */, "")
-      gsub(/^['\''"]|['\''"]$/, "")
-      print
-      exit
-    }
-  ' "$1"
-}
-
-# Function to get title from filename (convert to readable format)
-get_title_from_filename() {
-  local filename=$(basename "$1" .md)
-  filename=$(basename "$filename" .prompt)
-  echo "$filename" | sed 's/-/ /g' | awk '{ for (i = 1; i <= NF; i++) { $i = toupper(substr($i, 1, 1)) substr($i, 2) } print }'
-}
-
-# Function to extract title from markdown
-get_title() {
-  if has_frontmatter "$1"; then
-    get_title_from_filename "$1"
-  else
-    grep -m 1 "^# " "$1" | sed 's/^# //'
-  fi
-}
-
-# Function to extract description
-get_description() {
-  if has_frontmatter "$1"; then
-    get_frontmatter_description "$1"
-  else
-    awk '
-      /^## Description$/ { in_desc=1; next }
-      /^## / { in_desc=0 }
-      in_desc && NF > 0 { print; exit }
-    ' "$1" | sed 's/^[[:space:]]*//'
-  fi
-}
-
-# Process prompts directory
 echo "## 📂 Prompts" >> INDEX.md
 echo "" >> INDEX.md
 
-for category_dir in prompts/*/; do
-  if [ -d "$category_dir" ]; then
-    category_name=$(basename "$category_dir")
-    category_title=$(echo "$category_name" | sed 's/-/ /g' | awk '{ for (i = 1; i <= NF; i++) { $i = toupper(substr($i, 1, 1)) substr($i, 2) } print }')
-    
-    # Check if there are any .md files
-    if ls "$category_dir"*.md 1> /dev/null 2>&1; then
-      echo "### 📁 ${category_title}" >> INDEX.md
-      echo "" >> INDEX.md
-      
-      # Process each prompt in the category
-      for prompt_file in "$category_dir"*.md; do
-        if [ -f "$prompt_file" ]; then
-          title=$(get_title "$prompt_file")
-          description=$(get_description "$prompt_file")
-          relative_path="${prompt_file#./}"
-          
-          echo "- **[${title}](/${relative_path})** - ${description}" >> INDEX.md
-        fi
-      done
-      echo "" >> INDEX.md
-    fi
-  fi
-done
+# Collect categories from frontmatter, unique + sorted.
+categories=$(for f in .apm/prompts/*.prompt.md; do get_field "$f" category; done | sort -u)
 
-# Process .github/prompts directory
+while IFS= read -r category; do
+  [ -n "$category" ] || continue
+  echo "### 📁 $(titlecase "$category")" >> INDEX.md
+  echo "" >> INDEX.md
+  for f in .apm/prompts/*.prompt.md; do
+    [ "$(get_field "$f" category)" = "$category" ] || continue
+    title=$(get_field "$f" title)
+    description=$(get_field "$f" description)
+    echo "- **[${title}](/${f})** - ${description}" >> INDEX.md
+  done
+  echo "" >> INDEX.md
+done <<< "$categories"
+
+# Process .github/prompts directory (repo-local Copilot prompts, not part of the package).
 if [ -d ".github/prompts" ]; then
   echo "## 🤖 GitHub Copilot Prompts" >> INDEX.md
   echo "" >> INDEX.md
-  echo "> Prompts optimized for use with GitHub Copilot" >> INDEX.md
+  echo "> Prompts optimized for use with GitHub Copilot in this repository" >> INDEX.md
   echo "" >> INDEX.md
-  
-  for prompt_file in .github/prompts/*.md; do
-    if [ -f "$prompt_file" ]; then
-      title=$(get_title "$prompt_file")
-      description=$(get_description "$prompt_file")
-      relative_path="${prompt_file#./}"
-      
-      echo "- **[${title}](/${relative_path})** - ${description}" >> INDEX.md
-    fi
+  for f in .github/prompts/*.md; do
+    title=$(basename "$f" .md); title=$(basename "$title" .prompt); title=$(titlecase "$title")
+    description=$(get_field "$f" description)
+    echo "- **[${title}](/${f})** - ${description}" >> INDEX.md
   done
 fi
 
-# Add footer
 cat >> INDEX.md << 'EOF'
 
 ---
 
-*This index is automatically generated from the prompts directory.*
+*This index is automatically generated from the `.apm/` primitives.*
 EOF
 
 echo "✅ Index generated successfully!"
 
-# Inject index into README.md
 echo "📝 Injecting index into README.md..."
-
-# Extract the content between the header and footer of INDEX.md (skip first 5 lines and last 3 lines)
 INDEX_CONTENT=$(tail -n +6 INDEX.md | head -n -3)
-
-# Use awk to replace content between markers in README.md
 awk -v index_content="$INDEX_CONTENT" '
   BEGIN { in_section=0 }
-  /<!-- INDEX_START -->/ { 
+  /<!-- INDEX_START -->/ {
     print
     print "<!-- This section is auto-generated by scripts/generate-index.sh -->"
     print ""
@@ -140,9 +96,7 @@ awk -v index_content="$INDEX_CONTENT" '
     in_section=1
     next
   }
-  /<!-- INDEX_END -->/ { 
-    in_section=0
-  }
+  /<!-- INDEX_END -->/ { in_section=0 }
   !in_section { print }
 ' README.md > README.md.tmp && mv README.md.tmp README.md
 

@@ -1,8 +1,18 @@
 ---
 description: "Scans your recent emails to identify tasks requiring action before, during, or after an out-of-office period, then groups them into prioritized handoff buckets with delegates and deadlines."
+category: "productivity"
+title: "OOO Task Handoff Planner"
+platform: "Microsoft 365 Copilot"
+tags: ["out-of-office", "task-handoff", "delegation", "productivity", "email-management", "microsoft-365"]
+example: |
+  Use this prompt a few days before going on vacation or extended leave. Paste your automatic reply text before the prompt so Copilot can extract delegate names and topic context. It will scan your recent emails and produce a compact, prioritized task list split into "do now", "delegate", and "defer" buckets — helping you leave with zero loose ends.
+notes: |
+  - Requires the `work` mode in M365 Copilot with access to WorkIQ (email data).
+  - Paste your automatic reply / OOO message above the prompt so Copilot can identify your delegates and key topics.
+  - Adjust the OOO dates and the 15-day lookback window to match your situation.
+credits: |
+  - Created by: Microsoft
 ---
-
-# OOO Task Handoff Planner
 
 I'll be out of office from 20/02/2026 to 27/02/2026.
 

@@ -1,8 +1,22 @@
 ---
 description: "Designed to bring the Inbox back to zero in one pass without sending anything or deleting anything. The agent classifies each mail using a strict rule order, surfaces calendar invites with an RSVP proposal grounded in your role and calendar conflicts, proposes language-matched placeholder replies for human asks (so you can review and confirm before the assistant sends them in an interactive turn), tags the original mail with `🦞 Draft Ready` so the inbox view shows which mails have a reply waiting, scans the Sent folder for stale threads waiting on others, and reports back over Teams."
+category: "productivity"
+title: "Outlook Inbox-Zero Triage Pass"
+platform: "Microsoft 365 Copilot with Cowork"
+tags: ["productivity", "outlook", "email", "triage", "inbox-zero", "m365", "copilot", "calendar-invites", "rsvp"]
+notes: |
+  - Conservative-by-default: ambiguous mail goes to `4. Read Later`, never to `8. Archive`.
+  - `2. Follow-Up Later` is for automated CTAs (cert renewals, Connect resubmits, training reminders) that need eventual action but aren't time-critical today — keeps `1. Follow-Up Today` reserved for human-driven asks.
+  - `9. Expenses` separates money-related mail (receipts, bookings, corporate card, expense reports) from `7. Reference` so monthly expense reconciliation is faster.
+  - Calendar invites are detected via `@odata.type: "#microsoft.graph.eventMessageRequest"` — surfaced via a parallel Graph query because the standard ListMessages projection drops the type discriminator. Invites stay in the Inbox; Outlook auto-clears them on RSVP.
+  - RSVP proposals use a role × conflict matrix and the `event.id` from the eventMessage's `event` expansion — `AcceptEvent` / `TentativelyAcceptEvent` / `DeclineEvent` take the event id, not the message id.
+  - Drafts are language-matched to the incoming mail (e.g. Dutch in → Dutch draft).
+  - The triage prompt does NOT call any reply or RSVP API directly. It proposes drafts/RSVPs in the Teams summary; the user confirms in an interactive chat turn and the assistant then sends via `ReplyToMessage` / `ReplyAllToMessage` (which thread correctly on the original conversation and inherit recipients server-side) or `AcceptEvent` / `TentativelyAcceptEvent` / `DeclineEvent`. This avoids a known UX gotcha: the per-call approval dialog's "Always allow" button could convert one mis-click into blanket send permission for every future scheduled run.
+  - Outlook categories (`🦞 Draft Ready`, `🦞 Follow-up Booked`) give a visual signal in the inbox view of which mails have a reply pending, already sent, or had a calendar block created for a commitment.
+  - Adjust folder names in Step 2 if your inbox uses a different taxonomy.
+credits: |
+  Designed for Microsoft Copilot / Cowork with M365 tools (Outlook + Teams + Calendar). Originally built for a personal Inbox-zero workflow with Dutch/English mixed mail.
 ---
-
-# Outlook Inbox-Zero Triage Pass
 
 You are running an inbox triage pass. Goal: empty the Inbox by moving every mail into the correct subfolder, except calendar invites which stay put for RSVP. Be conservative — when in doubt, prefer "4. Read Later" over auto-archiving. Do NOT send any emails or RSVPs. Do NOT delete anything.
 

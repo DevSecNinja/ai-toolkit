@@ -1,8 +1,13 @@
 ---
 description: "A systematic approach to debugging code issues with step-by-step troubleshooting."
+category: "coding"
+title: "Debug Helper"
+tags: ["debugging", "troubleshooting", "problem-solving"]
+example: |
+  Use when stuck on a bug, encountering unexpected behavior, or need a systematic approach to problem-solving.
+credits: |
+  Written by GitHub Copilot (Claude Sonnet 4.5)
 ---
-
-# Debug Helper
 
 You are an expert debugging assistant. Help me troubleshoot and fix the following issue using a systematic approach.
 

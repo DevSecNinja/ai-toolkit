@@ -1,39 +1,38 @@
-# 🤝 Contributing to GPT Prompts Collection
+# 🤝 Contributing to AI Toolkit
 
-Thank you for your interest in contributing! This document provides guidelines for adding your prompts to this collection.
+Thank you for your interest in contributing! This document provides guidelines for adding your primitives to this toolkit.
 
 ## 📋 How to Contribute
 
 ### 1. Choose Your Category
 
-Place your prompt in the appropriate folder:
+Primitives are authored as files under `.apm/prompts/`, named
+`<category>-<name>.prompt.md`. The `category` also goes in the file's
+frontmatter. Common categories:
 
-- `prompts/coding/` - Development, debugging, code review
-- `prompts/writing/` - Documentation, content, technical writing
-- `prompts/analysis/` - Data analysis, research, insights
-- `prompts/creative/` - Creative writing, brainstorming
-- `prompts/business/` - Strategy, planning, productivity
+- `coding` - Development, debugging, code review
+- `writing` - Documentation, content, technical writing
+- `analysis` - Data analysis, research, insights
+- `productivity` - Workflow, email, task management
+- `home-assistant` - Home automation, smart home
 - Create a new category if needed!
 
 ### 2. Use the Template
 
-Copy [`PROMPT_TEMPLATE.md`](/PROMPT_TEMPLATE.md) and fill in:
+Copy [`PROMPT_TEMPLATE.md`](/PROMPT_TEMPLATE.md) and fill in the frontmatter and body:
 
-- **Title**: Clear, descriptive name
-- **Description**: Brief overview (1-2 sentences)
-- **Prompt**: The complete, ready-to-use prompt
-- **Example Use Case**: When to use this prompt
-- **Tags**: Relevant keywords for searchability
-- **Credits**: Attribution for creators, contributors, or inspiration sources
-
-**Note**: The category is automatically derived from the folder location, so you don't need to include it in the file.
+- **description** (required): Brief overview (1-2 sentences), shown in command pickers
+- **category** (required): Used to group the generated index
+- **title / tags / model / example / notes** (optional): enrich the index and future site
+- **Body**: the complete, ready-to-use prompt (delivered verbatim to the harness)
 
 ### 3. File Naming
 
-Use lowercase with hyphens:
+Name the file `<category>-<name>.prompt.md`, lowercase with hyphens. The base
+filename becomes the installed command name:
 
-- ✅ `code-review-assistant.md`
-- ✅ `api-documentation-generator.md`
+- ✅ `.apm/prompts/coding-code-review-assistant.prompt.md`
+- ✅ `.apm/prompts/writing-api-documentation-generator.prompt.md`
 - ❌ `Code Review Assistant.md`
 - ❌ `API_docs.md`
 
@@ -63,9 +62,10 @@ Before submitting:
 3. Refine based on the output
 4. Include example use cases from your testing
 
-> **Tip:** After adding or editing a prompt, regenerate the
-> [APM](/docs/apm.md) primitives with `bash scripts/generate-apm-primitives.sh`
-> and commit the updated `.apm/prompts/` files alongside your prompt.
+> **Tip:** Primitives are authored directly under `.apm/`. After adding or
+> editing one, regenerate the [index](/docs/apm.md) with
+> `bash scripts/generate-index.sh` and commit the updated `INDEX.md` / `README.md`
+> alongside your primitive.
 
 ## 🚀 Submission Process
 

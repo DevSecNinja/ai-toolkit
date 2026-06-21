@@ -1,8 +1,16 @@
 ---
 description: "Identifies sent emails that require follow-up by analyzing your sent items for questions, requests, or scheduling proposals that haven't received direct replies within a specified date range."
+category: "productivity"
+title: "Email Follow-up Tracker"
+platform: "Microsoft 365 Copilot"
+tags: ["email-management", "follow-up", "productivity", "communication-tracking", "inbox-management", "microsoft-365"]
+example: |
+  Use this prompt at the end of each month to review all sent emails and identify which ones need follow-up. Particularly useful for tracking pending requests, unanswered questions, or proposed meetings that haven't been confirmed. Helps maintain professional communication and ensures important conversations don't slip through the cracks.
+notes: |
+  Make sure to enable the `work` mode in Copilot and enable 'Think deeper'.
+credits: |
+  - Created by: @DevSecNinja
 ---
-
-# Email Follow-up Tracker
 
 Review my Sent Items from last month (first day to last day) and identify emails where I asked a question, requested information, proposed scheduling, or indicated I was expecting a response — and where NO substantive reply was received.
 

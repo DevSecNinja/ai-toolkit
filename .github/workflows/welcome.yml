@@ -24,7 +24,7 @@ jobs:
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           issue-message: |
-            👋 Welcome to the GPT Prompts Collection!
+            👋 Welcome to the AI Toolkit!
             
             Thank you for opening your first issue! We appreciate your contribution to making this collection better.
             
