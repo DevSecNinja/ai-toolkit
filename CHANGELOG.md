@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.0](https://github.com/DevSecNinja/ai-toolkit/compare/v0.1.1...v0.2.0) (2026-06-21)
+
+
+### Features
+
+* Add org conventions as an APM instruction primitive ([#21](https://github.com/DevSecNinja/ai-toolkit/issues/21)) ([8110bb0](https://github.com/DevSecNinja/ai-toolkit/commit/8110bb097066eae06c96728a1673b8b990f97a52))
+
 ## [0.1.1](https://github.com/DevSecNinja/ai-toolkit/compare/v0.1.0...v0.1.1) (2026-06-21)
 
 
