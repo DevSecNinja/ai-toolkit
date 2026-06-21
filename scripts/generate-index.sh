@@ -90,6 +90,20 @@ if compgen -G ".apm/skills/*/SKILL.md" > /dev/null; then
   echo "" >> INDEX.md
 fi
 
+# Process APM agent primitives (shipped in the package).
+if compgen -G ".apm/agents/*.agent.md" > /dev/null; then
+  echo "## 🧑‍✈️ Agents" >> INDEX.md
+  echo "" >> INDEX.md
+  echo "> Invocable specialist personas deployed to each harness's agents directory" >> INDEX.md
+  echo "" >> INDEX.md
+  for f in .apm/agents/*.agent.md; do
+    title=$(get_field "$f" name); [ -n "$title" ] || title=$(titlecase "$(basename "$f" .agent.md)")
+    description=$(get_field "$f" description)
+    echo "- **[${title}](/${f})** - ${description}" >> INDEX.md
+  done
+  echo "" >> INDEX.md
+fi
+
 # Process .github/prompts directory (repo-local Copilot prompts, not part of the package).
 if [ -d ".github/prompts" ]; then
   echo "## 🤖 GitHub Copilot Prompts" >> INDEX.md
