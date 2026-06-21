@@ -61,6 +61,30 @@ for file in .github/prompts/**/*.md; do
   echo ""
 done
 
+# APM instruction primitives: require description + applyTo + a non-empty body.
+for file in .apm/instructions/**/*.instructions.md; do
+  [ -f "$file" ] || continue
+  echo "Checking $file..."
+  FILE_VALID=1
+
+  if ! has_frontmatter "$file"; then
+    echo "❌ Missing YAML frontmatter in $file"; EXIT_CODE=1; FILE_VALID=0
+  else
+    if ! grep -q "^description:" "$file"; then
+      echo "❌ Missing 'description' field in frontmatter in $file"; EXIT_CODE=1; FILE_VALID=0
+    fi
+    if ! grep -q "^applyTo:" "$file"; then
+      echo "❌ Missing 'applyTo' field in frontmatter in $file"; EXIT_CODE=1; FILE_VALID=0
+    fi
+    if [ -z "$(body_after_frontmatter "$file" | tr -d '[:space:]')" ]; then
+      echo "❌ Empty instruction body in $file"; EXIT_CODE=1; FILE_VALID=0
+    fi
+  fi
+
+  [ $FILE_VALID -eq 1 ] && echo "✅ $file is valid"
+  echo ""
+done
+
 if [ $EXIT_CODE -eq 0 ]; then
   echo "✅ All primitives are properly structured!"
 else
