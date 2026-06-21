@@ -48,6 +48,12 @@ An organized, reusable toolkit of AI primitives to supercharge your AI coding ha
 
 - **[Devsecninja Conventions](/.apm/instructions/devsecninja-conventions.instructions.md)** (`**`) - DevSecNinja org-wide engineering conventions for AI agents: Conventional-Commit PR titles, pre-PR checks, docs, and no force-push.
 
+## 🧠 Skills
+
+> Model-invoked guides deployed to each harness's skills directory
+
+- **[Commit And Release](/.apm/skills/commit-and-release/SKILL.md)** - Use when asked to commit, write a commit message, stage files, open a pull request, or cut a release in a DevSecNinja repo. Guides Conventional Commit messages, Conventional-Commit PR titles (repos squash-merge), the pre-commit/validate workflow, and the release-please release flow.
+
 ## 🤖 GitHub Copilot Prompts
 
 > Prompts optimized for use with GitHub Copilot in this repository

@@ -76,6 +76,20 @@ if compgen -G ".apm/instructions/*.instructions.md" > /dev/null; then
   echo "" >> INDEX.md
 fi
 
+# Process APM skill primitives (shipped in the package).
+if compgen -G ".apm/skills/*/SKILL.md" > /dev/null; then
+  echo "## 🧠 Skills" >> INDEX.md
+  echo "" >> INDEX.md
+  echo "> Model-invoked guides deployed to each harness's skills directory" >> INDEX.md
+  echo "" >> INDEX.md
+  for f in .apm/skills/*/SKILL.md; do
+    name=$(basename "$(dirname "$f")"); title=$(titlecase "$name")
+    description=$(get_field "$f" description)
+    echo "- **[${title}](/${f})** - ${description}" >> INDEX.md
+  done
+  echo "" >> INDEX.md
+fi
+
 # Process .github/prompts directory (repo-local Copilot prompts, not part of the package).
 if [ -d ".github/prompts" ]; then
   echo "## 🤖 GitHub Copilot Prompts" >> INDEX.md
