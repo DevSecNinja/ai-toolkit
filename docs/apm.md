@@ -61,16 +61,19 @@ automatically whenever a primitive changes and commits the refreshed index.
 
 ## 📥 How to consume these primitives
 
+Pin a released version and pick your harness with `--target`:
+
 ```bash
-apm install DevSecNinja/ai-toolkit
+apm install DevSecNinja/ai-toolkit#v0.1.0 --target copilot
 ```
 
-> **Note:** `apm install <owner>/<repo>` resolves by **GitHub repository name**.
-> For `DevSecNinja/ai-toolkit` to work, the GitHub repo must be named
-> `ai-toolkit` (matching `apm.yml`'s `name`). Until the repo is renamed, install
-> from the current repository name.
+> Omit `#vX.Y.Z` to install from the latest default branch, and omit `--target`
+> to install into every detected harness. Run `apm targets` to list the
+> supported harnesses you can pass to `--target` (`copilot`, `claude`, `cursor`,
+> `opencode`, `gemini`, `windsurf`). `apm install` resolves by **GitHub
+> repository name** (`ai-toolkit`, matching `apm.yml`'s `name`).
 
-`apm install` deploys each prompt to every detected harness, keeping its
+`apm install` deploys each prompt to the targeted harness(es), keeping its
 `<category>-<name>` command name:
 
 | Harness | Where the prompt lands | How to invoke |
