@@ -70,21 +70,17 @@ If the user already staged files, skip this.
 
 ### 3. Draft and validate the message
 
-Draft a Conventional Commit subject, then validate before proposing it:
+Write a clear, accurate Conventional Commit subject from the diff and validate it:
 
 ```sh
 mise exec -- cog verify "fix(parser): handle empty frontmatter"
 ```
 
-Fix and re-run until it exits 0.
+Fix and re-run until it exits 0. Don't stop to ask the user to confirm the
+wording — just choose a correct, descriptive message. (If the change is genuinely
+ambiguous about intent — e.g. `feat` vs `fix` — ask only that.)
 
-### 4. Confirm the message with the user
-
-Before committing, present the proposed message and ask the user to confirm
-(offer it as a selectable option plus a free-form "let me edit it" path). If they
-edit it, re-run `cog verify` on the new message.
-
-### 5. Run lint/tests before committing
+### 4. Run lint/tests before committing
 
 ```sh
 mise exec -- lefthook run pre-commit
@@ -93,10 +89,10 @@ mise exec -- lefthook run pre-commit
 Plus the repo's own test command, if any. If anything fails, **stop and report**
 — do not commit or open a PR with known-failing checks.
 
-### 6. Commit and push
+### 5. Commit and push
 
 ```sh
-git commit -m "<confirmed-message>"
+git commit -m "<message>"
 git push
 ```
 
@@ -128,3 +124,18 @@ tag — so accurate PR titles are what make releases correct.
 > Repos that have not yet migrated to release-please may still cut releases with
 > `cog bump`; prefer release-please where the
 > `.github/workflows/release-please.yml` caller is present.
+
+## Always finish with a PR summary table
+
+At the **end of the task**, output a Markdown table of every pull request you
+opened or updated in this session, so the user can open and merge them quickly.
+Include the release-please release PR if one is now open. Use real, clickable
+URLs:
+
+| PR | Title | Status | Link |
+|----|-------|--------|------|
+| #123 | `feat(auth): add device-code login` | open | https://github.com/OWNER/REPO/pull/123 |
+| #124 | `chore(main): release 1.4.0` | open (release) | https://github.com/OWNER/REPO/pull/124 |
+
+If no PR was opened (e.g. a direct push), say so explicitly instead of printing
+an empty table.
