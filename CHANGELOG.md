@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1](https://github.com/DevSecNinja/ai-toolkit/compare/v0.1.0...v0.1.1) (2026-06-21)
+
+
+### Bug Fixes
+
+* delete clawpilot/automations/.gitkeep ([d42fa97](https://github.com/DevSecNinja/ai-toolkit/commit/d42fa97468bf8109971ec7328578fdb2bdd14a2a))
+
 ## 0.1.0 (2026-06-21)
 
 
