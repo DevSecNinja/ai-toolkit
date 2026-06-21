@@ -16,16 +16,19 @@ there in native APM format — there is no second "browsable" tree to keep in
 sync. The human-facing [`INDEX.md`](../INDEX.md) and the README index are
 *generated from* `.apm/`.
 
-Today the toolkit ships **prompt primitives**
+The toolkit ships **prompt primitives**
 ([`*.prompt.md`](https://microsoft.github.io/apm/producer/author-primitives/prompts/))
-under [`.apm/prompts/`](../.apm/prompts/). The structure is built to grow into
-`.apm/instructions/`, `.apm/agents/`, `.apm/hooks/` and `.apm/skills/` — just add
-the folder and author the primitive.
+under [`.apm/prompts/`](../.apm/prompts/) and **instruction primitives**
+([`*.instructions.md`](https://microsoft.github.io/apm/producer/author-primitives/instructions-and-agents/))
+under [`.apm/instructions/`](../.apm/instructions/). The structure is built to
+grow further into `.apm/agents/`, `.apm/hooks/` and `.apm/skills/` — just add the
+folder and author the primitive.
 
 | File / directory | Role |
 |------------------|------|
 | `apm.yml` | The producer manifest — package name, version and what ships. |
 | `.apm/prompts/*.prompt.md` | The prompt primitives (**source of truth**). |
+| `.apm/instructions/*.instructions.md` | The instruction primitives — long-lived behavior rules (**source of truth**). |
 | `scripts/generate-index.sh` | Generates `INDEX.md` + README index **from** `.apm/`. |
 | `INDEX.md` / README index | Generated, human-browsable catalog. |
 

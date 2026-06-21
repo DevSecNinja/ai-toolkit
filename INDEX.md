@@ -29,6 +29,12 @@
 
 - **[Technical Documentation Writer](/.apm/prompts/writing-technical-documentation.prompt.md)** - Generate clear, comprehensive technical documentation for code, APIs, or systems.
 
+## 📐 Instructions
+
+> Long-lived behavior rules deployed to each harness's instruction directory
+
+- **[Devsecninja Conventions](/.apm/instructions/devsecninja-conventions.instructions.md)** (`**`) - DevSecNinja org-wide engineering conventions for AI agents: Conventional-Commit PR titles, pre-PR checks, docs, and no force-push.
+
 ## 🤖 GitHub Copilot Prompts
 
 > Prompts optimized for use with GitHub Copilot in this repository

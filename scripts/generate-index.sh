@@ -2,10 +2,11 @@
 
 # Script to generate INDEX.md from the APM primitives in .apm/.
 #
-# .apm/ is the single source of truth. Each .apm/prompts/<category>-<name>.prompt.md
-# carries `title`, `category` and `description` in its YAML frontmatter. This
-# script reads those, groups by category, and writes INDEX.md plus the
-# auto-generated block in README.md.
+# .apm/ is the single source of truth. Prompt primitives
+# (.apm/prompts/<category>-<name>.prompt.md) carry `title`, `category` and
+# `description`; instruction primitives (.apm/instructions/<name>.instructions.md)
+# carry `description` and `applyTo`. This script reads those and writes INDEX.md
+# plus the auto-generated block in README.md.
 
 set -euo pipefail
 shopt -s nullglob
@@ -59,6 +60,21 @@ while IFS= read -r category; do
   done
   echo "" >> INDEX.md
 done <<< "$categories"
+
+# Process APM instruction primitives (shipped in the package).
+if compgen -G ".apm/instructions/*.instructions.md" > /dev/null; then
+  echo "## 📐 Instructions" >> INDEX.md
+  echo "" >> INDEX.md
+  echo "> Long-lived behavior rules deployed to each harness's instruction directory" >> INDEX.md
+  echo "" >> INDEX.md
+  for f in .apm/instructions/*.instructions.md; do
+    title=$(basename "$f" .instructions.md); title=$(titlecase "$title")
+    description=$(get_field "$f" description)
+    applyTo=$(get_field "$f" applyTo)
+    echo "- **[${title}](/${f})** (\`${applyTo}\`) - ${description}" >> INDEX.md
+  done
+  echo "" >> INDEX.md
+fi
 
 # Process .github/prompts directory (repo-local Copilot prompts, not part of the package).
 if [ -d ".github/prompts" ]; then
