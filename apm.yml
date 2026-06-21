@@ -18,7 +18,18 @@ description: A curated, multi-harness toolkit of AI primitives (prompts, instruc
 author: DevSecNinja
 dependencies:
   apm: []
-  mcp: []
+  # MCP servers consumers get wired into their harness on `apm install`.
+  # Declarations only — APM materializes them into each harness's MCP config.
+  mcp:
+    # GitHub MCP server (repos, issues, PRs, Actions, code search). Resolved
+    # from the GitHub MCP registry; APM injects the auth token per harness.
+    - io.github.github/github-mcp-server
+    # Microsoft Learn MCP server — trusted, up-to-date Microsoft/Azure docs and
+    # code samples. Public remote server, no authentication required.
+    - name: microsoft-learn
+      registry: false
+      transport: http
+      url: https://learn.microsoft.com/api/mcp
 # "auto" walks the local .apm/ tree and deploys every primitive it finds.
 includes: auto
 scripts: {}
