@@ -26,11 +26,22 @@ folder and author the primitive.
 
 | File / directory | Role |
 |------------------|------|
-| `apm.yml` | The producer manifest — package name, version and what ships. |
+| `apm.yml` | The producer manifest — package name, version, MCP servers, and what ships. |
 | `.apm/prompts/*.prompt.md` | The prompt primitives (**source of truth**). |
 | `.apm/instructions/*.instructions.md` | The instruction primitives — long-lived behavior rules (**source of truth**). |
 | `scripts/generate-index.sh` | Generates `INDEX.md` + README index **from** `.apm/`. |
 | `INDEX.md` / README index | Generated, human-browsable catalog. |
+
+### MCP servers
+
+The toolkit also declares **MCP servers** under `dependencies.mcp:` in `apm.yml`.
+Unlike file-based primitives these are declarations, not files — `apm install`
+materializes them into each detected harness's MCP config:
+
+| Server | Type | Notes |
+|--------|------|-------|
+| `io.github.github/github-mcp-server` | registry | GitHub repos/issues/PRs/Actions; APM injects the auth token per harness. |
+| `microsoft-learn` | remote (`http`) | Trusted Microsoft/Azure docs + code samples at `https://learn.microsoft.com/api/mcp`; no auth. |
 
 ### Primitive frontmatter
 
