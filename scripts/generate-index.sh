@@ -34,12 +34,10 @@ titlecase() {
   echo "$1" | sed 's/-/ /g' | awk '{ for (i=1;i<=NF;i++){ $i=toupper(substr($i,1,1)) substr($i,2) } print }'
 }
 
-cat > INDEX.md << EOF
+cat > INDEX.md << 'EOF'
 # 📑 Primitive Index
 
 > Auto-generated index of all available APM primitives
-
-Last updated: $(TZ=UTC date '+%Y-%m-%d %H:%M:%S %Z')
 
 EOF
 
@@ -85,7 +83,7 @@ EOF
 echo "✅ Index generated successfully!"
 
 echo "📝 Injecting index into README.md..."
-INDEX_CONTENT=$(tail -n +6 INDEX.md | head -n -3)
+INDEX_CONTENT=$(tail -n +4 INDEX.md | head -n -3)
 awk -v index_content="$INDEX_CONTENT" '
   BEGIN { in_section=0 }
   /<!-- INDEX_START -->/ {

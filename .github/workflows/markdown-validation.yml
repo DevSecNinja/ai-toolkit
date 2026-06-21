@@ -4,11 +4,11 @@ on:
   push:
     branches: [ main ]
     paths:
-      - 'prompts/**/*.md'
+      - '.apm/prompts/**/*.prompt.md'
       - '.github/prompts/**/*.md'
   pull_request:
     paths:
-      - 'prompts/**/*.md'
+      - '.apm/prompts/**/*.prompt.md'
       - '.github/prompts/**/*.md'
 
 permissions:
