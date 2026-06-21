@@ -1,12 +1,8 @@
 {
   "name": "AI Toolkit",
-  "image": "mcr.microsoft.com/devcontainers/base:ubuntu@sha256:4bcb1b466771b1ba1ea110e2a27daea2f6093f9527fb75ee59703ec89b5561cb",
-  "features": {
-    "ghcr.io/devcontainers/features/python:1": {
-      "version": "latest"
-    }
-  },
+  "image": "ghcr.io/devsecninja/dotfiles-devcontainer:latest@sha256:928038dacab522506eb421332f1f5a5523fe5ae43cd4675ab2f1f2e9117e37d3",
   "postCreateCommand": "bash .devcontainer/post-create.sh",
+  "remoteUser": "vscode",
   "customizations": {
     "vscode": {
       "extensions": [

@@ -67,6 +67,28 @@ Before submitting:
 > `bash scripts/generate-index.sh` and commit the updated `INDEX.md` / `README.md`
 > alongside your primitive.
 
+## 🪝 Git hooks (lefthook)
+
+This repo uses [lefthook](https://lefthook.dev) to run the same quality gates as
+CI before each commit. Inside the **Dev Container / Codespaces** the hooks are
+installed for you by `.devcontainer/post-create.sh`. For a local setup, install
+the pinned lefthook (see [`.mise.toml`](/.mise.toml)) and wire up the hooks:
+
+```bash
+mise install                    # installs the pinned lefthook
+mise exec -- lefthook install   # wires up the git hooks
+```
+
+What runs on **pre-commit**:
+
+- `bash tests/validate-prompts.sh` — validates every primitive's frontmatter.
+- `bash scripts/generate-index.sh` — regenerates `INDEX.md` / `README.md` from
+  `.apm/` and re-stages them, so the index never drifts from the primitives.
+
+Run the suite on demand with `mise exec -- lefthook run pre-commit --all-files`.
+To bypass hooks in an emergency, use `git commit --no-verify` (please don't make
+a habit of it).
+
 ## 🚀 Submission Process
 
 1. **Fork** this repository
