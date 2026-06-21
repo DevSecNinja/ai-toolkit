@@ -4,8 +4,8 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
-[![GitHub last commit](https://img.shields.io/github/last-commit/DevSecNinja/gpt-prompts)](https://github.com/DevSecNinja/gpt-prompts/commits/main)
-[![GitHub contributors](https://img.shields.io/github/contributors/DevSecNinja/gpt-prompts)](https://github.com/DevSecNinja/gpt-prompts/graphs/contributors)
+[![GitHub last commit](https://img.shields.io/github/last-commit/DevSecNinja/ai-toolkit)](https://github.com/DevSecNinja/ai-toolkit/commits/main)
+[![GitHub contributors](https://img.shields.io/github/contributors/DevSecNinja/ai-toolkit)](https://github.com/DevSecNinja/ai-toolkit/graphs/contributors)
 
 ## 📚 What's This?
 
@@ -54,16 +54,26 @@ An organized, reusable toolkit of AI primitives to supercharge your AI coding ha
 ## 📦 Install via APM
 
 This toolkit is an [APM (Agent Package Manager)](https://microsoft.github.io/apm/)
-**producer**. Install every primitive as native commands in your AI harness
-(GitHub Copilot, Claude Code, Cursor, OpenCode, Gemini, Windsurf):
+**producer**. Install its primitives as native commands in your AI harness
+(GitHub Copilot, Claude Code, Cursor, OpenCode, Gemini, Windsurf).
 
+Pin a released version and pick your harness with `--target`:
+
+<!-- x-release-please-start-version -->
 ```bash
-apm install DevSecNinja/ai-toolkit
+apm install DevSecNinja/ai-toolkit#v0.1.0 --target copilot
 ```
+<!-- x-release-please-end -->
 
-> `apm install` resolves by GitHub repo name, so this requires the repository to
-> be named `ai-toolkit`. See the [APM Producer Guide](/docs/apm.md) for how these
-> primitives are authored, produced and consumed.
+> `apm install` resolves by GitHub repo name (`ai-toolkit`). Omit `#v0.1.0` to
+> install from the latest default branch, and omit `--target` to install into
+> every detected harness.
+
+Run `apm targets` to list the supported harnesses you can pass to `--target`
+(e.g. `copilot`, `claude`, `cursor`, `opencode`, `gemini`, `windsurf`).
+
+See the [APM Producer Guide](/docs/apm.md) for how these primitives are authored,
+produced and consumed.
 
 ## 🤝 Contributing
 
