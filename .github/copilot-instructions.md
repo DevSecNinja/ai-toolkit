@@ -11,6 +11,14 @@ focused on Markdown primitives with bash automation scripts.
 **Automation**: Bash scripts
 **No Dependencies**: No package.json, requirements.txt, or external build deps
 
+**Producer vs. consumer**: `ai-toolkit` is the **producer** — the single source
+of truth where primitives are authored. Other repos (including
+`DevSecNinja/.github`) are **consumers** that install these primitives via
+`apm install`. Org-wide primitives (e.g. the `devsecninja-conventions`
+instruction and `commit-and-release` skill) are authored **here** and consumed
+elsewhere — never the reverse. Do not move producer primitives into a consumer
+repo.
+
 ## Source of truth: `.apm/`
 
 `.apm/` is the **single source of truth**. Primitives are authored directly there
