@@ -21,9 +21,7 @@
 ### 📁 Productivity
 
 - **[Email Follow-up Tracker](/.apm/prompts/productivity-email-follow-up-tracker.prompt.md)** - Identifies sent emails that require follow-up by analyzing your sent items for questions, requests, or scheduling proposals that haven't received direct replies within a specified date range.
-- **[Focus Time Blocker](/.apm/prompts/productivity-focus-time-blocker.prompt.md)** - Analyzes your calendar for the day, identifies free gaps between existing meetings, and creatively arranges at least 2 hours of focus time as calendar events — respecting your timezone and working hours, flexible on block sizes and morning-preferred, while protecting lunch.
 - **[OOO Task Handoff Planner](/.apm/prompts/productivity-ooo-task-handoff-planner.prompt.md)** - Scans your recent emails to identify tasks requiring action before, during, or after an out-of-office period, then groups them into prioritized handoff buckets with delegates and deadlines.
-- **[Outlook Inbox-Zero Triage Pass](/.apm/prompts/productivity-outlook-inbox-zero-triage.prompt.md)** - Designed to bring the Inbox back to zero in one pass without sending anything or deleting anything. The agent classifies each mail using a strict rule order, surfaces calendar invites with an RSVP proposal grounded in your role and calendar conflicts, proposes language-matched placeholder replies for human asks (so you can review and confirm before the assistant sends them in an interactive turn), tags the original mail with `🦞 Draft Ready` so the inbox view shows which mails have a reply waiting, scans the Sent folder for stale threads waiting on others, and reports back over Teams.
 
 ### 📁 Writing
 
@@ -40,6 +38,8 @@
 > Model-invoked guides deployed to each harness's skills directory
 
 - **[Commit And Release](/.apm/skills/commit-and-release/SKILL.md)** - Use when asked to commit, write a commit message, stage files, open a pull request, or cut a release in a DevSecNinja repo. Guides Conventional Commit messages, Conventional-Commit PR titles (repos squash-merge), the pre-commit/validate workflow, and the release-please release flow.
+- **[Findmeetingtimes Timezone](/.apm/skills/findmeetingtimes-timezone/SKILL.md)** - |
+- **[Focus Time Blocker](/.apm/skills/focus-time-blocker/SKILL.md)** - |
 
 ## 🧑‍✈️ Agents
 
