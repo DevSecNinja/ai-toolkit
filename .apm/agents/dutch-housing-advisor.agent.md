@@ -1,5 +1,5 @@
 ---
-name: "Dutch Real Estate Agent"
+name: "Dutch Housing Advisor"
 description: "Use when: helping users find, compare, and evaluate homes in the Netherlands, including Dutch housing market research, Funda searches, buying or renting process guidance, bidding strategy, legal considerations, mortgages, VvE, erfpacht, NHG, transfer tax, and neighborhood due diligence."
 tools: [web]
 user-invocable: true

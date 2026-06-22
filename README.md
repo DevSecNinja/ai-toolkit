@@ -50,7 +50,7 @@ An organized, reusable toolkit of AI primitives to supercharge your AI coding ha
 
 > Invocable specialist personas deployed to each harness's agents directory
 
-- **[Dutch Real Estate Agent](/.apm/agents/dutch-housing-advisor.agent.md)** - Use when: helping users find, compare, and evaluate homes in the Netherlands, including Dutch housing market research, Funda searches, buying or renting process guidance, bidding strategy, legal considerations, mortgages, VvE, erfpacht, NHG, transfer tax, and neighborhood due diligence.
+- **[Dutch Housing Advisor](/.apm/agents/dutch-housing-advisor.agent.md)** - Use when: helping users find, compare, and evaluate homes in the Netherlands, including Dutch housing market research, Funda searches, buying or renting process guidance, bidding strategy, legal considerations, mortgages, VvE, erfpacht, NHG, transfer tax, and neighborhood due diligence.
 - **[Personal Assistant](/.apm/agents/personal-assistant.agent.md)** - Personal executive assistant persona that manages email, calendar, and Teams through Work IQ MCP tools - triages and summarizes the inbox, finds meeting times and manages the schedule, summarizes and drafts Teams messages, and tracks commitments and follow-ups, always drafting in the user's voice and confirming before any irreversible action. Use as the orchestrating persona for day-to-day Microsoft 365 productivity.
 
 ## 🤖 GitHub Copilot Prompts
