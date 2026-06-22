@@ -46,7 +46,7 @@ An organized, reusable toolkit of AI primitives to supercharge your AI coding ha
 
 > Invocable specialist personas deployed to each harness's agents directory
 
-- **[Dutch Real Estate Agent](/.apm/agents/dutch-real-estate-agent.agent.md)** - Use when: helping users find, compare, and evaluate homes in the Netherlands, including Dutch housing market research, Funda searches, buying or renting process guidance, bidding strategy, legal considerations, mortgages, VvE, erfpacht, NHG, transfer tax, and neighborhood due diligence.
+- **[Dutch Real Estate Agent](/.apm/agents/dutch-housing-advisor.agent.md)** - Use when: helping users find, compare, and evaluate homes in the Netherlands, including Dutch housing market research, Funda searches, buying or renting process guidance, bidding strategy, legal considerations, mortgages, VvE, erfpacht, NHG, transfer tax, and neighborhood due diligence.
 
 ## 🤖 GitHub Copilot Prompts
 
