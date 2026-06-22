@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.4.0](https://github.com/DevSecNinja/ai-toolkit/compare/v0.3.0...v0.4.0) (2026-06-22)
+
+
+### Features
+
+* add FindMeetingTimes timezone handling skill to prevent misreading UTC slots ([4fe8365](https://github.com/DevSecNinja/ai-toolkit/commit/4fe836589b4f382bc48d031f3a57067b7e1ee033))
+* add Focus Time Blocker skill to schedule deep-work time based on calendar gaps ([3b64fc7](https://github.com/DevSecNinja/ai-toolkit/commit/3b64fc7e6310e2f006dd4055fc034fd10c98d497))
+* migrate git hooks from pre-commit to lefthook ([#19](https://github.com/DevSecNinja/ai-toolkit/issues/19)) ([ea7cae3](https://github.com/DevSecNinja/ai-toolkit/commit/ea7cae3e500bf098a84a01a1c606617493b7653e))
+
 ## [0.3.0](https://github.com/DevSecNinja/ai-toolkit/compare/v0.2.0...v0.3.0) (2026-06-21)
 
 
