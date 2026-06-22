@@ -17,15 +17,6 @@ An organized, reusable toolkit of AI primitives to supercharge your AI coding ha
 
 ## 📂 Prompts
 
-### 📁 Analysis
-
-- **[Data Analysis Assistant](/.apm/prompts/analysis-data-analysis.prompt.md)** - Analyze datasets and provide insights, visualization suggestions, and statistical interpretations.
-
-### 📁 Coding
-
-- **[Code Review Assistant](/.apm/prompts/coding-code-review-assistant.prompt.md)** - A prompt for conducting thorough code reviews with focus on best practices, security, and maintainability.
-- **[Debug Helper](/.apm/prompts/coding-debug-helper.prompt.md)** - A systematic approach to debugging code issues with step-by-step troubleshooting.
-
 ### 📁 Home Assistant
 
 - **[Home Assistant Automation Renamer](/.apm/prompts/home-assistant-automation-renamer.prompt.md)** - This prompt helps rewrite Home Assistant automation aliases and descriptions into clear, non-technical language that anyone in your household can understand, without changing any automation logic.
@@ -35,10 +26,6 @@ An organized, reusable toolkit of AI primitives to supercharge your AI coding ha
 
 - **[Email Follow-up Tracker](/.apm/prompts/productivity-email-follow-up-tracker.prompt.md)** - Identifies sent emails that require follow-up by analyzing your sent items for questions, requests, or scheduling proposals that haven't received direct replies within a specified date range.
 - **[OOO Task Handoff Planner](/.apm/prompts/productivity-ooo-task-handoff-planner.prompt.md)** - Scans your recent emails to identify tasks requiring action before, during, or after an out-of-office period, then groups them into prioritized handoff buckets with delegates and deadlines.
-
-### 📁 Writing
-
-- **[Technical Documentation Writer](/.apm/prompts/writing-technical-documentation.prompt.md)** - Generate clear, comprehensive technical documentation for code, APIs, or systems.
 
 ## 📐 Instructions
 
