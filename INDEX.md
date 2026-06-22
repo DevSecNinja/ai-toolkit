@@ -4,6 +4,10 @@
 
 ## 📂 Prompts
 
+### 📁 Coding
+
+- **[Copilot Repository Onboarding](/.apm/prompts/coding-copilot-onboarding.prompt.md)** - Onboard a repository to GitHub Copilot by generating a .github/copilot-instructions.md that documents build, test, layout, and validation steps so a coding agent works efficiently from day one.
+
 ### 📁 Home Assistant
 
 - **[Home Assistant Automation Renamer](/.apm/prompts/home-assistant-automation-renamer.prompt.md)** - This prompt helps rewrite Home Assistant automation aliases and descriptions into clear, non-technical language that anyone in your household can understand, without changing any automation logic.
@@ -37,7 +41,6 @@
 
 - **[Copilot Add Prompt](/.github/prompts/copilot-add-prompt.prompt.md)** - Add a new prompt primitive to the AI Toolkit by authoring it under .apm/prompts/ with the right frontmatter
 - **[Copilot Generate Informal Message](/.github/prompts/copilot-generate-informal-message.prompt.md)** - Creates an informal message to share a prompt from the repository with your team
-- **[Copilot Onboarding](/.github/prompts/copilot-onboarding.prompt.md)** - Onboard this repository to Copilot
 
 ---
 

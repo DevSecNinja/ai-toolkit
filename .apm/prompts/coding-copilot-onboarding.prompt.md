@@ -1,6 +1,10 @@
 ---
-agent: 'agent'
-description: 'Onboard this repository to Copilot'
+description: "Onboard a repository to GitHub Copilot by generating a .github/copilot-instructions.md that documents build, test, layout, and validation steps so a coding agent works efficiently from day one."
+category: "coding"
+title: "Copilot Repository Onboarding"
+tags: ["copilot", "onboarding", "copilot-instructions", "repository-setup", "coding-agent"]
+example: |
+  Run once per repository to produce a high-quality .github/copilot-instructions.md, reducing failed CI runs and unnecessary exploration on future agent tasks.
 ---
 
 Your task is to "onboard" this repository to Copilot coding agent by adding a .github/copilot-instructions.md file in the repository that contains information describing how a coding agent seeing it for the first time can work most efficiently.
