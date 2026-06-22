@@ -1,6 +1,10 @@
 ---
 name: commit-and-release
 description: "Use when asked to commit, write a commit message, stage files, open a pull request, or cut a release in a DevSecNinja repo. Guides Conventional Commit messages, Conventional-Commit PR titles (repos squash-merge), the pre-commit/validate workflow, and the release-please release flow."
+targets:
+  - copilot
+  - claude
+  - agent-skills
 ---
 
 # Commit & Release
