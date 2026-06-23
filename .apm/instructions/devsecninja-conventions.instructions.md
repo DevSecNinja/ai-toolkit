@@ -27,6 +27,32 @@ Org-wide rules for every DevSecNinja repository. A repository's own
 - Never force-push to `main` or any shared/protected branch. All changes land via
   PR through normal CI; branch protection is always respected.
 
+## Reusing centralized artifacts
+
+The `DevSecNinja/.github` repository is the central home for shared CI/CD
+building blocks — reusable workflows, composite actions, Renovate presets, issue
+and PR templates, labeler configs, and other org-wide config. Before authoring
+any new workflow, composite action, or config file, you MUST check there first
+and prefer reuse over duplication.
+
+- **Check first (mandatory):** before creating a new workflow or config artifact,
+  search `DevSecNinja/.github` for existing functionality that already does what
+  you need. If a reusable workflow, composite action, or shared preset fits, call
+  or extend it instead of writing a local copy.
+- **No similar artifact? Expand an existing one.** If nothing matches but a
+  related central artifact is close, prefer extending that artifact (e.g. add an
+  input, a job, or an option) over creating a parallel one — provided the change
+  stays backward-compatible. Remember a new **required** input to a reusable
+  workflow is a breaking change (`feat!:`); add new inputs with safe defaults.
+- **Can't extend? Propose implementing it centrally.** If the functionality is
+  genuinely new and would add value for other repos too, suggest implementing it
+  in `DevSecNinja/.github` rather than locally, so every repo can consume it.
+  Call this out explicitly in the PR description and link the proposed central
+  change.
+- **Only build locally as a last resort.** Create a repo-local workflow or config
+  only when the need is truly repo-specific and has no reuse value elsewhere.
+  Document why it isn't centralized.
+
 ## Coding standards
 
 - Commit messages follow Conventional Commits (same types as above). In-PR
