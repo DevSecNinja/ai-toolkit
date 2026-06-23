@@ -1,5 +1,5 @@
 lockfile_version: '1'
-generated_at: '2026-06-23T11:56:50.727466+00:00'
+generated_at: '2026-06-23T16:29:35.576268+00:00'
 apm_version: 0.21.0
 dependencies:
 - repo_url: github/awesome-copilot
@@ -8,6 +8,7 @@ dependencies:
   resolved_ref: 3e36d367091a1e67b77974cade6f1aa48bc77a81
   virtual_path: agents/accessibility.agent.md
   is_virtual: true
+  package_type: apm_package
   deployed_files:
   - .github/agents/accessibility.agent.md
   deployed_file_hashes:
@@ -19,6 +20,7 @@ dependencies:
   resolved_ref: 3e36d367091a1e67b77974cade6f1aa48bc77a81
   virtual_path: agents/adr-generator.agent.md
   is_virtual: true
+  package_type: apm_package
   deployed_files:
   - .github/agents/adr-generator.agent.md
   deployed_file_hashes:
@@ -30,6 +32,7 @@ dependencies:
   resolved_ref: 3e36d367091a1e67b77974cade6f1aa48bc77a81
   virtual_path: agents/devops-expert.agent.md
   is_virtual: true
+  package_type: apm_package
   deployed_files:
   - .github/agents/devops-expert.agent.md
   deployed_file_hashes:
@@ -41,6 +44,7 @@ dependencies:
   resolved_ref: 3e36d367091a1e67b77974cade6f1aa48bc77a81
   virtual_path: agents/github-actions-expert.agent.md
   is_virtual: true
+  package_type: apm_package
   deployed_files:
   - .github/agents/github-actions-expert.agent.md
   deployed_file_hashes:
@@ -52,6 +56,7 @@ dependencies:
   resolved_ref: 3e36d367091a1e67b77974cade6f1aa48bc77a81
   virtual_path: agents/linkedin-post-writer.agent.md
   is_virtual: true
+  package_type: apm_package
   deployed_files:
   - .github/agents/linkedin-post-writer.agent.md
   deployed_file_hashes:
@@ -63,6 +68,7 @@ dependencies:
   resolved_ref: 3e36d367091a1e67b77974cade6f1aa48bc77a81
   virtual_path: agents/project-architecture-planner.agent.md
   is_virtual: true
+  package_type: apm_package
   deployed_files:
   - .github/agents/project-architecture-planner.agent.md
   deployed_file_hashes:
@@ -74,6 +80,7 @@ dependencies:
   resolved_ref: 3e36d367091a1e67b77974cade6f1aa48bc77a81
   virtual_path: agents/prompt-builder.agent.md
   is_virtual: true
+  package_type: apm_package
   deployed_files:
   - .github/agents/prompt-builder.agent.md
   deployed_file_hashes:
@@ -85,6 +92,7 @@ dependencies:
   resolved_ref: 3e36d367091a1e67b77974cade6f1aa48bc77a81
   virtual_path: agents/sast-sca-security-analyzer.agent.md
   is_virtual: true
+  package_type: apm_package
   deployed_files:
   - .github/agents/sast-sca-security-analyzer.agent.md
   deployed_file_hashes:
@@ -96,6 +104,7 @@ dependencies:
   resolved_ref: 3e36d367091a1e67b77974cade6f1aa48bc77a81
   virtual_path: agents/se-security-reviewer.agent.md
   is_virtual: true
+  package_type: apm_package
   deployed_files:
   - .github/agents/se-security-reviewer.agent.md
   deployed_file_hashes:
@@ -107,6 +116,7 @@ dependencies:
   resolved_ref: 3e36d367091a1e67b77974cade6f1aa48bc77a81
   virtual_path: agents/se-technical-writer.agent.md
   is_virtual: true
+  package_type: apm_package
   deployed_files:
   - .github/agents/se-technical-writer.agent.md
   deployed_file_hashes:
@@ -118,6 +128,7 @@ dependencies:
   resolved_ref: 3e36d367091a1e67b77974cade6f1aa48bc77a81
   virtual_path: agents/se-ux-ui-designer.agent.md
   is_virtual: true
+  package_type: apm_package
   deployed_files:
   - .github/agents/se-ux-ui-designer.agent.md
   deployed_file_hashes:
@@ -129,6 +140,7 @@ dependencies:
   resolved_ref: 3e36d367091a1e67b77974cade6f1aa48bc77a81
   virtual_path: agents/software-engineer-agent-v1.agent.md
   is_virtual: true
+  package_type: apm_package
   deployed_files:
   - .github/agents/software-engineer-agent-v1.agent.md
   deployed_file_hashes:
@@ -140,6 +152,7 @@ dependencies:
   resolved_ref: 3e36d367091a1e67b77974cade6f1aa48bc77a81
   virtual_path: agents/task-planner.agent.md
   is_virtual: true
+  package_type: apm_package
   deployed_files:
   - .github/agents/task-planner.agent.md
   deployed_file_hashes:
