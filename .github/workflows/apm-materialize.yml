@@ -1,0 +1,118 @@
+---
+name: APM Materialize
+
+# Renovate maintains the dependency pins under `dependencies.apm` in apm.yml
+# (tag pins via the org `.renovate/customManagers.json5`; the SHA-pinned
+# github/awesome-copilot agents via the custom manager in this repo's
+# renovate.json5). Renovate only edits the manifest text — apm.lock.yaml and the
+# deployed primitives under .github/ stay stale. This workflow materializes them.
+#
+# IMPORTANT — runs POST-MERGE on main, never on the PR:
+# Pushing materialized files back onto Renovate's own bump branch corrupts
+# Renovate's branch ownership (it stops rebasing/automerging). So instead this
+# runs AFTER apm.yml lands on main and opens a SEPARATE `chore: materialize` PR
+# via the open-pr composite. That PR carries the refreshed apm.lock.yaml and the
+# regenerated .github/agents/ — whose diff is the prompt-hijacking review gate.
+#
+# The PR is opened with a GitHub App token so required CI fires on it.
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - apm.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: apm-materialize
+  cancel-in-progress: false
+
+jobs:
+  materialize:
+    name: Materialize APM primitives
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Harden runner
+        # renovate: datasource=github-tags depName=DevSecNinja/.github
+        uses: DevSecNinja/.github/actions/harden-runner@7f2abdd838a855dba31a2b2de6358529fdcef09d # v1.8.0
+
+      - name: Generate App token
+        id: app-token
+        # renovate: datasource=github-releases depName=actions/create-github-app-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          app-id: ${{ vars.RELEASE_PLEASE_APP_ID }}
+          private-key: ${{ secrets.RELEASE_PLEASE_APP_PRIVATE_KEY }}
+          permission-contents: write
+          permission-pull-requests: write
+
+      - name: Checkout main
+        # zizmor: ignore[artipacked]
+        # Persisted credentials are required: the open-pr step below pushes the
+        # materialize branch using the token checkout writes into the remote URL.
+        # This job runs no untrusted code — it installs the pinned apm CLI and
+        # runs `apm install` over the repo's own committed apm.yml.
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+
+      - name: Check for apm.yml
+        id: precheck
+        run: |
+          if [ ! -f apm.yml ]; then
+            echo "::notice::No apm.yml in this repo; nothing to materialize."
+            echo "skip=true" >> "${GITHUB_OUTPUT}"
+          else
+            echo "skip=false" >> "${GITHUB_OUTPUT}"
+          fi
+
+      - name: Install apm CLI
+        if: steps.precheck.outputs.skip != 'true'
+        env:
+          # renovate: datasource=pypi depName=apm-cli
+          apm_cli_version: "0.21.0"
+        run: |
+          set -euo pipefail
+          # ubuntu-24.04 ships python3 + pip; install the pinned apm-cli for this user.
+          python3 -m pip install --user "apm-cli==${apm_cli_version}"
+          echo "${HOME}/.local/bin" >> "${GITHUB_PATH}"
+
+      - name: Materialize primitives (apm install)
+        if: steps.precheck.outputs.skip != 'true'
+        run: |
+          set -euo pipefail
+          apm --version
+          apm install
+
+      - name: Open materialize PR
+        if: steps.precheck.outputs.skip != 'true'
+        # renovate: datasource=github-tags depName=DevSecNinja/.github
+        uses: DevSecNinja/.github/actions/open-pr@7f2abdd838a855dba31a2b2de6358529fdcef09d # v1.8.0
+        with:
+          branch: chore/apm-materialize
+          base: main
+          title: "chore: materialize APM primitives"
+          commit-message: "chore: materialize APM primitives from apm.yml"
+          labels: apm-sync
+          github-token: ${{ steps.app-token.outputs.token }}
+          # Stage the lockfile and deployed harness files (apm.yml itself is
+          # already on main; apm_modules/ and the non-committed harness output
+          # stay git-ignored, so only .github/agents/ + apm.lock.yaml land here).
+          if-no-changes: skip
+          body: |-
+            Automated PR — materializes the APM primitives for the current
+            `apm.yml`. Runs `apm install` to refresh `apm.lock.yaml` and redeploy
+            the agents into `.github/agents/` after an `apm.yml` change landed on
+            `main` (e.g. a Renovate SHA/tag bump).
+
+            **Review the `.github/agents/` diff** — this is the prompt-hijacking
+            gate: confirm the upstream agent text changed as expected.
+
+            Triggered by `${{ github.workflow }}` at commit `${{ github.sha }}`.

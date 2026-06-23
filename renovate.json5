@@ -13,4 +13,23 @@
     "github>DevSecNinja/.github//.renovate/packageRules.json5",
     "github>DevSecNinja/.github//.renovate/semanticCommits.json5",
   ],
+  // The org customManagers preset (above) tracks `#vX.Y.Z` tag pins. The curated
+  // github/awesome-copilot agents in apm.yml are pinned to a commit SHA on the
+  // upstream default branch (no release tags), so they need their own manager:
+  // track main's HEAD as a digest. A merged bump triggers apm-materialize.yml,
+  // which regenerates .github/agents/ for review.
+  customManagers: [
+    {
+      customType: "regex",
+      description: "Bump SHA-pinned github/awesome-copilot agents in apm.yml",
+      managerFilePatterns: ["/^apm\\.yml$/"],
+      matchStrings: [
+        "github/awesome-copilot/[^#\\s]+#(?<currentDigest>[0-9a-f]{40})",
+      ],
+      depNameTemplate: "github/awesome-copilot",
+      packageNameTemplate: "https://github.com/github/awesome-copilot",
+      datasourceTemplate: "git-refs",
+      currentValueTemplate: "main",
+    },
+  ],
 }
