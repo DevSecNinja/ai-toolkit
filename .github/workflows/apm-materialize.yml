@@ -36,8 +36,11 @@ jobs:
     name: Materialize APM primitives
     runs-on: ubuntu-24.04
     permissions:
-      contents: write
-      pull-requests: write
+      # GITHUB_TOKEN is used only by the read-only `apm install` dependency
+      # fetch below. All writes (checkout, git push, the materialize PR) use the
+      # App installation token, which carries its own contents + pull-requests
+      # write granted at token-generation time. So keep GITHUB_TOKEN read-only.
+      contents: read
     steps:
       - name: Harden runner
         # renovate: datasource=github-tags depName=DevSecNinja/.github
