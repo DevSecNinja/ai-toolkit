@@ -86,10 +86,16 @@ jobs:
 
       - name: Materialize primitives (apm install)
         if: steps.precheck.outputs.skip != 'true'
+        env:
+          # APM fetches the github/awesome-copilot virtual-file deps over the
+          # GitHub REST API, which needs a token even for public repos — without
+          # it the unauthenticated API is rate-limited and `apm install` fails
+          # immediately. The default GITHUB_TOKEN can read public repos.
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           apm --version
-          apm install
+          apm install --verbose
 
       - name: Open materialize PR
         if: steps.precheck.outputs.skip != 'true'
