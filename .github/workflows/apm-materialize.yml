@@ -98,7 +98,14 @@ jobs:
         run: |
           set -euo pipefail
           apm --version
-          apm install --verbose
+          # --update reconciles apm.lock.yaml to whatever apm.yml currently pins.
+          #   Deps are SHA-pinned (immutable content), so this only re-records the
+          #   hash CI computes — fixing environment-specific lockfile drift and
+          #   applying Renovate SHA bumps. The review gate stays on the SHA bump +
+          #   the .github/agents/ diff. --only apm skips the interactive MCP
+          #   registry prompt (MCP servers are declarations for consumers; they
+          #   are not needed to materialize the agents here).
+          apm install --update --only apm --verbose
 
       - name: Open materialize PR
         if: steps.precheck.outputs.skip != 'true'
