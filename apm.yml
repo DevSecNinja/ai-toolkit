@@ -17,7 +17,31 @@ version: 0.4.0 # x-release-please-version
 description: A curated, multi-harness toolkit of AI primitives (prompts, instructions, agents and hooks) installable via APM.
 author: DevSecNinja
 dependencies:
-  apm: []
+  # Agents curated by-reference from github/awesome-copilot, SHA-pinned for
+  # reproducibility. Bump with `apm update` (Dependabot-style: manifest stays
+  # pinned, the comment tracks the human-readable source).
+  # Source: https://github.com/github/awesome-copilot @ 3e36d36 (2026-06-22).
+  apm:
+    # DevSecOps & CI/CD
+    - github/awesome-copilot/agents/devops-expert.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
+    - github/awesome-copilot/agents/github-actions-expert.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
+    # Security
+    - github/awesome-copilot/agents/sast-sca-security-analyzer.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
+    - github/awesome-copilot/agents/se-security-reviewer.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
+    # Architecture & decisions
+    - github/awesome-copilot/agents/project-architecture-planner.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
+    - github/awesome-copilot/agents/adr-generator.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
+    # Engineering & delivery
+    - github/awesome-copilot/agents/software-engineer-agent-v1.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
+    - github/awesome-copilot/agents/task-planner.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
+    # Authoring
+    - github/awesome-copilot/agents/prompt-builder.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
+    - github/awesome-copilot/agents/se-technical-writer.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
+    # Frontend, design & accessibility (many public GitHub Pages web apps)
+    - github/awesome-copilot/agents/accessibility.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
+    - github/awesome-copilot/agents/se-ux-ui-designer.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
+    # Content / social
+    - github/awesome-copilot/agents/linkedin-post-writer.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
   # MCP servers consumers get wired into their harness on `apm install`.
   # Declarations only — APM materializes them into each harness's MCP config.
   mcp:

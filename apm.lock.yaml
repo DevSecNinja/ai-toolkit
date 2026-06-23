@@ -1,0 +1,189 @@
+lockfile_version: '1'
+generated_at: '2026-06-23T07:10:26.778186+00:00'
+apm_version: 0.21.0
+dependencies:
+- repo_url: github/awesome-copilot
+  host: github.com
+  resolved_commit: 3e36d367091a1e67b77974cade6f1aa48bc77a81
+  resolved_ref: 3e36d367091a1e67b77974cade6f1aa48bc77a81
+  virtual_path: agents/accessibility.agent.md
+  is_virtual: true
+  package_type: apm_package
+  content_hash: sha256:31460dfae4bcbb080e9298bd56049c6f82608f9a43af39d740d0bca2e02ed4e1
+- repo_url: github/awesome-copilot
+  host: github.com
+  resolved_commit: 3e36d367091a1e67b77974cade6f1aa48bc77a81
+  resolved_ref: 3e36d367091a1e67b77974cade6f1aa48bc77a81
+  virtual_path: agents/adr-generator.agent.md
+  is_virtual: true
+  package_type: apm_package
+  deployed_files:
+  - .github/agents/adr-generator.agent.md
+  deployed_file_hashes:
+    .github/agents/adr-generator.agent.md: sha256:cccff71d07da590a865e29de5a00f59ab106f89d59e90d986efcf711065c85ba
+  content_hash: sha256:eb8dc2e6ac265105ae09197b485cdd2cc0e579f09c6b72e1f657b20b987710e8
+- repo_url: github/awesome-copilot
+  host: github.com
+  resolved_commit: 3e36d367091a1e67b77974cade6f1aa48bc77a81
+  resolved_ref: 3e36d367091a1e67b77974cade6f1aa48bc77a81
+  virtual_path: agents/devops-expert.agent.md
+  is_virtual: true
+  package_type: apm_package
+  deployed_files:
+  - .github/agents/devops-expert.agent.md
+  deployed_file_hashes:
+    .github/agents/devops-expert.agent.md: sha256:e7db97e279c7539cc0af8c4b0cf92d18d4227da29b5acc63405aa62a23fceed5
+  content_hash: sha256:ec5901e421fe3041f8c50ac7c6ebe6bf52b6dde6037a47d48ae26be4c8ffb198
+- repo_url: github/awesome-copilot
+  host: github.com
+  resolved_commit: 3e36d367091a1e67b77974cade6f1aa48bc77a81
+  resolved_ref: 3e36d367091a1e67b77974cade6f1aa48bc77a81
+  virtual_path: agents/github-actions-expert.agent.md
+  is_virtual: true
+  package_type: apm_package
+  deployed_files:
+  - .github/agents/github-actions-expert.agent.md
+  deployed_file_hashes:
+    .github/agents/github-actions-expert.agent.md: sha256:034ca7a8efd5118caa3ff3221b71e3e94dbd171919651152c50c553fa3a9d392
+  content_hash: sha256:6ebd8f3b7c87667280a5a819f1d78938e73e7602159dc8ccd77fe406e318fbd7
+- repo_url: github/awesome-copilot
+  host: github.com
+  resolved_commit: 3e36d367091a1e67b77974cade6f1aa48bc77a81
+  resolved_ref: 3e36d367091a1e67b77974cade6f1aa48bc77a81
+  virtual_path: agents/linkedin-post-writer.agent.md
+  is_virtual: true
+  package_type: apm_package
+  content_hash: sha256:857936a473e5cb9bd815fb189dc06e1f2e2ea4c4de99c33a62037a89e3e194c5
+- repo_url: github/awesome-copilot
+  host: github.com
+  resolved_commit: 3e36d367091a1e67b77974cade6f1aa48bc77a81
+  resolved_ref: 3e36d367091a1e67b77974cade6f1aa48bc77a81
+  virtual_path: agents/project-architecture-planner.agent.md
+  is_virtual: true
+  package_type: apm_package
+  deployed_files:
+  - .github/agents/project-architecture-planner.agent.md
+  deployed_file_hashes:
+    .github/agents/project-architecture-planner.agent.md: sha256:8fca6222812d23bfa9e1619ed8d6711d75a2b188734807e8ffc566252ab5c861
+  content_hash: sha256:fd3c7187c8be106fb49e3129162a9f81c096e5202dd158a47df3b20693213a5d
+- repo_url: github/awesome-copilot
+  host: github.com
+  resolved_commit: 3e36d367091a1e67b77974cade6f1aa48bc77a81
+  resolved_ref: 3e36d367091a1e67b77974cade6f1aa48bc77a81
+  virtual_path: agents/prompt-builder.agent.md
+  is_virtual: true
+  package_type: apm_package
+  deployed_files:
+  - .github/agents/prompt-builder.agent.md
+  deployed_file_hashes:
+    .github/agents/prompt-builder.agent.md: sha256:0e8fdbcc477c36ce1e2a8d06b66698958f3f2f6a6370fc33704df000c762f9f5
+  content_hash: sha256:a7a9bee21922e5a643751523ea47a53ae7ef685c0a1fc620d655cc87574d5923
+- repo_url: github/awesome-copilot
+  host: github.com
+  resolved_commit: 3e36d367091a1e67b77974cade6f1aa48bc77a81
+  resolved_ref: 3e36d367091a1e67b77974cade6f1aa48bc77a81
+  virtual_path: agents/sast-sca-security-analyzer.agent.md
+  is_virtual: true
+  package_type: apm_package
+  deployed_files:
+  - .github/agents/sast-sca-security-analyzer.agent.md
+  deployed_file_hashes:
+    .github/agents/sast-sca-security-analyzer.agent.md: sha256:75ba76fcc3ec735ed3edf6312da055ca58b215d35df5c3be08314d35bf5e7b7c
+  content_hash: sha256:c493a2705524541e7beb53e2467d8594cec0a37c4a0b969e0e1def892bb08642
+- repo_url: github/awesome-copilot
+  host: github.com
+  resolved_commit: 3e36d367091a1e67b77974cade6f1aa48bc77a81
+  resolved_ref: 3e36d367091a1e67b77974cade6f1aa48bc77a81
+  virtual_path: agents/se-security-reviewer.agent.md
+  is_virtual: true
+  package_type: apm_package
+  deployed_files:
+  - .github/agents/se-security-reviewer.agent.md
+  deployed_file_hashes:
+    .github/agents/se-security-reviewer.agent.md: sha256:98065e5c9a8079dd902fd3454467674c97d27f8818824aad0a12db6b7d5c8516
+  content_hash: sha256:2a3c29cfb763424d217fb6fcfefeb93a32691754202ba613705073fa2ad67925
+- repo_url: github/awesome-copilot
+  host: github.com
+  resolved_commit: 3e36d367091a1e67b77974cade6f1aa48bc77a81
+  resolved_ref: 3e36d367091a1e67b77974cade6f1aa48bc77a81
+  virtual_path: agents/se-technical-writer.agent.md
+  is_virtual: true
+  package_type: apm_package
+  deployed_files:
+  - .github/agents/se-technical-writer.agent.md
+  deployed_file_hashes:
+    .github/agents/se-technical-writer.agent.md: sha256:bd414b4af2bb7423f59361fc03c22b9d63347d448a2e5f52ffece68d6168ae1b
+  content_hash: sha256:e209327bd2509b726a799ec06a398c32aa2ea6ea166a1b9eb8ac4760ac182ef6
+- repo_url: github/awesome-copilot
+  host: github.com
+  resolved_commit: 3e36d367091a1e67b77974cade6f1aa48bc77a81
+  resolved_ref: 3e36d367091a1e67b77974cade6f1aa48bc77a81
+  virtual_path: agents/se-ux-ui-designer.agent.md
+  is_virtual: true
+  package_type: apm_package
+  content_hash: sha256:39d62eb52cda3eec692a8d943a31f29ce1175b355154a52efad59d31779c845e
+- repo_url: github/awesome-copilot
+  host: github.com
+  resolved_commit: 3e36d367091a1e67b77974cade6f1aa48bc77a81
+  resolved_ref: 3e36d367091a1e67b77974cade6f1aa48bc77a81
+  virtual_path: agents/software-engineer-agent-v1.agent.md
+  is_virtual: true
+  package_type: apm_package
+  deployed_files:
+  - .github/agents/software-engineer-agent-v1.agent.md
+  deployed_file_hashes:
+    .github/agents/software-engineer-agent-v1.agent.md: sha256:129552bb554b6b1f2124b5dc09eea936b50e27e26de2c0a11edc965714268f8a
+  content_hash: sha256:24700fb01bafb55cb1f2cb22e38a3b1cd37780bbb6faff14a0b848961e98e6d7
+- repo_url: github/awesome-copilot
+  host: github.com
+  resolved_commit: 3e36d367091a1e67b77974cade6f1aa48bc77a81
+  resolved_ref: 3e36d367091a1e67b77974cade6f1aa48bc77a81
+  virtual_path: agents/task-planner.agent.md
+  is_virtual: true
+  package_type: apm_package
+  deployed_files:
+  - .github/agents/task-planner.agent.md
+  deployed_file_hashes:
+    .github/agents/task-planner.agent.md: sha256:6fb553d785a9e26e7cae034527acf3d363c8ac2acb6dc11dd8235a6fcca0f975
+  content_hash: sha256:66a7af3bad399166291c0a927492b3f744a5d6db137699801bd537f04dec6c6c
+local_deployed_files:
+- .agents/skills/commit-and-release
+- .agents/skills/commit-and-release/SKILL.md
+- .agents/skills/commitment-tracker
+- .agents/skills/commitment-tracker/SKILL.md
+- .agents/skills/email-follow-up-tracker
+- .agents/skills/email-follow-up-tracker/SKILL.md
+- .agents/skills/findmeetingtimes-timezone
+- .agents/skills/findmeetingtimes-timezone/SKILL.md
+- .agents/skills/focus-time-blocker
+- .agents/skills/focus-time-blocker/SKILL.md
+- .agents/skills/inbox-triage-pass
+- .agents/skills/inbox-triage-pass/SKILL.md
+- .agents/skills/meeting-transcript-creation
+- .agents/skills/meeting-transcript-creation/SKILL.md
+- .agents/skills/morning-briefing
+- .agents/skills/morning-briefing/SKILL.md
+- .agents/skills/ooo-task-handoff-planner
+- .agents/skills/ooo-task-handoff-planner/SKILL.md
+- .github/agents/dutch-housing-advisor.agent.md
+- .github/agents/personal-assistant.agent.md
+- .github/instructions/devsecninja-conventions.instructions.md
+- .github/prompts/coding-copilot-onboarding.prompt.md
+- .github/prompts/home-assistant-automation-renamer.prompt.md
+- .github/prompts/home-assistant-notification-optimizer.prompt.md
+local_deployed_file_hashes:
+  .agents/skills/commit-and-release/SKILL.md: sha256:eac86c66942132842a6412c75a2fa5386910a87d721d403b8d79941d1881b625
+  .agents/skills/commitment-tracker/SKILL.md: sha256:b04824c8402248e8b2028db81b179f23429be3a50b4990c3af8cafb34dffd7da
+  .agents/skills/email-follow-up-tracker/SKILL.md: sha256:8627f23f0b5edb9123575533627987a2dc23e78d6e77d07ba86eb392edf83dd6
+  .agents/skills/findmeetingtimes-timezone/SKILL.md: sha256:0d4062c16f5b300eb42ea37bcced506d272cb3a499e4c48953a64a3b90b80fb1
+  .agents/skills/focus-time-blocker/SKILL.md: sha256:1577c55abd281234108ff228a317931f659e4c3511a4218f10024da1fc69fb3e
+  .agents/skills/inbox-triage-pass/SKILL.md: sha256:226c8aea4767932fbadc66fd0932d8a47bb19588322b8067ed5ddc815f94be0a
+  .agents/skills/meeting-transcript-creation/SKILL.md: sha256:9287214edd7a5703b85b3b18fea54b7ad00cc49bde09c1ae3a75a3f0364eb130
+  .agents/skills/morning-briefing/SKILL.md: sha256:d5496aa416534df0be1f301d03a3d74dfb3f84cd72aafb33573a59c0c4af525b
+  .agents/skills/ooo-task-handoff-planner/SKILL.md: sha256:8886cdf1b9effe8a877e890d09fa54281ab680516a3837f0b24b0110d7c4d8b9
+  .github/agents/dutch-housing-advisor.agent.md: sha256:258095e7d019f13b62578ea67bf3a363b6c9dd200218dabf6222f57dd63ba256
+  .github/agents/personal-assistant.agent.md: sha256:07bd3008773513b5f5478933513b6f224b232d98212a789df2a0100281c865fd
+  .github/instructions/devsecninja-conventions.instructions.md: sha256:cae5797e9754190863c7eaaae73dcdb6e8bf4b0ce8ad5897c6db5aec60568e8a
+  .github/prompts/coding-copilot-onboarding.prompt.md: sha256:7dba4b8abe245cfdfae299f8643adbca6760d33300cff248c1778f863463a6d3
+  .github/prompts/home-assistant-automation-renamer.prompt.md: sha256:dce2d61ce6aa32062f4a4547a157abcba0ee96cad1f3a90ca13a5c80f908eff9
+  .github/prompts/home-assistant-notification-optimizer.prompt.md: sha256:3109ed96a5a17fa8c8d7e7a47f35174e3769bfc0e1fac2a6fd8e008dcb52beca
