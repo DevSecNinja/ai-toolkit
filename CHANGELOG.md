@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.5.0](https://github.com/DevSecNinja/ai-toolkit/compare/v0.4.0...v0.5.0) (2026-06-23)
+
+
+### Features
+
+* add new skills for personal assistant, commitment tracker, inbox triage, meeting transcript creation, and morning briefing ([fe3073e](https://github.com/DevSecNinja/ai-toolkit/commit/fe3073e31186cde8019cf67496984698a2f58aff))
+* **deps:** curate awesome-copilot agents as pinned APM dependencies ([c1cec9f](https://github.com/DevSecNinja/ai-toolkit/commit/c1cec9f15cffb5cf8d89909b145ec05b5c443fd2))
+* **deps:** self-consume curated agents and commit them as a review gate ([f8de0b1](https://github.com/DevSecNinja/ai-toolkit/commit/f8de0b1c0281227ef77747e77ad2d46852e19bd2))
+* **hooks:** add tool-guardian native APM hook ([548b05d](https://github.com/DevSecNinja/ai-toolkit/commit/548b05db0902d626a9bfab89470a992924df67bb))
+
+
+### Bug Fixes
+
+* **ci:** pass GITHUB_TOKEN to apm install in materialize workflow ([5640f23](https://github.com/DevSecNinja/ai-toolkit/commit/5640f236cef0b58e1648e599af79af0bf3bb1137))
+* **ci:** reconcile apm.lock.yaml on Linux in materialize ([d33ef57](https://github.com/DevSecNinja/ai-toolkit/commit/d33ef570b73a8e4ab51282e94197257bd99b8640))
+
 ## [0.4.0](https://github.com/DevSecNinja/ai-toolkit/compare/v0.3.0...v0.4.0) (2026-06-22)
 
 
