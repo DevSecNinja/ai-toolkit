@@ -54,6 +54,12 @@ dependencies:
       registry: false
       transport: http
       url: https://learn.microsoft.com/api/mcp
+# Self-consumption: this repo installs its own + curated dependencies into the
+# GitHub Copilot harness so the agents are usable here too. Pin the target to
+# copilot only, so `apm install` materializes into .github/** (+ .agents/skills/)
+# rather than fanning out to every harness.
+targets:
+  - copilot
 # "auto" walks the local .apm/ tree and deploys every primitive it finds.
 includes: auto
 scripts: {}

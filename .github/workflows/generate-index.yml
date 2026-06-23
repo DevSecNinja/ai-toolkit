@@ -5,11 +5,19 @@ on:
     branches: [ main ]
     paths:
       - '.apm/prompts/**'
+      - '.apm/instructions/**'
+      - '.apm/skills/**'
+      - '.apm/agents/**'
       - '.github/prompts/**/*.md'
+      - '.github/agents/**/*.md'
   pull_request:
     paths:
       - '.apm/prompts/**'
+      - '.apm/instructions/**'
+      - '.apm/skills/**'
+      - '.apm/agents/**'
       - '.github/prompts/**/*.md'
+      - '.github/agents/**/*.md'
   workflow_dispatch:
 
 permissions:

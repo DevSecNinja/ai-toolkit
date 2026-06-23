@@ -51,6 +51,8 @@ done
 # Repo-local Copilot prompts (not part of the shipped package).
 for file in .github/prompts/**/*.md; do
   [ -f "$file" ] || continue
+  # Skip APM-deployed copies (their .apm/prompts source is validated above).
+  [ -f ".apm/prompts/$(basename "$file")" ] && continue
   echo "Checking $file..."
   if has_frontmatter "$file" && grep -q "^description:" "$file"; then
     echo "✅ $file is valid"

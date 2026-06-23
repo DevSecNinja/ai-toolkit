@@ -104,6 +104,27 @@ if compgen -G ".apm/agents/*.agent.md" > /dev/null; then
   echo "" >> INDEX.md
 fi
 
+# Bundled agents materialized from APM dependencies. These are committed under
+# .github/agents/ as a reviewable snapshot (the prompt-hijacking review gate);
+# skip our own agents' deploy copies (those are authored under .apm/agents/).
+if compgen -G ".github/agents/*.agent.md" > /dev/null; then
+  printed_header=0
+  for f in .github/agents/*.agent.md; do
+    [ -f ".apm/agents/$(basename "$f")" ] && continue
+    if [ "$printed_header" -eq 0 ]; then
+      echo "## 🤝 Bundled Agents" >> INDEX.md
+      echo "" >> INDEX.md
+      echo "> External agents pulled via APM dependencies, committed here as a reviewable snapshot (see \`apm.yml\`)" >> INDEX.md
+      echo "" >> INDEX.md
+      printed_header=1
+    fi
+    title=$(get_field "$f" name); [ -n "$title" ] || title=$(titlecase "$(basename "$f" .agent.md)")
+    description=$(get_field "$f" description)
+    echo "- **[${title}](/${f})** - ${description}" >> INDEX.md
+  done
+  [ "$printed_header" -eq 1 ] && echo "" >> INDEX.md
+fi
+
 # Process .github/prompts directory (repo-local Copilot prompts, not part of the package).
 if [ -d ".github/prompts" ]; then
   echo "## 🤖 GitHub Copilot Prompts" >> INDEX.md
@@ -111,6 +132,9 @@ if [ -d ".github/prompts" ]; then
   echo "> Prompts optimized for use with GitHub Copilot in this repository" >> INDEX.md
   echo "" >> INDEX.md
   for f in .github/prompts/*.md; do
+    base=$(basename "$f")
+    # Skip APM-deployed copies (their .apm/prompts source is already indexed above).
+    [ -f ".apm/prompts/$base" ] && continue
     title=$(basename "$f" .md); title=$(basename "$title" .prompt); title=$(titlecase "$title")
     description=$(get_field "$f" description)
     echo "- **[${title}](/${f})** - ${description}" >> INDEX.md

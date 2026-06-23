@@ -40,6 +40,24 @@
 - **[Dutch Housing Advisor](/.apm/agents/dutch-housing-advisor.agent.md)** - Use when: helping users find, compare, and evaluate homes in the Netherlands, including Dutch housing market research, Funda searches, buying or renting process guidance, bidding strategy, legal considerations, mortgages, VvE, erfpacht, NHG, transfer tax, and neighborhood due diligence.
 - **[Personal Assistant](/.apm/agents/personal-assistant.agent.md)** - Personal executive assistant persona that manages email, calendar, and Teams through Work IQ MCP tools - triages and summarizes the inbox, finds meeting times and manages the schedule, summarizes and drafts Teams messages, and tracks commitments and follow-ups, always drafting in the user's voice and confirming before any irreversible action. Use as the orchestrating persona for day-to-day Microsoft 365 productivity.
 
+## 🤝 Bundled Agents
+
+> External agents pulled via APM dependencies, committed here as a reviewable snapshot (see `apm.yml`)
+
+- **[Accessibility](/.github/agents/accessibility.agent.md)** - 
+- **[Adr Generator](/.github/agents/adr-generator.agent.md)** - 
+- **[Devops Expert](/.github/agents/devops-expert.agent.md)** - 
+- **[Github Actions Expert](/.github/agents/github-actions-expert.agent.md)** - 
+- **[Linkedin Post Writer](/.github/agents/linkedin-post-writer.agent.md)** - 
+- **[Project Architecture Planner](/.github/agents/project-architecture-planner.agent.md)** - 
+- **[Prompt Builder](/.github/agents/prompt-builder.agent.md)** - 
+- **[Sast Sca Security Analyzer](/.github/agents/sast-sca-security-analyzer.agent.md)** - 
+- **[Se Security Reviewer](/.github/agents/se-security-reviewer.agent.md)** - 
+- **[Se Technical Writer](/.github/agents/se-technical-writer.agent.md)** - 
+- **[Se Ux Ui Designer](/.github/agents/se-ux-ui-designer.agent.md)** - 
+- **[Software Engineer Agent V1](/.github/agents/software-engineer-agent-v1.agent.md)** - 
+- **[Task Planner](/.github/agents/task-planner.agent.md)** - 
+
 ## 🤖 GitHub Copilot Prompts
 
 > Prompts optimized for use with GitHub Copilot in this repository

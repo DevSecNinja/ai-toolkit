@@ -1,5 +1,5 @@
 lockfile_version: '1'
-generated_at: '2026-06-23T07:10:26.778186+00:00'
+generated_at: '2026-06-23T09:10:18.237397+00:00'
 apm_version: 0.21.0
 dependencies:
 - repo_url: github/awesome-copilot
@@ -9,6 +9,10 @@ dependencies:
   virtual_path: agents/accessibility.agent.md
   is_virtual: true
   package_type: apm_package
+  deployed_files:
+  - .github/agents/accessibility.agent.md
+  deployed_file_hashes:
+    .github/agents/accessibility.agent.md: sha256:fe79c1ffb138fae09155c852a78ab92a841279aa117d1c60d6035d4f707b351a
   content_hash: sha256:31460dfae4bcbb080e9298bd56049c6f82608f9a43af39d740d0bca2e02ed4e1
 - repo_url: github/awesome-copilot
   host: github.com
@@ -53,6 +57,10 @@ dependencies:
   virtual_path: agents/linkedin-post-writer.agent.md
   is_virtual: true
   package_type: apm_package
+  deployed_files:
+  - .github/agents/linkedin-post-writer.agent.md
+  deployed_file_hashes:
+    .github/agents/linkedin-post-writer.agent.md: sha256:d51232621776ff13fb2c452d1073a8720ec38b30de57876d0ad6d5c7f4a9d628
   content_hash: sha256:857936a473e5cb9bd815fb189dc06e1f2e2ea4c4de99c33a62037a89e3e194c5
 - repo_url: github/awesome-copilot
   host: github.com
@@ -121,6 +129,10 @@ dependencies:
   virtual_path: agents/se-ux-ui-designer.agent.md
   is_virtual: true
   package_type: apm_package
+  deployed_files:
+  - .github/agents/se-ux-ui-designer.agent.md
+  deployed_file_hashes:
+    .github/agents/se-ux-ui-designer.agent.md: sha256:8bd92d41f54d2e09a9e3f1e0ea08944b03a9e5d74eb3a7de805eaf8ebf63ce0f
   content_hash: sha256:39d62eb52cda3eec692a8d943a31f29ce1175b355154a52efad59d31779c845e
 - repo_url: github/awesome-copilot
   host: github.com
@@ -167,6 +179,8 @@ local_deployed_files:
 - .agents/skills/ooo-task-handoff-planner/SKILL.md
 - .github/agents/dutch-housing-advisor.agent.md
 - .github/agents/personal-assistant.agent.md
+- .github/hooks/ai-toolkit-tool-guardian.json
+- .github/hooks/scripts/ai-toolkit/scripts/tool-guardian/guard-tool.sh
 - .github/instructions/devsecninja-conventions.instructions.md
 - .github/prompts/coding-copilot-onboarding.prompt.md
 - .github/prompts/home-assistant-automation-renamer.prompt.md
@@ -183,6 +197,8 @@ local_deployed_file_hashes:
   .agents/skills/ooo-task-handoff-planner/SKILL.md: sha256:8886cdf1b9effe8a877e890d09fa54281ab680516a3837f0b24b0110d7c4d8b9
   .github/agents/dutch-housing-advisor.agent.md: sha256:258095e7d019f13b62578ea67bf3a363b6c9dd200218dabf6222f57dd63ba256
   .github/agents/personal-assistant.agent.md: sha256:07bd3008773513b5f5478933513b6f224b232d98212a789df2a0100281c865fd
+  .github/hooks/ai-toolkit-tool-guardian.json: sha256:37fa76a417af448c127fd9da65b9996b8f06e92c727c309594194b3ecaa98b46
+  .github/hooks/scripts/ai-toolkit/scripts/tool-guardian/guard-tool.sh: sha256:f74d1860c92308da65d39576e3cf36413942084f51345fd29e63b55bf0ae5d18
   .github/instructions/devsecninja-conventions.instructions.md: sha256:cae5797e9754190863c7eaaae73dcdb6e8bf4b0ce8ad5897c6db5aec60568e8a
   .github/prompts/coding-copilot-onboarding.prompt.md: sha256:7dba4b8abe245cfdfae299f8643adbca6760d33300cff248c1778f863463a6d3
   .github/prompts/home-assistant-automation-renamer.prompt.md: sha256:dce2d61ce6aa32062f4a4547a157abcba0ee96cad1f3a90ca13a5c80f908eff9
