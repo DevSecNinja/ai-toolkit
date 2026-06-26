@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.6.0](https://github.com/DevSecNinja/ai-toolkit/compare/v0.5.0...v0.6.0) (2026-06-26)
+
+
+### Features
+
+* add Ada agent for personal knowledge vault management ([5e7af0e](https://github.com/DevSecNinja/ai-toolkit/commit/5e7af0e0736eef03bfd564f5c076772918eb9329))
+* **deps:** update dependency apm-cli ( 0.21.0 ➔ 0.22.0 ) [automerge] ([#37](https://github.com/DevSecNinja/ai-toolkit/issues/37)) ([e6cf424](https://github.com/DevSecNinja/ai-toolkit/commit/e6cf4244c0a4a27a48a7f1616fbef5fe0c35ec30))
+* **skills:** add obsidian skill (markdown + bases) with MIT attribution ([#38](https://github.com/DevSecNinja/ai-toolkit/issues/38)) ([8e9a47a](https://github.com/DevSecNinja/ai-toolkit/commit/8e9a47a7ac5adff3eed6d28cd7a81bc6950ad1ba))
+
 ## [0.5.0](https://github.com/DevSecNinja/ai-toolkit/compare/v0.4.0...v0.5.0) (2026-06-23)
 
 
