@@ -50,6 +50,7 @@ That committed snapshot is a **review gate**: bumping a dependency (`apm update`
 - **[Inbox Triage Pass](/.apm/skills/inbox-triage-pass/SKILL.md)** - |
 - **[Meeting Transcript Creation](/.apm/skills/meeting-transcript-creation/SKILL.md)** - |
 - **[Morning Briefing](/.apm/skills/morning-briefing/SKILL.md)** - |
+- **[Obsidian](/.apm/skills/obsidian/SKILL.md)** - Create and edit Obsidian content -- Obsidian Flavored Markdown (wikilinks, embeds, callouts, properties, tags) and Bases (.base database views with filters, formulas, and summaries). Use when working with Obsidian notes or .base files, or when the user mentions wikilinks, callouts, frontmatter, tags, embeds, Bases, table/card views, filters, or formulas in Obsidian.
 - **[Ooo Task Handoff Planner](/.apm/skills/ooo-task-handoff-planner/SKILL.md)** - |
 
 ## 🧑‍✈️ Agents
@@ -64,19 +65,19 @@ That committed snapshot is a **review gate**: bumping a dependency (`apm update`
 
 > External agents pulled via APM dependencies, committed here as a reviewable snapshot (see `apm.yml`)
 
-- **[Accessibility Expert](/.github/agents/accessibility.agent.md)** - Expert assistant for web accessibility (WCAG 2.1/2.2), inclusive UX, and a11y testing
-- **[ADR Generator](/.github/agents/adr-generator.agent.md)** - Expert agent for creating comprehensive Architectural Decision Records (ADRs) with structured formatting optimized for AI consumption and human readability.
-- **[DevOps Expert](/.github/agents/devops-expert.agent.md)** - DevOps specialist following the infinity loop principle (Plan → Code → Build → Test → Release → Deploy → Operate → Monitor) with focus on automation, collaboration, and continuous improvement
-- **[GitHub Actions Expert](/.github/agents/github-actions-expert.agent.md)** - GitHub Actions specialist focused on secure CI/CD workflows, action pinning, OIDC authentication, permissions least privilege, and supply-chain security
-- **[LinkedIn Post Writer](/.github/agents/linkedin-post-writer.agent.md)** - Draft and format compelling LinkedIn posts with Unicode bold/italic styling, visual separators, and engagement-optimized structure. Transforms raw content, technical material, images, or ideas into copy-paste-ready LinkedIn posts.
-- **[Project Architecture Planner](/.github/agents/project-architecture-planner.agent.md)** - Holistic software architecture planner that evaluates tech stacks, designs scalability roadmaps, performs cloud-agnostic cost analysis, reviews existing codebases, and delivers interactive Mermaid diagrams with HTML preview and draw.io export
-- **[Prompt Builder](/.github/agents/prompt-builder.agent.md)** - Expert prompt engineering and validation system for creating high-quality prompts - Brought to you by microsoft/edge-ai
-- **[sast-sca-security-analyzer](/.github/agents/sast-sca-security-analyzer.agent.md)** - Use when: performing SAST (Static Application Security Testing), SCA (Software Composition Analysis), scanning source code or binaries for security flaws, auditing third-party dependency vulnerabilities, checking policy compliance, generating structured security reports, identifying CWE-mapped flaws with file/line precision, reviewing open-source license risk, or producing CI/CD-gate security findings.
-- **[SE: Security](/.github/agents/se-security-reviewer.agent.md)** - Security-focused code review specialist with OWASP Top 10, Zero Trust, LLM security, and enterprise security standards
-- **[SE: Tech Writer](/.github/agents/se-technical-writer.agent.md)** - Technical writing specialist for creating developer documentation, technical blogs, tutorials, and educational content
-- **[SE: UX Designer](/.github/agents/se-ux-ui-designer.agent.md)** - Jobs-to-be-Done analysis, user journey mapping, and UX research artifacts for Figma and design workflows
-- **[Software Engineer Agent](/.github/agents/software-engineer-agent-v1.agent.md)** - Expert-level software engineering agent. Deliver production-ready, maintainable code. Execute systematically and specification-driven. Document comprehensively. Operate autonomously and adaptively.
-- **[Task Planner Instructions](/.github/agents/task-planner.agent.md)** - Task planner for creating actionable implementation plans - Brought to you by microsoft/edge-ai
+- **[Accessibility](/.github/agents/accessibility.agent.md)** - 
+- **[Adr Generator](/.github/agents/adr-generator.agent.md)** - 
+- **[Devops Expert](/.github/agents/devops-expert.agent.md)** - 
+- **[Github Actions Expert](/.github/agents/github-actions-expert.agent.md)** - 
+- **[Linkedin Post Writer](/.github/agents/linkedin-post-writer.agent.md)** - 
+- **[Project Architecture Planner](/.github/agents/project-architecture-planner.agent.md)** - 
+- **[Prompt Builder](/.github/agents/prompt-builder.agent.md)** - 
+- **[Sast Sca Security Analyzer](/.github/agents/sast-sca-security-analyzer.agent.md)** - 
+- **[Se Security Reviewer](/.github/agents/se-security-reviewer.agent.md)** - 
+- **[Se Technical Writer](/.github/agents/se-technical-writer.agent.md)** - 
+- **[Se Ux Ui Designer](/.github/agents/se-ux-ui-designer.agent.md)** - 
+- **[Software Engineer Agent V1](/.github/agents/software-engineer-agent-v1.agent.md)** - 
+- **[Task Planner](/.github/agents/task-planner.agent.md)** - 
 
 ## 🤖 GitHub Copilot Prompts
 
