@@ -1,6 +1,6 @@
 {
   "name": "AI Toolkit",
-  "image": "ghcr.io/devsecninja/dotfiles-devcontainer:latest@sha256:48beb9a50b889539520f1ff01e1c370ee1facd0b652654a8a09a712976eecff8",
+  "image": "ghcr.io/devsecninja/dotfiles-devcontainer:latest@sha256:8202754ed9462d75af7f0ed73c904cdc1b70feef0e17459fe5f26f2e36e9332d",
   "postCreateCommand": "bash .devcontainer/post-create.sh",
   "remoteUser": "vscode",
   "customizations": {
