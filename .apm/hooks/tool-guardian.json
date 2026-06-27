@@ -1,16 +1,16 @@
 {
-    "disableAllHooks": true,
-    "hooks": {
-        "preToolUse": [
-            {
-                "hooks": [
-                    {
-                        "type": "command",
-                        "command": "${PLUGIN_ROOT}/scripts/tool-guardian/guard-tool.sh",
-                        "timeout": 10
-                    }
-                ]
-            }
-        ]
-    }
+  "version": 1,
+  "hooks": {
+    "preToolUse": [
+      {
+        "type": "command",
+        "bash": "${PLUGIN_ROOT}/scripts/tool-guardian/guard-tool.sh",
+        "cwd": ".",
+        "env": {
+          "GUARD_MODE": "block"
+        },
+        "timeoutSec": 10
+      }
+    ]
+  }
 }
