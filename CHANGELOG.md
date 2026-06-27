@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.1](https://github.com/DevSecNinja/ai-toolkit/compare/v0.6.0...v0.6.1) (2026-06-27)
+
+
+### Bug Fixes
+
+* disable all hooks in tool-guardian configuration ([e141858](https://github.com/DevSecNinja/ai-toolkit/commit/e141858e40be90dc68bcc7cc54e1ec6e8d6e0414))
+
 ## [0.6.0](https://github.com/DevSecNinja/ai-toolkit/compare/v0.5.0...v0.6.0) (2026-06-26)
 
 
