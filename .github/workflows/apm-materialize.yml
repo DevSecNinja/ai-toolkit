@@ -107,6 +107,15 @@ jobs:
           #   are not needed to materialize the agents here).
           apm install --update --only apm --verbose
 
+      - name: Fetch materialize branch
+        # Populate refs/remotes/origin/chore/apm-materialize so that the
+        # --force-with-lease push in open-pr has a valid lease to compare
+        # against. Without this fetch the branch exists on the remote but the
+        # local clone has no tracking ref, causing git to report "stale info"
+        # and reject the push.
+        if: steps.precheck.outputs.skip != 'true'
+        run: git fetch origin chore/apm-materialize || true
+
       - name: Open materialize PR
         if: steps.precheck.outputs.skip != 'true'
         # renovate: datasource=github-tags depName=DevSecNinja/.github
