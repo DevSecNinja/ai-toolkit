@@ -1,0 +1,23 @@
+---
+name: Auto-fix formatting
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  autofix:
+    uses: DevSecNinja/.github/.github/workflows/autofix.yml@42b7c72b7ea3a1ba0002e0bec84a86cb8a8f896a # main
+    permissions:
+      contents: write
+    with:
+      # renovate: datasource=github-releases depName=jdx/mise
+      mise-version: "2026.6.9"
+      # Optional: use formatter configs from a non-root directory.
+      # autofix-config-dir: config-sync/files
+      # Toggle formatters on/off (all default to true):
+      # autofix-dprint: true
+      # autofix-yamlfmt: true
+      # autofix-shfmt: true
