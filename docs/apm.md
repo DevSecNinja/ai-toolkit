@@ -5,7 +5,7 @@ This repository (`ai-toolkit`) is an [**APM (Agent Package Manager)**](https://m
 coding harness — GitHub Copilot, Claude Code, Cursor, OpenCode, Gemini and
 Windsurf — as native, parameterized commands.
 
-> APM is Microsoft's open package manager for *agentic primitives* (prompts,
+> APM is Microsoft's open package manager for _agentic primitives_ (prompts,
 > instructions, agents, skills, hooks and MCP servers). See the official
 > [producer documentation](https://microsoft.github.io/apm/producer/).
 
@@ -14,7 +14,7 @@ Windsurf — as native, parameterized commands.
 `.apm/` is the **single source of truth**. Primitives are authored directly
 there in native APM format — there is no second "browsable" tree to keep in
 sync. The human-facing [`INDEX.md`](../INDEX.md) and the README index are
-*generated from* `.apm/`.
+_generated from_ `.apm/`.
 
 The toolkit ships **prompt primitives**
 ([`*.prompt.md`](https://microsoft.github.io/apm/producer/author-primitives/prompts/))
@@ -27,15 +27,15 @@ under [`.apm/agents/`](../.apm/agents/), and **skill primitives**
 under [`.apm/skills/<name>/`](../.apm/skills/). The structure is built to grow
 further into `.apm/hooks/` — just add the folder and author the primitive.
 
-| File / directory | Role |
-|------------------|------|
-| `apm.yml` | The producer manifest — package name, version, MCP servers, and what ships. |
-| `.apm/prompts/*.prompt.md` | The prompt primitives (**source of truth**). |
+| File / directory                      | Role                                                                          |
+| ------------------------------------- | ----------------------------------------------------------------------------- |
+| `apm.yml`                             | The producer manifest — package name, version, MCP servers, and what ships.   |
+| `.apm/prompts/*.prompt.md`            | The prompt primitives (**source of truth**).                                  |
 | `.apm/instructions/*.instructions.md` | The instruction primitives — long-lived behavior rules (**source of truth**). |
-| `.apm/agents/*.agent.md` | The agent primitives — invocable specialist personas (**source of truth**). |
-| `.apm/skills/<name>/SKILL.md` | The skill primitives — model-invoked procedures (**source of truth**). |
-| `scripts/generate-index.sh` | Generates `INDEX.md` + README index **from** `.apm/`. |
-| `INDEX.md` / README index | Generated, human-browsable catalog. |
+| `.apm/agents/*.agent.md`              | The agent primitives — invocable specialist personas (**source of truth**).   |
+| `.apm/skills/<name>/SKILL.md`         | The skill primitives — model-invoked procedures (**source of truth**).        |
+| `scripts/generate-index.sh`           | Generates `INDEX.md` + README index **from** `.apm/`.                         |
+| `INDEX.md` / README index             | Generated, human-browsable catalog.                                           |
 
 ### MCP servers
 
@@ -43,10 +43,10 @@ The toolkit also declares **MCP servers** under `dependencies.mcp:` in `apm.yml`
 Unlike file-based primitives these are declarations, not files — `apm install`
 materializes them into each detected harness's MCP config:
 
-| Server | Type | Notes |
-|--------|------|-------|
-| `io.github.github/github-mcp-server` | registry | GitHub repos/issues/PRs/Actions; APM injects the auth token per harness. |
-| `microsoft-learn` | remote (`http`) | Trusted Microsoft/Azure docs + code samples at `https://learn.microsoft.com/api/mcp`; no auth. |
+| Server                               | Type            | Notes                                                                                          |
+| ------------------------------------ | --------------- | ---------------------------------------------------------------------------------------------- |
+| `io.github.github/github-mcp-server` | registry        | GitHub repos/issues/PRs/Actions; APM injects the auth token per harness.                       |
+| `microsoft-learn`                    | remote (`http`) | Trusted Microsoft/Azure docs + code samples at `https://learn.microsoft.com/api/mcp`; no auth. |
 
 ### Primitive frontmatter
 
@@ -95,14 +95,14 @@ apm install DevSecNinja/ai-toolkit#v0.1.0 --target copilot
 `apm install` deploys each prompt to the targeted harness(es), keeping its
 `<category>-<name>` command name:
 
-| Harness | Where the prompt lands | How to invoke |
-|---------|------------------------|---------------|
-| GitHub Copilot | `.github/prompts/<category>-<name>.prompt.md` | prompts picker |
-| Claude Code | `.claude/commands/<category>-<name>.md` | `/<category>-<name>` |
-| Cursor | `.cursor/commands/<category>-<name>.md` | `/<category>-<name>` |
-| OpenCode | `.opencode/commands/<category>-<name>.md` | `/<category>-<name>` |
-| Gemini | `.gemini/commands/<category>-<name>.toml` | `/<category>-<name>` |
-| Windsurf | `.windsurf/workflows/<category>-<name>.md` | workflows menu |
+| Harness        | Where the prompt lands                        | How to invoke        |
+| -------------- | --------------------------------------------- | -------------------- |
+| GitHub Copilot | `.github/prompts/<category>-<name>.prompt.md` | prompts picker       |
+| Claude Code    | `.claude/commands/<category>-<name>.md`       | `/<category>-<name>` |
+| Cursor         | `.cursor/commands/<category>-<name>.md`       | `/<category>-<name>` |
+| OpenCode       | `.opencode/commands/<category>-<name>.md`     | `/<category>-<name>` |
+| Gemini         | `.gemini/commands/<category>-<name>.toml`     | `/<category>-<name>` |
+| Windsurf       | `.windsurf/workflows/<category>-<name>.md`    | workflows menu       |
 
 ## 🏷️ Versioning
 
@@ -120,10 +120,10 @@ The flow:
    [`release-please-config.json`](../release-please-config.json)) and
    `CHANGELOG.md`, then creates the `vX.Y.Z` tag and the GitHub Release.
 
-Because `apm.yml` is bumped *inside the release PR*, the tagged commit always
+Because `apm.yml` is bumped _inside the release PR_, the tagged commit always
 carries the matching version — so **pinned installs (`@1.2.3`) resolve to a tree
 whose `apm.yml` says `1.2.3`**. (This replaces the earlier post-release sync
-workflow, which bumped `apm.yml` *after* tagging and left the tag tree stale.)
+workflow, which bumped `apm.yml` _after_ tagging and left the tag tree stale.)
 
 > The `# x-release-please-version` annotation on the `version:` line in `apm.yml`
 > is what the generic updater keys off — keep it intact.

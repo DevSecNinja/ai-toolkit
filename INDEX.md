@@ -70,4 +70,4 @@
 
 ---
 
-*This index is automatically generated from the `.apm/` primitives.*
+_This index is automatically generated from the `.apm/` primitives._
