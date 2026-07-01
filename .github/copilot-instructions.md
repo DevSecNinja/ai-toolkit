@@ -21,7 +21,7 @@ repo.
 
 **Do not onboard this repo as an APM consumer (no self-consumption).** The
 `DevSecNinja/.github` APM sync pipeline (`apm-materialize.yml` + a Renovate
-custom manager) is for **consumer** repos that pull *from* this package. Running
+custom manager) is for **consumer** repos that pull _from_ this package. Running
 it here would make `ai-toolkit` consume itself: pure duplication of `.apm/`, and
 `apm install --target copilot` writes prompts into `.github/prompts/`, colliding
 with `tests/validate-prompts.sh` and `scripts/generate-index.sh` (which scan that

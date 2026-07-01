@@ -1,10 +1,13 @@
+---
 name: Welcome
 
 on:
   pull_request_target:
-    types: [opened]
+    types:
+      - opened
   issues:
-    types: [opened]
+    types:
+      - opened
 
 jobs:
   welcome:
@@ -17,7 +20,7 @@ jobs:
       github.actor != github.repository_owner &&
       !contains(github.actor, 'copilot') &&
       !contains(github.actor, '[bot]')
-    
+
     steps:
       - name: Welcome new contributor
         uses: actions/first-interaction@1c4688942c71f71d4f5502a26ea67c331730fa4d # v3.1.0
@@ -25,25 +28,25 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           issue-message: |
             👋 Welcome to the AI Toolkit!
-            
+
             Thank you for opening your first issue! We appreciate your contribution to making this collection better.
-            
+
             A maintainer will review your issue soon. In the meantime:
             - Make sure you've provided enough context
             - Check if there are similar existing issues
             - Feel free to add more information if needed
-            
-          pr-message: |
+
+          pr-message: |-
             🎉 Thank you for your first contribution!
-            
+
             We're excited to have you as part of our community. Your pull request will be reviewed soon.
-            
+
             Please make sure:
             - ✅ Your prompt follows the template structure
             - ✅ It's placed in the correct category folder
             - ✅ The filename uses lowercase-with-hyphens format
             - ✅ You've tested the prompt and it produces useful results
-            
+
             Check out [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
-            
+
             Thanks again for making this collection better! 🚀

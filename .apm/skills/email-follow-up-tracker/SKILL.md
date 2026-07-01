@@ -64,7 +64,7 @@ Produce a table, sorted by **Days Since Sent** (oldest first), including
 counter of how many emails require follow-up.
 
 | Date Sent | Recipient (Organization) | Subject | Key Question/Request | Days Since Sent | Follow-up Priority (High/Medium/Low) | Received Substantive Reply (Yes/No) |
-|-----------|--------------------------|---------|----------------------|-----------------|--------------------------------------|-------------------------------------|
+| --------- | ------------------------ | ------- | -------------------- | --------------- | ------------------------------------ | ----------------------------------- |
 
 ## Guardrails
 
