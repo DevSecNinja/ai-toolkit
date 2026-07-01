@@ -16,3 +16,16 @@ with each bundled component.
 The `obsidian` skill (`SKILL.md` and its `references/`, including `BASES.md` and
 `FUNCTIONS_REFERENCE.md`) is adapted from the upstream `obsidian-markdown` and
 `obsidian-bases` skills and redistributed under the MIT License.
+
+## tripit-exporter skill
+
+- **Source:** [caseyg's "TripIt Export" skill](https://lobehub.com/skills/caseyg-caseys-claude-tripit-export)
+- **Copyright:** © Casey Grippi (@caseyg)
+- **License:** Personal use (see below)
+- **Bundled at:** [`.apm/skills/tripit-exporter/`](.apm/skills/tripit-exporter/)
+- **License text:** [`.apm/skills/tripit-exporter/LICENSE`](.apm/skills/tripit-exporter/LICENSE)
+
+The `tripit-exporter` skill (`SKILL.md`) is adapted from Casey Grippi's upstream
+`tripit-export` skill and redistributed for personal use. As the upstream author
+notes: "Personal use. Skills contain hardcoded assumptions (locations, accounts,
+preferences) that you'd need to adapt for your own use."

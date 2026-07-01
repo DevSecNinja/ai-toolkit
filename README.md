@@ -52,6 +52,7 @@ That committed snapshot is a **review gate**: bumping a dependency (`apm update`
 - **[Morning Briefing](/.apm/skills/morning-briefing/SKILL.md)** - |
 - **[Obsidian](/.apm/skills/obsidian/SKILL.md)** - Create and edit Obsidian content -- Obsidian Flavored Markdown (wikilinks, embeds, callouts, properties, tags) and Bases (.base database views with filters, formulas, and summaries). Use when working with Obsidian notes or .base files, or when the user mentions wikilinks, callouts, frontmatter, tags, embeds, Bases, table/card views, filters, or formulas in Obsidian.
 - **[Ooo Task Handoff Planner](/.apm/skills/ooo-task-handoff-planner/SKILL.md)** - |
+- **[Tripit Exporter](/.apm/skills/tripit-exporter/SKILL.md)** - Export all TripIt travel data (trips, flights, lodging, activities, cars, rail, cruises and more) to a single JSON file using TripIt's undocumented API v2. Use when the user asks to export, download, or back up their TripIt trips — e.g. "export tripit data", "export my trips from tripit", "download tripit trips", or /tripit-export. Requires a browser-automation plugin and an interactive TripIt login.
 
 ## 🧑‍✈️ Agents
 
