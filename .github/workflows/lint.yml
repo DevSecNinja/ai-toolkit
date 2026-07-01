@@ -1,0 +1,42 @@
+---
+name: Lint
+
+on:
+  pull_request:
+  push:
+    branches:
+      - "main"
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    uses: DevSecNinja/.github/.github/workflows/lint.yml@27fd66740c629ea38380dcd3bf93e7bc74c54247 # v1.9.0
+    permissions:
+      contents: read
+      security-events: write
+    with:
+      # renovate: datasource=github-releases depName=jdx/mise
+      mise-version: "2026.6.9"
+      # renovate: datasource=github-releases depName=golangci/golangci-lint
+      # golangci-lint-version: "v2.12.2"
+      # Optional: use configs from a non-root directory.
+      # lint-config-dir: config-sync/files
+      # Optional: fail this workflow when a linter fails (default: false).
+      # lint-fail-on-error: true
+      # Optional: use a different Go version file.
+      # go-version-file: go.mod
+      # Toggle linters on/off (all default to true):
+      # lint-dprint: true
+      # lint-yamlfmt: true
+      # lint-yamllint: true
+      # lint-actionlint: true
+      # lint-gitleaks: true
+      # lint-go: true
+      # lint-shellcheck: true
+      # lint-shfmt: true
+      # lint-checkov: true
+      # lint-trivy: true
+      # lint-zizmor: true
+      # lint-config-drift: false
