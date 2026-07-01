@@ -12,8 +12,8 @@
 
 ```markdown
 ![[image.png]]
-![[image.png|640x480]]    Width x Height
-![[image.png|300]]        Width only (maintains aspect ratio)
+![[image.png|640x480]] Width x Height
+![[image.png|300]] Width only (maintains aspect ratio)
 ```
 
 ## External Images

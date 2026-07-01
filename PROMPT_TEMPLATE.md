@@ -16,6 +16,7 @@ notes: |
 
 [Your complete prompt goes here. Everything after the frontmatter is delivered
 verbatim to the harness. Be specific and clear about:
+
 - The role or expertise the AI should take
 - The task or output expected
 - Any specific format or structure requirements

@@ -31,7 +31,7 @@ Add the following high level details about the codebase to reduce the amount of 
 
 - A summary of what the repository does.
 - High level repository information, such as the size of the repo, the type of the project, the languages, frameworks, or target runtimes in use.
-</HighLevelDetails>
+  </HighLevelDetails>
 
 Add information about how to build and validate changes so the agent does not need to search and find it each time.
 <BuildInstructions>
@@ -46,21 +46,21 @@ Add information about how to build and validate changes so the agent does not ne
 - When you find a sequence of commands that work for a particular purpose, document them in detail.
 - Use language to indicate when something should always be done. For example: "always run npm install before building".
 - Record any validation steps from documentation.
-</BuildInstructions>
+  </BuildInstructions>
 
 List key facts about the layout and architecture of the codebase to help the agent find where to make changes with minimal searching.
 <ProjectLayout>
 
 - A description of the major architectural elements of the project, including the relative paths to the main project files, the location
-of configuration files for linting, compilation, testing, and preferences.
+  of configuration files for linting, compilation, testing, and preferences.
 - A description of the checks run prior to check in, including any GitHub workflows, continuous integration builds, or other validation pipelines.
 - Document the steps so that the agent can replicate these itself.
 - Any explicit validation steps that the agent can consider to have further confidence in its changes.
 - Dependencies that aren't obvious from the layout or file structure.
 - Finally, fill in any remaining space with detailed lists of the following, in order of priority: the list of files in the repo root, the
-contents of the README, the contents of any key source files, the list of files in the next level down of directories, giving priority to the more structurally important and snippets of code from key source files, such as the one containing the main method.
-</ProjectLayout>
-</WhatToAdd>
+  contents of the README, the contents of any key source files, the list of files in the next level down of directories, giving priority to the more structurally important and snippets of code from key source files, such as the one containing the main method.
+  </ProjectLayout>
+  </WhatToAdd>
 
 <StepsToFollow>
 - Perform a comprehensive inventory of the codebase. Search for and view:

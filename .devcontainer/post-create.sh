@@ -11,7 +11,7 @@ set -euo pipefail
 # Avoids "detected dubious ownership" failures when git runs in the
 # bind-mounted workspace (owned by a different uid than the container user).
 ########################################
-git config --global --add safe.directory "$(pwd)"
+git config --global --add safe.directory "${PWD}"
 
 ########################################
 # Mise — install the tools pinned in .mise.toml (lefthook)

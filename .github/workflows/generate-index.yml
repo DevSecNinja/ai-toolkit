@@ -1,8 +1,10 @@
+---
 name: Generate Index
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
     paths:
       - '.apm/prompts/**'
       - '.apm/instructions/**'
@@ -41,17 +43,20 @@ jobs:
       - name: Check for changes
         id: git-check
         run: |
-          git diff --exit-code INDEX.md README.md || echo "changed=true" >> $GITHUB_OUTPUT
+          git diff --exit-code INDEX.md README.md || echo "changed=true" >> "$GITHUB_OUTPUT"
 
       - name: Commit and push if changed
         if: steps.git-check.outputs.changed == 'true'
-        run: |
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          HEAD_REF: ${{ github.head_ref }}
+        run: |-
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git add INDEX.md README.md
           git commit -m "docs: Update index [skip ci]"
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            branch="${{ github.head_ref }}"
+          if [ "${EVENT_NAME}" = "pull_request" ]; then
+            branch="${HEAD_REF}"
           else
             branch="${GITHUB_REF_NAME:-main}"
           fi
