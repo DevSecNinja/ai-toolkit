@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.7.0](https://github.com/DevSecNinja/ai-toolkit/compare/v0.6.2...v0.7.0) (2026-07-01)
+
+
+### Features
+
+* add autofix workflow for automatic formatting ([2c52f57](https://github.com/DevSecNinja/ai-toolkit/commit/2c52f571ecbbff1c4e8aef88f4739da2e7575771))
+* add lint workflow ([9a981c7](https://github.com/DevSecNinja/ai-toolkit/commit/9a981c7c705220b035210599d29e8c58bcfaf869))
+* add tripit-exporter skill ([#47](https://github.com/DevSecNinja/ai-toolkit/issues/47)) ([1a1f583](https://github.com/DevSecNinja/ai-toolkit/commit/1a1f583fd650448536c5839ab71024354745f5e8))
+
+
+### Bug Fixes
+
+* fetch materialize branch before open-pr to resolve stale force-with-lease ([#43](https://github.com/DevSecNinja/ai-toolkit/issues/43)) ([b43082d](https://github.com/DevSecNinja/ai-toolkit/commit/b43082d32f27ff587a3f03ac93341768fa0df7ce))
+
 ## [0.6.2](https://github.com/DevSecNinja/ai-toolkit/compare/v0.6.1...v0.6.2) (2026-06-27)
 
 

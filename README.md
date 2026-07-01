@@ -99,7 +99,7 @@ Pin a released version and pick your harness with `--target`:
 <!-- x-release-please-start-version -->
 
 ```bash
-apm install DevSecNinja/ai-toolkit#v0.6.2 --target copilot
+apm install DevSecNinja/ai-toolkit#v0.7.0 --target copilot
 ```
 
 <!-- x-release-please-end -->
