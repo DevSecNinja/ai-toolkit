@@ -136,10 +136,10 @@ opened or updated in this session, so the user can open and merge them quickly.
 Include the release-please release PR if one is now open. Use real, clickable
 URLs:
 
-| PR | Title | Status | Link |
-|----|-------|--------|------|
-| #123 | `feat(auth): add device-code login` | open | https://github.com/OWNER/REPO/pull/123 |
-| #124 | `chore(main): release 1.4.0` | open (release) | https://github.com/OWNER/REPO/pull/124 |
+| PR   | Title                               | Status         | Link                                   |
+| ---- | ----------------------------------- | -------------- | -------------------------------------- |
+| #123 | `feat(auth): add device-code login` | open           | https://github.com/OWNER/REPO/pull/123 |
+| #124 | `chore(main): release 1.4.0`        | open (release) | https://github.com/OWNER/REPO/pull/124 |
 
 If no PR was opened (e.g. a direct push), say so explicitly instead of printing
 an empty table.

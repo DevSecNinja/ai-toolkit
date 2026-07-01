@@ -103,17 +103,17 @@ filters:
 
 ### Filter Operators
 
-| Operator | Description |
-|----------|-------------|
-| `==` | equals |
-| `!=` | not equal |
-| `>` | greater than |
-| `<` | less than |
-| `>=` | greater than or equal |
-| `<=` | less than or equal |
-| `&&` | logical and |
-| `\|\|` | logical or |
-| <code>!</code> | logical not |
+| Operator       | Description           |
+| -------------- | --------------------- |
+| `==`           | equals                |
+| `!=`           | not equal             |
+| `>`            | greater than          |
+| `<`            | less than             |
+| `>=`           | greater than or equal |
+| `<=`           | less than or equal    |
+| `&&`           | logical and           |
+| `\|\|`         | logical or            |
+| <code>!</code> | logical not           |
 
 ## Properties
 
@@ -125,21 +125,21 @@ filters:
 
 ### File Properties Reference
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `file.name` | String | File name |
-| `file.basename` | String | File name without extension |
-| `file.path` | String | Full path to file |
-| `file.folder` | String | Parent folder path |
-| `file.ext` | String | File extension |
-| `file.size` | Number | File size in bytes |
-| `file.ctime` | Date | Created time |
-| `file.mtime` | Date | Modified time |
-| `file.tags` | List | All tags in file |
-| `file.links` | List | Internal links in file |
-| `file.backlinks` | List | Files linking to this file |
-| `file.embeds` | List | Embeds in the note |
-| `file.properties` | Object | All frontmatter properties |
+| Property          | Type   | Description                 |
+| ----------------- | ------ | --------------------------- |
+| `file.name`       | String | File name                   |
+| `file.basename`   | String | File name without extension |
+| `file.path`       | String | Full path to file           |
+| `file.folder`     | String | Parent folder path          |
+| `file.ext`        | String | File extension              |
+| `file.size`       | Number | File size in bytes          |
+| `file.ctime`      | Date   | Created time                |
+| `file.mtime`      | Date   | Modified time               |
+| `file.tags`       | List   | All tags in file            |
+| `file.links`      | List   | Internal links in file      |
+| `file.backlinks`  | List   | Files linking to this file  |
+| `file.embeds`     | List   | Embeds in the note          |
+| `file.properties` | Object | All frontmatter properties  |
 
 ### The `this` Keyword
 
@@ -176,15 +176,15 @@ formulas:
 
 Most commonly used functions. For the complete reference of all types (Date, String, Number, List, File, Link, Object, RegExp), see [FUNCTIONS_REFERENCE.md](FUNCTIONS_REFERENCE.md).
 
-| Function | Signature | Description |
-|----------|-----------|-------------|
-| `date()` | `date(string): date` | Parse string to date (`YYYY-MM-DD HH:mm:ss`) |
-| `now()` | `now(): date` | Current date and time |
-| `today()` | `today(): date` | Current date (time = 00:00:00) |
-| `if()` | `if(condition, trueResult, falseResult?)` | Conditional |
-| `duration()` | `duration(string): duration` | Parse duration string |
-| `file()` | `file(path): file` | Get file object |
-| `link()` | `link(path, display?): Link` | Create a link |
+| Function     | Signature                                 | Description                                  |
+| ------------ | ----------------------------------------- | -------------------------------------------- |
+| `date()`     | `date(string): date`                      | Parse string to date (`YYYY-MM-DD HH:mm:ss`) |
+| `now()`      | `now(): date`                             | Current date and time                        |
+| `today()`    | `today(): date`                           | Current date (time = 00:00:00)               |
+| `if()`       | `if(condition, trueResult, falseResult?)` | Conditional                                  |
+| `duration()` | `duration(string): duration`              | Parse duration string                        |
+| `file()`     | `file(path): file`                        | Get file object                              |
+| `link()`     | `link(path, display?): Link`              | Create a link                                |
 
 ### Duration Type
 
@@ -268,23 +268,23 @@ views:
 
 ## Default Summary Formulas
 
-| Name | Input Type | Description |
-|------|------------|-------------|
-| `Average` | Number | Mathematical mean |
-| `Min` | Number | Smallest number |
-| `Max` | Number | Largest number |
-| `Sum` | Number | Sum of all numbers |
-| `Range` | Number | Max - Min |
-| `Median` | Number | Mathematical median |
-| `Stddev` | Number | Standard deviation |
-| `Earliest` | Date | Earliest date |
-| `Latest` | Date | Latest date |
-| `Range` | Date | Latest - Earliest |
-| `Checked` | Boolean | Count of true values |
-| `Unchecked` | Boolean | Count of false values |
-| `Empty` | Any | Count of empty values |
-| `Filled` | Any | Count of non-empty values |
-| `Unique` | Any | Count of unique values |
+| Name        | Input Type | Description               |
+| ----------- | ---------- | ------------------------- |
+| `Average`   | Number     | Mathematical mean         |
+| `Min`       | Number     | Smallest number           |
+| `Max`       | Number     | Largest number            |
+| `Sum`       | Number     | Sum of all numbers        |
+| `Range`     | Number     | Max - Min                 |
+| `Median`    | Number     | Mathematical median       |
+| `Stddev`    | Number     | Standard deviation        |
+| `Earliest`  | Date       | Earliest date             |
+| `Latest`    | Date       | Latest date               |
+| `Range`     | Date       | Latest - Earliest         |
+| `Checked`   | Boolean    | Count of true values      |
+| `Unchecked` | Boolean    | Count of false values     |
+| `Empty`     | Any        | Count of empty values     |
+| `Filled`    | Any        | Count of non-empty values |
+| `Unique`    | Any        | Count of unique values    |
 
 ## Complete Examples
 
@@ -419,6 +419,7 @@ Embed in Markdown files:
 ![[MyBase.base]]
 
 <!-- Specific view -->
+
 ![[MyBase.base#View Name]]
 ```
 

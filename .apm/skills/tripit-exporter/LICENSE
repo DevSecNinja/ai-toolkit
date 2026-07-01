@@ -1,0 +1,15 @@
+TripIt Export skill — attribution & license
+============================================
+
+This skill is adapted from Casey Grippi's "TripIt Export" skill.
+
+- Source:  https://lobehub.com/skills/caseyg-caseys-claude-tripit-export
+- Author:  Casey Grippi (@caseyg)
+
+License (as stated by the upstream author):
+
+  Personal use. Skills contain hardcoded assumptions (locations, accounts,
+  preferences) that you'd need to adapt for your own use.
+
+This material is redistributed here for personal use, with attribution to the
+original author. Adapt it for your own accounts and preferences before use.

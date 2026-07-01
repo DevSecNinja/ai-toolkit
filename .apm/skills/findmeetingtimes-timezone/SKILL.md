@@ -39,10 +39,10 @@ it were local time silently produces a wrong-by-1-or-2-hour proposal.
 
 ## Conversion reference (Europe/Berlin, NL user)
 
-| Period | Offset | UTC → local |
-|--------|--------|-------------|
-| CET (winter, ~late Oct → late Mar) | UTC+1 | add 1 hour |
-| CEST (summer, ~late Mar → late Oct) | UTC+2 | add 2 hours |
+| Period                              | Offset | UTC → local |
+| ----------------------------------- | ------ | ----------- |
+| CET (winter, ~late Oct → late Mar)  | UTC+1  | add 1 hour  |
+| CEST (summer, ~late Mar → late Oct) | UTC+2  | add 2 hours |
 
 DST transitions: last Sunday of March (→ CEST) and last Sunday of
 October (→ CET). Around those dates, do not assume — verify the offset.
@@ -70,9 +70,9 @@ If any box is unchecked, do not propose the slot yet.
 
 ## Common failure modes
 
-| Symptom | Likely cause |
-|---------|--------------|
-| Proposed slot is off by 2 hours in summer | Read UTC as CEST |
-| Proposed slot is off by 1 hour in winter | Read UTC as CET |
-| Attendee shows "free" but conflicts with user's calendar | Skipped the cross-check step |
-| Proposed slot near DST transition is off by 1 hour | Used wrong offset for the date |
+| Symptom                                                  | Likely cause                   |
+| -------------------------------------------------------- | ------------------------------ |
+| Proposed slot is off by 2 hours in summer                | Read UTC as CEST               |
+| Proposed slot is off by 1 hour in winter                 | Read UTC as CET                |
+| Attendee shows "free" but conflicts with user's calendar | Skipped the cross-check step   |
+| Proposed slot near DST transition is off by 1 hour       | Used wrong offset for the date |
