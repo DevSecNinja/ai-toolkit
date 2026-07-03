@@ -68,6 +68,11 @@ and prefer reuse over duplication.
 - Dependencies: when adding or updating a package, check for and use the latest
   stable release rather than scaffolding on — or leaving deps at — outdated
   versions. Let Renovate keep them current thereafter.
+- Dependency provenance: prefer first-party/official sources (the vendor's own
+  package or feed) over third-party or community-maintained wrappers. Before
+  introducing a community-owned package, devcontainer feature, or action,
+  evaluate its trustworthiness (maintainer, adoption, activity); when in doubt,
+  install from the official source (e.g. via a script) instead.
 - Security: never commit plaintext secrets. Use SOPS, Vault, or GitHub Secrets.
 
 ## Tooling and files
