@@ -73,6 +73,11 @@ and prefer reuse over duplication.
   introducing a community-owned package, devcontainer feature, or action,
   evaluate its trustworthiness (maintainer, adoption, activity); when in doubt,
   install from the official source (e.g. via a script) instead.
+- Pin versions precisely: pin every external dependency, tool, and action to an
+  exact version — prefer a full commit SHA where the ecosystem supports it (e.g.
+  GitHub Actions) — and let Renovate manage the bumps. Avoid floating refs like
+  `latest`, `main`, or unpinned ranges. Consuming repos pin the tool versions
+  they use (e.g. in `mise.toml`) rather than relying on a central default.
 - Security: never commit plaintext secrets. Use SOPS, Vault, or GitHub Secrets.
 
 ## Tooling and files
