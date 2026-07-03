@@ -65,6 +65,9 @@ and prefer reuse over duplication.
   applicable so Renovate can bump it.
 - Reusable workflows in `DevSecNinja/.github` MUST NOT default package/tool
   version inputs — declare them `required: true` so the caller owns the version.
+- Dependencies: when adding or updating a package, check for and use the latest
+  stable release rather than scaffolding on — or leaving deps at — outdated
+  versions. Let Renovate keep them current thereafter.
 - Security: never commit plaintext secrets. Use SOPS, Vault, or GitHub Secrets.
 
 ## Tooling and files
