@@ -1,0 +1,6 @@
+# Paths (relative to repo root) excluded from central config sync.
+# One path per line. Blank lines and `#` comments are allowed.
+
+# Renovate config is managed locally (extends the shared DevSecNinja/.github
+# preset); do not let config-sync overwrite it.
+renovate.json5
