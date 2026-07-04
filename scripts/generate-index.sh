@@ -13,20 +13,33 @@ shopt -s nullglob
 
 echo "📑 Generating prompt index..."
 
-# Extract a single scalar frontmatter field (handles quoted values).
+# Extract a single scalar frontmatter field (handles quoted values and YAML
+# block scalars like `description: |` / `>` whose text spans indented lines).
 get_field() {
     awk -v key="$2" '
     NR==1 && $0!="---" { exit }
     NR==1 { infm=1; next }
     infm && $0=="---" { exit }
-    infm {
-      if ($0 ~ "^" key ":") {
-        sub("^" key ": *", "")
-        gsub(/^["'\'']|["'\'']$/, "")
-        print
-        exit
+    infm && $0 ~ "^" key ":" {
+      sub("^" key ": *", "")
+      # Block scalar indicator (| or >, optionally with chomping like |-, >-).
+      if ($0 ~ /^[|>][+-]?[0-9]*[[:space:]]*$/) {
+        block=1
+        next
       }
+      gsub(/^["'\'']|["'\'']$/, "")
+      print
+      exit
     }
+    block {
+      # A dedented (non-indented) non-blank line ends the block scalar.
+      if ($0 ~ /^[^[:space:]]/) { exit }
+      line=$0
+      sub(/^[[:space:]]+/, "", line)
+      if (line=="") next
+      out = (out=="" ? line : out " " line)
+    }
+    END { if (block) print out }
   ' "$1"
 }
 
