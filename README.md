@@ -87,7 +87,6 @@ That committed snapshot is a **review gate**: bumping a dependency (`apm update`
 - **[Copilot Add Prompt](/.github/prompts/copilot-add-prompt.prompt.md)** - Add a new prompt primitive to the AI Toolkit by authoring it under .apm/prompts/ with the right frontmatter
 - **[Copilot Generate Informal Message](/.github/prompts/copilot-generate-informal-message.prompt.md)** - Creates an informal message to share a prompt from the repository with your team
 
-
 <!-- INDEX_END -->
 
 ## 📦 Install via APM
