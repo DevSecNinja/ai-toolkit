@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.8.0](https://github.com/DevSecNinja/ai-toolkit/compare/v0.7.0...v0.8.0) (2026-07-04)
+
+
+### Features
+
+* add writing-style instruction to curb AI tells ([#58](https://github.com/DevSecNinja/ai-toolkit/issues/58)) ([b9c618b](https://github.com/DevSecNinja/ai-toolkit/commit/b9c618b4e59c0dc2b9428a39c52a90cca1e83204))
+* **deps:** update dependency apm-cli ( 0.22.0 ➔ 0.23.1 ) [automerge] ([#50](https://github.com/DevSecNinja/ai-toolkit/issues/50)) ([5af85d2](https://github.com/DevSecNinja/ai-toolkit/commit/5af85d2cbd64f1886592286f5660572eb9d58477))
+* **mise:** update tool pipx:checkov ( 3.2.522 ➔ 3.3.1 ) [automerge] ([#51](https://github.com/DevSecNinja/ai-toolkit/issues/51)) ([70a2088](https://github.com/DevSecNinja/ai-toolkit/commit/70a208871e643e12835f830f94362591487e28a5))
+* **mise:** update tool trivy ( 0.70.0 ➔ 0.71.2 ) [automerge] ([#52](https://github.com/DevSecNinja/ai-toolkit/issues/52)) ([1a21a58](https://github.com/DevSecNinja/ai-toolkit/commit/1a21a58418dc520f39963d2122df34725ef02167))
+
 ## [0.7.0](https://github.com/DevSecNinja/ai-toolkit/compare/v0.6.2...v0.7.0) (2026-07-01)
 
 
