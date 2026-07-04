@@ -1,65 +1,31 @@
-# APM (Agent Package Manager) producer manifest.
-# https://microsoft.github.io/apm/producer/
-#
-# This repository is an APM producer. Consumers can run
-#   apm install DevSecNinja/ai-toolkit
-# to deploy these primitives as native commands / prompts in their AI harness
-# (GitHub Copilot, Claude, Cursor, OpenCode, Gemini, Windsurf).
-#
-# .apm/ is the single source of truth — primitives are authored directly there.
-# INDEX.md and the README index are generated FROM .apm/ by
-# scripts/generate-index.sh (the browsable view is derived, not duplicated).
 name: ai-toolkit
-# Bumped automatically by release-please inside the release PR (see the
-# `extra-files` entry in release-please-config.json). The annotation on the
-# line below is what the generic updater keys off — keep it intact.
-version: 0.8.0 # x-release-please-version
-description: A curated, multi-harness toolkit of AI primitives (prompts, instructions, agents and hooks) installable via APM.
+version: 0.8.0
+description: A curated, multi-harness toolkit of AI primitives (prompts, instructions,
+  agents and hooks) installable via APM.
 author: DevSecNinja
 dependencies:
-  # Agents curated by-reference from github/awesome-copilot, SHA-pinned for
-  # reproducibility. Bump with `apm update` (Dependabot-style: manifest stays
-  # pinned, the comment tracks the human-readable source).
-  # Source: https://github.com/github/awesome-copilot @ 3e36d36 (2026-06-22).
   apm:
-    # DevSecOps & CI/CD
-    - github/awesome-copilot/agents/devops-expert.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
-    - github/awesome-copilot/agents/github-actions-expert.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
-    # Security
-    - github/awesome-copilot/agents/sast-sca-security-analyzer.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
-    - github/awesome-copilot/agents/se-security-reviewer.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
-    # Architecture & decisions
-    - github/awesome-copilot/agents/project-architecture-planner.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
-    - github/awesome-copilot/agents/adr-generator.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
-    # Engineering & delivery
-    - github/awesome-copilot/agents/software-engineer-agent-v1.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
-    - github/awesome-copilot/agents/task-planner.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
-    # Authoring
-    - github/awesome-copilot/agents/prompt-builder.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
-    - github/awesome-copilot/agents/se-technical-writer.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
-    # Frontend, design & accessibility (many public GitHub Pages web apps)
-    - github/awesome-copilot/agents/accessibility.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
-    - github/awesome-copilot/agents/se-ux-ui-designer.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
-    # Content / social
-    - github/awesome-copilot/agents/linkedin-post-writer.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
-  # MCP servers consumers get wired into their harness on `apm install`.
-  # Declarations only — APM materializes them into each harness's MCP config.
+  - github/awesome-copilot/agents/devops-expert.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
+  - github/awesome-copilot/agents/github-actions-expert.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
+  - github/awesome-copilot/agents/sast-sca-security-analyzer.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
+  - github/awesome-copilot/agents/se-security-reviewer.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
+  - github/awesome-copilot/agents/project-architecture-planner.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
+  - github/awesome-copilot/agents/adr-generator.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
+  - github/awesome-copilot/agents/software-engineer-agent-v1.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
+  - github/awesome-copilot/agents/task-planner.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
+  - github/awesome-copilot/agents/prompt-builder.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
+  - github/awesome-copilot/agents/se-technical-writer.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
+  - github/awesome-copilot/agents/accessibility.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
+  - github/awesome-copilot/agents/se-ux-ui-designer.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
+  - github/awesome-copilot/agents/linkedin-post-writer.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
+  - DevSecNinja/ai-toolkit#v0.8.0
   mcp:
-    # GitHub MCP server (repos, issues, PRs, Actions, code search). Resolved
-    # from the GitHub MCP registry; APM injects the auth token per harness.
-    - io.github.github/github-mcp-server
-    # Microsoft Learn MCP server — trusted, up-to-date Microsoft/Azure docs and
-    # code samples. Public remote server, no authentication required.
-    - name: microsoft-learn
-      registry: false
-      transport: http
-      url: https://learn.microsoft.com/api/mcp
-# Self-consumption: this repo installs its own + curated dependencies into the
-# GitHub Copilot harness so the agents are usable here too. Pin the target to
-# copilot only, so `apm install` materializes into .github/** (+ .agents/skills/)
-# rather than fanning out to every harness.
+  - io.github.github/github-mcp-server
+  - name: microsoft-learn
+    registry: false
+    transport: http
+    url: https://learn.microsoft.com/api/mcp
 targets:
-  - copilot
-# "auto" walks the local .apm/ tree and deploys every primitive it finds.
+- copilot
 includes: auto
 scripts: {}
