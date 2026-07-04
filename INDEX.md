@@ -18,6 +18,7 @@
 > Long-lived behavior rules deployed to each harness's instruction directory
 
 - **[Devsecninja Conventions](/.apm/instructions/devsecninja-conventions.instructions.md)** (`**`) - DevSecNinja org-wide engineering conventions for AI agents: Conventional-Commit PR titles, pre-PR checks, docs, and no force-push.
+- **[Writing Style](/.apm/instructions/writing-style.instructions.md)** (`**`) - Human-facing writing style for AI agents: avoid AI tells like 'So' sentence openers and em-dash/spaced-hyphen pauses, and default to a restrained, low-emoji tone.
 
 ## 🧠 Skills
 
