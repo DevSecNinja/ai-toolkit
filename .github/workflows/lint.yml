@@ -18,7 +18,7 @@ jobs:
       security-events: write
     with:
       # renovate: datasource=github-releases depName=jdx/mise
-      mise-version: "2026.6.11"
+      mise-version: "2026.6.14"
       # renovate: datasource=github-releases depName=golangci/golangci-lint
       # golangci-lint-version: "v2.12.2"
       # Optional: use configs from a non-root directory.
