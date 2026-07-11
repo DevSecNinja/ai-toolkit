@@ -80,7 +80,7 @@ jobs:
         if: steps.precheck.outputs.skip != 'true'
         env:
           # renovate: datasource=pypi depName=apm-cli
-          apm_cli_version: "0.24.0"
+          apm_cli_version: "0.24.1"
         run: |
           set -euo pipefail
           # ubuntu-24.04 ships python3 + pip; install the pinned apm-cli for this user.
