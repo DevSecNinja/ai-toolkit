@@ -14,7 +14,7 @@ jobs:
       contents: write
     with:
       # renovate: datasource=github-releases depName=jdx/mise
-      mise-version: "2026.6.14"
+      mise-version: "2026.7.0"
       # Optional: use formatter configs from a non-root directory.
       # autofix-config-dir: config-sync/files
       # Toggle formatters on/off (all default to true):
