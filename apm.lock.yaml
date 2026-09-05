@@ -1,12 +1,13 @@
 lockfile_version: '1'
-generated_at: '2026-07-04T07:08:23.629094+00:00'
-apm_version: 0.21.0
+generated_at: '2026-09-05T02:33:09.834306+00:00'
+apm_version: 0.29.0
 dependencies:
-- repo_url: DevSecNinja/ai-toolkit
+- repo_url: devsecninja/ai-toolkit
+  materialization_repo_url: DevSecNinja/ai-toolkit
   name: ai-toolkit
   host: github.com
   resolved_commit: 2491cedec727e722a7751ff516ae7b7c95de922b
-  resolved_ref: v0.8.0
+  resolved_ref: 2491cedec727e722a7751ff516ae7b7c95de922b
   version: 0.8.0
   package_type: apm_package
   deployed_files:
@@ -261,6 +262,550 @@ dependencies:
   deployed_file_hashes:
     .github/agents/task-planner.agent.md: sha256:396e333df4318d590a8b07f960a61361169689d68896731149ea1f5a11ddc8fd
   content_hash: sha256:868b1c2b411f4857a13f5fe32279589a836ed6d7c4b257d5ba1d5af0d1546c6a
+deployments:
+- kind: project-relative
+  target: copilot
+  value: .agents/skills/commit-and-release
+  runtime: null
+  scope: project
+  owners:
+  - devsecninja/ai-toolkit
+  - .
+  active_owner: devsecninja/ai-toolkit
+  content_hash: null
+- kind: project-relative
+  target: copilot
+  value: .agents/skills/commit-and-release/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - devsecninja/ai-toolkit
+  - .
+  active_owner: devsecninja/ai-toolkit
+  content_hash: sha256:232179a79dcbbf99fe5b188626c9b5af93a42070de0ae19b83f140cfc9dd4177
+- kind: project-relative
+  target: copilot
+  value: .agents/skills/commitment-tracker
+  runtime: null
+  scope: project
+  owners:
+  - devsecninja/ai-toolkit
+  - .
+  active_owner: devsecninja/ai-toolkit
+  content_hash: null
+- kind: project-relative
+  target: copilot
+  value: .agents/skills/commitment-tracker/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - devsecninja/ai-toolkit
+  - .
+  active_owner: devsecninja/ai-toolkit
+  content_hash: sha256:675f56e67ad756c0501806dbfb9e5d08466bda7daf202c3fbf7d72b22089cf36
+- kind: project-relative
+  target: copilot
+  value: .agents/skills/email-follow-up-tracker
+  runtime: null
+  scope: project
+  owners:
+  - devsecninja/ai-toolkit
+  - .
+  active_owner: devsecninja/ai-toolkit
+  content_hash: null
+- kind: project-relative
+  target: copilot
+  value: .agents/skills/email-follow-up-tracker/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - devsecninja/ai-toolkit
+  - .
+  active_owner: devsecninja/ai-toolkit
+  content_hash: sha256:79171aad8e4c17aa876a966015337b52d24c7c20c872001aa878066660b288c6
+- kind: project-relative
+  target: copilot
+  value: .agents/skills/findmeetingtimes-timezone
+  runtime: null
+  scope: project
+  owners:
+  - devsecninja/ai-toolkit
+  - .
+  active_owner: devsecninja/ai-toolkit
+  content_hash: null
+- kind: project-relative
+  target: copilot
+  value: .agents/skills/findmeetingtimes-timezone/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - devsecninja/ai-toolkit
+  - .
+  active_owner: devsecninja/ai-toolkit
+  content_hash: sha256:29a5d09945de8c6f8e5d04f71af6ba90eebf033db5b186b2bcfcd719b5cbe679
+- kind: project-relative
+  target: copilot
+  value: .agents/skills/focus-time-blocker
+  runtime: null
+  scope: project
+  owners:
+  - devsecninja/ai-toolkit
+  - .
+  active_owner: devsecninja/ai-toolkit
+  content_hash: null
+- kind: project-relative
+  target: copilot
+  value: .agents/skills/focus-time-blocker/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - devsecninja/ai-toolkit
+  - .
+  active_owner: devsecninja/ai-toolkit
+  content_hash: sha256:b08ff79cc3683176f458ecbc0daec4f3ef358f9ce3453022ce90ac5a2404ef22
+- kind: project-relative
+  target: copilot
+  value: .agents/skills/inbox-triage-pass
+  runtime: null
+  scope: project
+  owners:
+  - devsecninja/ai-toolkit
+  - .
+  active_owner: devsecninja/ai-toolkit
+  content_hash: null
+- kind: project-relative
+  target: copilot
+  value: .agents/skills/inbox-triage-pass/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - devsecninja/ai-toolkit
+  - .
+  active_owner: devsecninja/ai-toolkit
+  content_hash: sha256:cd4045ad38e5b50e8db41c3de7baa8ca8936ea98fa25cccb84328bd220efe52b
+- kind: project-relative
+  target: copilot
+  value: .agents/skills/meeting-transcript-creation
+  runtime: null
+  scope: project
+  owners:
+  - devsecninja/ai-toolkit
+  - .
+  active_owner: devsecninja/ai-toolkit
+  content_hash: null
+- kind: project-relative
+  target: copilot
+  value: .agents/skills/meeting-transcript-creation/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - devsecninja/ai-toolkit
+  - .
+  active_owner: devsecninja/ai-toolkit
+  content_hash: sha256:f8eae3f425e927765db6cad00744f53824ed0ab2d6bc66842ea64b508995cae3
+- kind: project-relative
+  target: copilot
+  value: .agents/skills/morning-briefing
+  runtime: null
+  scope: project
+  owners:
+  - devsecninja/ai-toolkit
+  - .
+  active_owner: devsecninja/ai-toolkit
+  content_hash: null
+- kind: project-relative
+  target: copilot
+  value: .agents/skills/morning-briefing/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - devsecninja/ai-toolkit
+  - .
+  active_owner: devsecninja/ai-toolkit
+  content_hash: sha256:6891d49b2391d4f4dd1e8ac0b536995a22750edd987a9db280c1ee3c19a9a63b
+- kind: project-relative
+  target: copilot
+  value: .agents/skills/obsidian
+  runtime: null
+  scope: project
+  owners:
+  - devsecninja/ai-toolkit
+  - .
+  active_owner: devsecninja/ai-toolkit
+  content_hash: null
+- kind: project-relative
+  target: copilot
+  value: .agents/skills/obsidian/LICENSE
+  runtime: null
+  scope: project
+  owners:
+  - devsecninja/ai-toolkit
+  - .
+  active_owner: devsecninja/ai-toolkit
+  content_hash: sha256:64c64d48361edfe8610016441bf593256ea9b67f133b00f47c55aa29ee878567
+- kind: project-relative
+  target: copilot
+  value: .agents/skills/obsidian/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - devsecninja/ai-toolkit
+  - .
+  active_owner: devsecninja/ai-toolkit
+  content_hash: sha256:15c25d4d2c84725f8226fcf9b92a8a7b9ebbde31b64f5e9002b4d5a37394d8c4
+- kind: project-relative
+  target: copilot
+  value: .agents/skills/obsidian/references/BASES.md
+  runtime: null
+  scope: project
+  owners:
+  - devsecninja/ai-toolkit
+  - .
+  active_owner: devsecninja/ai-toolkit
+  content_hash: sha256:c7166ebd9a5329d274fae88b063fc83d8ebd1c634a9dd72e552b326582712bb1
+- kind: project-relative
+  target: copilot
+  value: .agents/skills/obsidian/references/CALLOUTS.md
+  runtime: null
+  scope: project
+  owners:
+  - devsecninja/ai-toolkit
+  - .
+  active_owner: devsecninja/ai-toolkit
+  content_hash: sha256:54d94cbfc99c31ce0790525b74a87b98071ae2bb7904fc08e1a23be7999623d1
+- kind: project-relative
+  target: copilot
+  value: .agents/skills/obsidian/references/EMBEDS.md
+  runtime: null
+  scope: project
+  owners:
+  - devsecninja/ai-toolkit
+  - .
+  active_owner: devsecninja/ai-toolkit
+  content_hash: sha256:fc3f9c1730e81d1f87e1ee68858c4bfc9c23f07edf9df39866a6ede3d4bbdebd
+- kind: project-relative
+  target: copilot
+  value: .agents/skills/obsidian/references/FUNCTIONS_REFERENCE.md
+  runtime: null
+  scope: project
+  owners:
+  - devsecninja/ai-toolkit
+  - .
+  active_owner: devsecninja/ai-toolkit
+  content_hash: sha256:af0a31376a59f5b4fdbe6f51dcfe6d3aa971c8cda386b1b9801fac0cdbedbc59
+- kind: project-relative
+  target: copilot
+  value: .agents/skills/obsidian/references/PROPERTIES.md
+  runtime: null
+  scope: project
+  owners:
+  - devsecninja/ai-toolkit
+  - .
+  active_owner: devsecninja/ai-toolkit
+  content_hash: sha256:10e854dbfdf1a6a154e3ed058f0b1756a353f5fc02c0e94144a65e6158aa3d8b
+- kind: project-relative
+  target: copilot
+  value: .agents/skills/ooo-task-handoff-planner
+  runtime: null
+  scope: project
+  owners:
+  - devsecninja/ai-toolkit
+  - .
+  active_owner: devsecninja/ai-toolkit
+  content_hash: null
+- kind: project-relative
+  target: copilot
+  value: .agents/skills/ooo-task-handoff-planner/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - devsecninja/ai-toolkit
+  - .
+  active_owner: devsecninja/ai-toolkit
+  content_hash: sha256:8886cdf1b9effe8a877e890d09fa54281ab680516a3837f0b24b0110d7c4d8b9
+- kind: project-relative
+  target: copilot
+  value: .agents/skills/tripit-exporter
+  runtime: null
+  scope: project
+  owners:
+  - devsecninja/ai-toolkit
+  - .
+  active_owner: devsecninja/ai-toolkit
+  content_hash: null
+- kind: project-relative
+  target: copilot
+  value: .agents/skills/tripit-exporter/LICENSE
+  runtime: null
+  scope: project
+  owners:
+  - devsecninja/ai-toolkit
+  - .
+  active_owner: devsecninja/ai-toolkit
+  content_hash: sha256:ad7e683b837ca04d9965bb5f1d79b3874c5e0ba1f2101f6090c3e74c09d7e7d1
+- kind: project-relative
+  target: copilot
+  value: .agents/skills/tripit-exporter/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - devsecninja/ai-toolkit
+  - .
+  active_owner: devsecninja/ai-toolkit
+  content_hash: sha256:63cd5e957c9935e92a40ca508dada9dd49a3033259b4156fd3d9e5e9a1831871
+- kind: project-relative
+  target: copilot
+  value: .github/agents/accessibility.agent.md
+  runtime: null
+  scope: project
+  owners:
+  - github/awesome-copilot/agents/accessibility.agent.md
+  active_owner: github/awesome-copilot/agents/accessibility.agent.md
+  content_hash: sha256:739ed64a0ef2e7f560ef16329e7f6d7fedfdfbcc3f00382a926d33f978e614d0
+- kind: project-relative
+  target: copilot
+  value: .github/agents/ada.agent.md
+  runtime: null
+  scope: project
+  owners:
+  - devsecninja/ai-toolkit
+  - .
+  active_owner: devsecninja/ai-toolkit
+  content_hash: sha256:92c30af29bd4e8d77d66afc06da40db240c61dbfbdd19eb8d25b4793b045fedb
+- kind: project-relative
+  target: copilot
+  value: .github/agents/adr-generator.agent.md
+  runtime: null
+  scope: project
+  owners:
+  - github/awesome-copilot/agents/adr-generator.agent.md
+  active_owner: github/awesome-copilot/agents/adr-generator.agent.md
+  content_hash: sha256:abbf07c6a768a21baa94a1aed858510c8038cb89866461d47ab64817e9f347ac
+- kind: project-relative
+  target: copilot
+  value: .github/agents/devops-expert.agent.md
+  runtime: null
+  scope: project
+  owners:
+  - github/awesome-copilot/agents/devops-expert.agent.md
+  active_owner: github/awesome-copilot/agents/devops-expert.agent.md
+  content_hash: sha256:63197c5250702760e79fb3ccb4e2b154b1a52b41ac62e7d45ae2def6eea23952
+- kind: project-relative
+  target: copilot
+  value: .github/agents/dutch-housing-advisor.agent.md
+  runtime: null
+  scope: project
+  owners:
+  - devsecninja/ai-toolkit
+  - .
+  active_owner: devsecninja/ai-toolkit
+  content_hash: sha256:ff7237b06a8d536daebf7dcffba32772a4dc913a36d1358bf8090516e4e21c6c
+- kind: project-relative
+  target: copilot
+  value: .github/agents/github-actions-expert.agent.md
+  runtime: null
+  scope: project
+  owners:
+  - github/awesome-copilot/agents/github-actions-expert.agent.md
+  active_owner: github/awesome-copilot/agents/github-actions-expert.agent.md
+  content_hash: sha256:9a113142559959683041c85c094ca32541fa7e0db42d3510acf6d79a68bbb597
+- kind: project-relative
+  target: copilot
+  value: .github/agents/linkedin-post-writer.agent.md
+  runtime: null
+  scope: project
+  owners:
+  - github/awesome-copilot/agents/linkedin-post-writer.agent.md
+  active_owner: github/awesome-copilot/agents/linkedin-post-writer.agent.md
+  content_hash: sha256:1a6c8505fb43e6636af78914728c87283d5908a8a25dc4d8fef8cf96c0d24b9a
+- kind: project-relative
+  target: copilot
+  value: .github/agents/personal-assistant.agent.md
+  runtime: null
+  scope: project
+  owners:
+  - devsecninja/ai-toolkit
+  - .
+  active_owner: devsecninja/ai-toolkit
+  content_hash: sha256:a48a53144bfc4bc62d2a20f2a984f1fb55ad9ec98d30dfeccff0276e86740b65
+- kind: project-relative
+  target: copilot
+  value: .github/agents/project-architecture-planner.agent.md
+  runtime: null
+  scope: project
+  owners:
+  - github/awesome-copilot/agents/project-architecture-planner.agent.md
+  active_owner: github/awesome-copilot/agents/project-architecture-planner.agent.md
+  content_hash: sha256:11ce5dc54676fbe183849a4c0d317e5d893d012e6fc32a99b1ac22f9a173ad6c
+- kind: project-relative
+  target: copilot
+  value: .github/agents/prompt-builder.agent.md
+  runtime: null
+  scope: project
+  owners:
+  - github/awesome-copilot/agents/prompt-builder.agent.md
+  active_owner: github/awesome-copilot/agents/prompt-builder.agent.md
+  content_hash: sha256:1f2296311ebdb3c082bab8194a377adf6207e88522227cc381158402549b0f1a
+- kind: project-relative
+  target: copilot
+  value: .github/agents/sast-sca-security-analyzer.agent.md
+  runtime: null
+  scope: project
+  owners:
+  - github/awesome-copilot/agents/sast-sca-security-analyzer.agent.md
+  active_owner: github/awesome-copilot/agents/sast-sca-security-analyzer.agent.md
+  content_hash: sha256:5980dc5817b48eea6f88d25f847fcac11b3131f5f9444856bfda243d2c808518
+- kind: project-relative
+  target: copilot
+  value: .github/agents/se-security-reviewer.agent.md
+  runtime: null
+  scope: project
+  owners:
+  - github/awesome-copilot/agents/se-security-reviewer.agent.md
+  active_owner: github/awesome-copilot/agents/se-security-reviewer.agent.md
+  content_hash: sha256:3b5fec1f93bf21e20b865493ceca30708738642887d00c68e0bd0051f2d0e1fc
+- kind: project-relative
+  target: copilot
+  value: .github/agents/se-technical-writer.agent.md
+  runtime: null
+  scope: project
+  owners:
+  - github/awesome-copilot/agents/se-technical-writer.agent.md
+  active_owner: github/awesome-copilot/agents/se-technical-writer.agent.md
+  content_hash: sha256:e2b7fe3959fee4701084022bdfb6bae9c24b2890d44305f17d779d0055ec9506
+- kind: project-relative
+  target: copilot
+  value: .github/agents/se-ux-ui-designer.agent.md
+  runtime: null
+  scope: project
+  owners:
+  - github/awesome-copilot/agents/se-ux-ui-designer.agent.md
+  active_owner: github/awesome-copilot/agents/se-ux-ui-designer.agent.md
+  content_hash: sha256:a7078735984cfec19643027b8e876435b3d73f43ab431f910186e16a11b0bdd2
+- kind: project-relative
+  target: copilot
+  value: .github/agents/software-engineer-agent-v1.agent.md
+  runtime: null
+  scope: project
+  owners:
+  - github/awesome-copilot/agents/software-engineer-agent-v1.agent.md
+  active_owner: github/awesome-copilot/agents/software-engineer-agent-v1.agent.md
+  content_hash: sha256:79ebbe7c389bc6043ac0a0e0f48ba8431d7f573deed3fd049c42f4cc27930f0b
+- kind: project-relative
+  target: copilot
+  value: .github/agents/task-planner.agent.md
+  runtime: null
+  scope: project
+  owners:
+  - github/awesome-copilot/agents/task-planner.agent.md
+  active_owner: github/awesome-copilot/agents/task-planner.agent.md
+  content_hash: sha256:396e333df4318d590a8b07f960a61361169689d68896731149ea1f5a11ddc8fd
+- kind: project-relative
+  target: copilot
+  value: .github/hooks/ai-toolkit-git-push-approval.json
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:e882ddb46538d7653a14b1e91273795c6c8023271fe1fb25ab371439f995839f
+- kind: project-relative
+  target: copilot
+  value: .github/hooks/ai-toolkit-tool-guardian.json
+  runtime: null
+  scope: project
+  owners:
+  - devsecninja/ai-toolkit
+  - .
+  active_owner: devsecninja/ai-toolkit
+  content_hash: sha256:ac518c3b22487e2ab72a2624262f7eb0739874853be30cf0db6184ff58d01e0b
+- kind: project-relative
+  target: copilot
+  value: .github/hooks/scripts/ai-toolkit/scripts/git-push-approval/require-push-approval.sh
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:cf4096ad00f53f6dbaa24bfb4365d01f6405c158636393bd4f6ca6fdca3bd11f
+- kind: project-relative
+  target: copilot
+  value: .github/hooks/scripts/ai-toolkit/scripts/tool-guardian/guard-tool.sh
+  runtime: null
+  scope: project
+  owners:
+  - devsecninja/ai-toolkit
+  - .
+  active_owner: devsecninja/ai-toolkit
+  content_hash: sha256:d500ad6b087dd2653d49590fc4926d21eaff66445f3057290808b63ea9440384
+- kind: project-relative
+  target: copilot
+  value: .github/instructions/devsecninja-conventions.instructions.md
+  runtime: null
+  scope: project
+  owners:
+  - devsecninja/ai-toolkit
+  - .
+  active_owner: devsecninja/ai-toolkit
+  content_hash: sha256:4dce4f46d59178dfebe9bd56b755aa08e6e1b3de46debe03b463e903301dbd2c
+- kind: project-relative
+  target: copilot
+  value: .github/instructions/writing-style.instructions.md
+  runtime: null
+  scope: project
+  owners:
+  - devsecninja/ai-toolkit
+  - .
+  active_owner: devsecninja/ai-toolkit
+  content_hash: sha256:4d3700565fafac3fa5f2a6ce8f7110b4716a81f44990bb71ccfd3f51d599452e
+- kind: project-relative
+  target: copilot
+  value: .github/prompts/coding-copilot-onboarding.prompt.md
+  runtime: null
+  scope: project
+  owners:
+  - devsecninja/ai-toolkit
+  - .
+  active_owner: devsecninja/ai-toolkit
+  content_hash: sha256:35e9058ff1181c9bd4612c4c2c216a2379813212e7e4db5462723aeeb12825f3
+- kind: project-relative
+  target: copilot
+  value: .github/prompts/home-assistant-automation-renamer.prompt.md
+  runtime: null
+  scope: project
+  owners:
+  - devsecninja/ai-toolkit
+  - .
+  active_owner: devsecninja/ai-toolkit
+  content_hash: sha256:46d8cb31d75f4ff73b1ace176ad52b523d5cf8feb6d8f9cbcf8e9b2ee74112f8
+- kind: project-relative
+  target: copilot
+  value: .github/prompts/home-assistant-notification-optimizer.prompt.md
+  runtime: null
+  scope: project
+  owners:
+  - devsecninja/ai-toolkit
+  - .
+  active_owner: devsecninja/ai-toolkit
+  content_hash: sha256:bef7b8a47605fd61dcdd6eb1e60b8294e9f25f5bf2a60662e1cfa7a8c7e2b64a
+- kind: uri
+  target: mcp
+  value: io.github.github/github-mcp-server
+  runtime: copilot
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: null
+- kind: uri
+  target: mcp
+  value: microsoft-learn
+  runtime: copilot
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: null
 mcp_servers:
 - io.github.github/github-mcp-server
 - microsoft-learn
@@ -272,6 +817,10 @@ mcp_configs:
     transport: http
     registry: false
     url: https://learn.microsoft.com/api/mcp
+mcp_target_servers:
+  copilot:
+  - io.github.github/github-mcp-server
+  - microsoft-learn
 local_deployed_files:
 - .agents/skills/commit-and-release
 - .agents/skills/commit-and-release/SKILL.md
@@ -305,7 +854,9 @@ local_deployed_files:
 - .github/agents/ada.agent.md
 - .github/agents/dutch-housing-advisor.agent.md
 - .github/agents/personal-assistant.agent.md
+- .github/hooks/ai-toolkit-git-push-approval.json
 - .github/hooks/ai-toolkit-tool-guardian.json
+- .github/hooks/scripts/ai-toolkit/scripts/git-push-approval/require-push-approval.sh
 - .github/hooks/scripts/ai-toolkit/scripts/tool-guardian/guard-tool.sh
 - .github/instructions/devsecninja-conventions.instructions.md
 - .github/instructions/writing-style.instructions.md
@@ -334,7 +885,9 @@ local_deployed_file_hashes:
   .github/agents/ada.agent.md: sha256:92c30af29bd4e8d77d66afc06da40db240c61dbfbdd19eb8d25b4793b045fedb
   .github/agents/dutch-housing-advisor.agent.md: sha256:ff7237b06a8d536daebf7dcffba32772a4dc913a36d1358bf8090516e4e21c6c
   .github/agents/personal-assistant.agent.md: sha256:a48a53144bfc4bc62d2a20f2a984f1fb55ad9ec98d30dfeccff0276e86740b65
+  .github/hooks/ai-toolkit-git-push-approval.json: sha256:e882ddb46538d7653a14b1e91273795c6c8023271fe1fb25ab371439f995839f
   .github/hooks/ai-toolkit-tool-guardian.json: sha256:ac518c3b22487e2ab72a2624262f7eb0739874853be30cf0db6184ff58d01e0b
+  .github/hooks/scripts/ai-toolkit/scripts/git-push-approval/require-push-approval.sh: sha256:cf4096ad00f53f6dbaa24bfb4365d01f6405c158636393bd4f6ca6fdca3bd11f
   .github/hooks/scripts/ai-toolkit/scripts/tool-guardian/guard-tool.sh: sha256:d500ad6b087dd2653d49590fc4926d21eaff66445f3057290808b63ea9440384
   .github/instructions/devsecninja-conventions.instructions.md: sha256:4dce4f46d59178dfebe9bd56b755aa08e6e1b3de46debe03b463e903301dbd2c
   .github/instructions/writing-style.instructions.md: sha256:4d3700565fafac3fa5f2a6ce8f7110b4716a81f44990bb71ccfd3f51d599452e
