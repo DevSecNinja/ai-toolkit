@@ -1,5 +1,50 @@
 # Changelog
 
+## [0.9.0](https://github.com/DevSecNinja/ai-toolkit/compare/v0.8.0...v0.9.0) (2026-09-05)
+
+
+### Features
+
+* **deps:** update dependency apm-cli ( 0.23.1 ➔ 0.24.0 ) [automerge] ([#63](https://github.com/DevSecNinja/ai-toolkit/issues/63)) ([cd8eab7](https://github.com/DevSecNinja/ai-toolkit/commit/cd8eab7d5bc0a308eb99f22ee288d5e5c27f0dac))
+* **deps:** update dependency apm-cli ( 0.24.1 ➔ 0.25.0 ) [automerge] ([#70](https://github.com/DevSecNinja/ai-toolkit/issues/70)) ([46fbd29](https://github.com/DevSecNinja/ai-toolkit/commit/46fbd291c0be977506ade4cc9bd69a1d8bb90e00))
+* **deps:** update dependency apm-cli ( 0.25.0 ➔ 0.26.0 ) [automerge] ([#75](https://github.com/DevSecNinja/ai-toolkit/issues/75)) ([096b37e](https://github.com/DevSecNinja/ai-toolkit/commit/096b37e813783ec8b1d33e86b305cd5aa057af65))
+* **deps:** update dependency apm-cli ( 0.26.0 ➔ 0.27.0 ) [automerge] ([#97](https://github.com/DevSecNinja/ai-toolkit/issues/97)) ([f2a0f02](https://github.com/DevSecNinja/ai-toolkit/commit/f2a0f02279b092f76919afdad0cfa6dd8265feac))
+* **github-release:** update release jdx/mise ( v2026.6.14 ➔ v2026.7.0 ) [automerge] ([#73](https://github.com/DevSecNinja/ai-toolkit/issues/73)) ([5cd395f](https://github.com/DevSecNinja/ai-toolkit/commit/5cd395fb083265919c21bb079fb50c2914c053a3))
+* **github-release:** update release jdx/mise ( v2026.7.18 ➔ v2026.8.0 ) [automerge] ([#94](https://github.com/DevSecNinja/ai-toolkit/issues/94)) ([9e66c3d](https://github.com/DevSecNinja/ai-toolkit/commit/9e66c3deb632c9e899c84c6f0cc7d8ea2cc9679b))
+* **hooks:** require human approval before git push ([#81](https://github.com/DevSecNinja/ai-toolkit/issues/81)) ([4c3a9ab](https://github.com/DevSecNinja/ai-toolkit/commit/4c3a9abd689eb50661e7bed1ecf0a0accd35e690))
+* **mise:** update tool dprint ( 0.54.0 ➔ 0.55.0 ) [automerge] ([#68](https://github.com/DevSecNinja/ai-toolkit/issues/68)) ([2b8601f](https://github.com/DevSecNinja/ai-toolkit/commit/2b8601f364926d20ec40d690527c7f3401c7556e))
+* **mise:** update tool trivy ( 0.71.2 ➔ 0.72.0 ) [automerge] ([#74](https://github.com/DevSecNinja/ai-toolkit/issues/74)) ([1eaf9c8](https://github.com/DevSecNinja/ai-toolkit/commit/1eaf9c8ce2e48dcfb619a8742d93e67f2ef927fb))
+* **mise:** update tool uv ( 0.11.32 ➔ 0.12.0 ) [automerge] ([#92](https://github.com/DevSecNinja/ai-toolkit/issues/92)) ([4422ac6](https://github.com/DevSecNinja/ai-toolkit/commit/4422ac632c084d3ab84dd4fa7cda998488b268cb))
+* **mise:** update tool zizmor ( 1.25.2 ➔ 1.26.1 ) [automerge] ([#62](https://github.com/DevSecNinja/ai-toolkit/issues/62)) ([d355382](https://github.com/DevSecNinja/ai-toolkit/commit/d355382357606c41f36d65f96610067470d1e0c8))
+* **mise:** update tool zizmor ( 1.26.1 ➔ 1.27.0 ) [automerge] ([#85](https://github.com/DevSecNinja/ai-toolkit/issues/85)) ([1fe40a6](https://github.com/DevSecNinja/ai-toolkit/commit/1fe40a602d92543124a364128688b2d6e9f5799f))
+* **mise:** update tool zizmor ( 1.27.0 ➔ 1.28.0 ) [automerge] ([#88](https://github.com/DevSecNinja/ai-toolkit/issues/88)) ([b772d44](https://github.com/DevSecNinja/ai-toolkit/commit/b772d44a8aced244c63a4a40c27a5f4aa520ae8c))
+* **mise:** update tool zizmor ( 1.28.0 ➔ 1.29.0 ) [automerge] ([#95](https://github.com/DevSecNinja/ai-toolkit/issues/95)) ([6d588cf](https://github.com/DevSecNinja/ai-toolkit/commit/6d588cf429122d5a42cf1cd100c6e1e578e0604b))
+
+
+### Bug Fixes
+
+* **deps:** update dependency apm-cli ( 0.24.0 ➔ 0.24.1 ) [automerge] ([#67](https://github.com/DevSecNinja/ai-toolkit/issues/67)) ([686ac4f](https://github.com/DevSecNinja/ai-toolkit/commit/686ac4f0def1122b087a69933b158f6114687ed5))
+* **generate-index:** parse block-scalar descriptions in frontmatter ([#60](https://github.com/DevSecNinja/ai-toolkit/issues/60)) ([a85b9bf](https://github.com/DevSecNinja/ai-toolkit/commit/a85b9bfb80b379226c1d0cc711cb40740df26f5e))
+* **github-release:** update release jdx/mise ( v2026.6.11 ➔ v2026.6.14 ) [automerge] ([#64](https://github.com/DevSecNinja/ai-toolkit/issues/64)) ([470e76c](https://github.com/DevSecNinja/ai-toolkit/commit/470e76c9db808ba00bac0fe33d45e442a86183a7))
+* **github-release:** update release jdx/mise ( v2026.7.0 ➔ v2026.7.5 ) [automerge] ([#77](https://github.com/DevSecNinja/ai-toolkit/issues/77)) ([8fde3e9](https://github.com/DevSecNinja/ai-toolkit/commit/8fde3e95c4f71cf10be0d63d514cb71a94681494))
+* **github-release:** update release jdx/mise ( v2026.7.12 ➔ v2026.7.13 ) [automerge] ([#89](https://github.com/DevSecNinja/ai-toolkit/issues/89)) ([7ad0646](https://github.com/DevSecNinja/ai-toolkit/commit/7ad06461be2752ab6d21dc5800f37f346c7bfb59))
+* **github-release:** update release jdx/mise ( v2026.7.13 ➔ v2026.7.14 ) [automerge] ([#90](https://github.com/DevSecNinja/ai-toolkit/issues/90)) ([d974d03](https://github.com/DevSecNinja/ai-toolkit/commit/d974d03c8497c57ca8ec754113131b2401542f6d))
+* **github-release:** update release jdx/mise ( v2026.7.14 ➔ v2026.7.18 ) [automerge] ([#91](https://github.com/DevSecNinja/ai-toolkit/issues/91)) ([a3fd997](https://github.com/DevSecNinja/ai-toolkit/commit/a3fd997533426e26a5a2fc1b04b164a53294f0b0))
+* **github-release:** update release jdx/mise ( v2026.7.5 ➔ v2026.7.7 ) [automerge] ([#82](https://github.com/DevSecNinja/ai-toolkit/issues/82)) ([c228f8d](https://github.com/DevSecNinja/ai-toolkit/commit/c228f8deeedb3f07a6839c4b4da73e53af4e3473))
+* **github-release:** update release jdx/mise ( v2026.7.7 ➔ v2026.7.12 ) [automerge] ([#86](https://github.com/DevSecNinja/ai-toolkit/issues/86)) ([b5ecf14](https://github.com/DevSecNinja/ai-toolkit/commit/b5ecf140846e4146fabb074097a25ce9d42929dc))
+* **mise:** update tool dprint ( 0.55.0 ➔ 0.55.1 ) [automerge] ([#69](https://github.com/DevSecNinja/ai-toolkit/issues/69)) ([1d5caed](https://github.com/DevSecNinja/ai-toolkit/commit/1d5caed4d90d5e10972ab4cf21507cf0fb459dd0))
+* **mise:** update tool dprint ( 0.55.1 ➔ 0.55.2 ) [automerge] ([#83](https://github.com/DevSecNinja/ai-toolkit/issues/83)) ([37da95f](https://github.com/DevSecNinja/ai-toolkit/commit/37da95f4145010dc6f33efa43ea1190b5fb6a479))
+* **mise:** update tool lefthook ( 2.1.9 ➔ 2.1.10 ) [automerge] ([#78](https://github.com/DevSecNinja/ai-toolkit/issues/78)) ([e0d0184](https://github.com/DevSecNinja/ai-toolkit/commit/e0d0184f7141153920e6a3a315304da8db467be2))
+* **mise:** update tool pipx:checkov ( 3.3.1 ➔ 3.3.2 ) [automerge] ([#65](https://github.com/DevSecNinja/ai-toolkit/issues/65)) ([9c45e17](https://github.com/DevSecNinja/ai-toolkit/commit/9c45e17453a71816d41314e59740e8b189fab790))
+* **mise:** update tool pipx:checkov ( 3.3.2 ➔ 3.3.6 ) [automerge] ([#71](https://github.com/DevSecNinja/ai-toolkit/issues/71)) ([314fa7e](https://github.com/DevSecNinja/ai-toolkit/commit/314fa7ebce99e9759d094981411ab0499e056c9f))
+* **mise:** update tool pipx:checkov ( 3.3.6 ➔ 3.3.8 ) [automerge] ([#79](https://github.com/DevSecNinja/ai-toolkit/issues/79)) ([626b870](https://github.com/DevSecNinja/ai-toolkit/commit/626b8707c6eba82ac390294831b228258c3179f8))
+* **mise:** update tool pipx:checkov ( 3.3.8 ➔ 3.3.9 ) [automerge] ([#96](https://github.com/DevSecNinja/ai-toolkit/issues/96)) ([21fa45e](https://github.com/DevSecNinja/ai-toolkit/commit/21fa45ed71dca73a94dc41b2ecde84b4661ddf50))
+* **mise:** update tool uv ( 0.11.25 ➔ 0.11.26 ) [automerge] ([#72](https://github.com/DevSecNinja/ai-toolkit/issues/72)) ([9d7f6a2](https://github.com/DevSecNinja/ai-toolkit/commit/9d7f6a2374cbff34e00b3c25b01f32be23ac5180))
+* **mise:** update tool uv ( 0.11.26 ➔ 0.11.28 ) [automerge] ([#80](https://github.com/DevSecNinja/ai-toolkit/issues/80)) ([fa74a31](https://github.com/DevSecNinja/ai-toolkit/commit/fa74a313fcbc066b9f5180bd5eb479817e6d6c43))
+* **mise:** update tool uv ( 0.11.28 ➔ 0.11.29 ) [automerge] ([#84](https://github.com/DevSecNinja/ai-toolkit/issues/84)) ([e428574](https://github.com/DevSecNinja/ai-toolkit/commit/e42857421074088f1beb1e32778c1de6bda0279b))
+* **mise:** update tool uv ( 0.11.29 ➔ 0.11.32 ) [automerge] ([#87](https://github.com/DevSecNinja/ai-toolkit/issues/87)) ([d2ea866](https://github.com/DevSecNinja/ai-toolkit/commit/d2ea866ea2ddf4f9bad11d9a9dfbbe4dd55a2185))
+* **mise:** update tool uv ( 0.12.0 ➔ 0.12.1 ) [automerge] ([#93](https://github.com/DevSecNinja/ai-toolkit/issues/93)) ([3b8bb4b](https://github.com/DevSecNinja/ai-toolkit/commit/3b8bb4bd086673b0bfa26cc9a6cafa2546a2cd02))
+
 ## [0.8.0](https://github.com/DevSecNinja/ai-toolkit/compare/v0.7.0...v0.8.0) (2026-07-04)
 
 
