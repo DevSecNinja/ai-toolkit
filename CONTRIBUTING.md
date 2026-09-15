@@ -107,11 +107,34 @@ non-regular files without following links; unreadable content fails discovery.
 Reports must explicitly contain an empty `scope_exclusions` list: upstream can
 call an inspection complete even after excluding files, which is not sufficient
 for this gate. No exclusions, findings, or baselines are automatically accepted.
-Review the
-`skillspector-reports` artifact (JSON reports, logs, and summary) for file/line
-evidence before deciding how to remediate a finding; heuristic matches are not
-proof of exploitability. Artifacts are retained for 14 days and may contain
-source excerpts, so treat them with the same sensitivity as the scanned content.
+
+Review findings in the **Actions run summary**: it shows severity, rule, linked
+repository file/line, matched evidence, explanations, and analysis limitations.
+Findings and counts from incomplete scans remain visible alongside an `ERROR`
+status. A dash means no readable report was available, not zero findings.
+Long summaries show up to 100 entries per section, with the highest-severity
+findings first; full data remains in the artifact.
+
+Repository findings are also exported to **SARIF** and uploaded using
+`github/codeql-action/upload-sarif`, even when the severity gate fails. Find them
+under **Security > Code scanning**, selecting the relevant branch/PR and the
+SkillSpector tool. PR annotations appear only where findings overlap changed
+lines. Repository-relative locations and stable rule/severity IDs let GitHub
+track findings across runs; the upload action supplies source fingerprints.
+SARIF records incomplete execution and diagnostic notifications rather than
+presenting partial scans as clean. Severity bands are mapped to GitHub's numeric
+security-severity categories, not independently calculated CVSS scores.
+
+The scan job grants only `contents: read` and `security-events: write`; it does
+not need a PR-write token or `pull_request_target`. Only the repository scan opts
+in to SARIF export. Synthetic smoke findings are never uploaded to Code Scanning.
+Uploads require a generated SARIF file and are skipped on cancellation.
+
+The `skillspector-reports` artifact retains raw JSON reports, scanner logs,
+`summary.json`, `summary.md`, and `repository/findings.sarif` for 14 days.
+Review the evidence before deciding how to remediate a finding; heuristic
+matches are not proof of exploitability. Reports may contain source excerpts,
+so treat them with the same sensitivity as the scanned content.
 
 The workflow builds [NVIDIA/SkillSpector](https://github.com/NVIDIA/SkillSpector)
 v2.11.2 from commit `69dcdfb74487d361ba4c811d088cfdea2ff3a9dc` using its upstream
@@ -137,7 +160,7 @@ the workflow, then run:
 ```bash
 python3 -m unittest discover -s tests -p 'test_skillspector.py'
 python3 tests/smoke-skillspector.py --output-dir /tmp/skillspector-smoke
-python3 scripts/scan-skills.py --output-dir /tmp/skillspector-reports
+python3 scripts/scan-skills.py --output-dir /tmp/skillspector-reports --sarif
 ```
 
 Use a new output directory for each run; existing reports are never reused.

@@ -22,10 +22,18 @@ def report(*severities):
         "execution_successful": True,
         "components": [{"path": "SKILL.md", "type": "markdown"}],
         "analysis_completeness": {"is_complete": True, "scope_exclusions": []},
-        "metadata": {"llm_requested": False},
+        "metadata": {"llm_requested": False, "skillspector_version": "2.11.2"},
         "suppressed_count": 0,
         "suppressed": [],
-        "issues": [{"severity": severity} for severity in severities],
+        "issues": [{
+            "id": "R1",
+            "severity": severity,
+            "location": {"file": "SKILL.md", "start_line": 1},
+            "pattern": "Synthetic rule",
+            "explanation": "Synthetic explanation",
+            "finding": "Synthetic evidence",
+            "remediation": "Review the finding.",
+        } for severity in severities],
     }
 
 
@@ -40,7 +48,10 @@ class ScanTests(unittest.TestCase):
         self.addCleanup(patch.stopall)
         patch.object(os, "getuid", return_value=1000, create=True).start()
         patch.object(os, "getgid", return_value=1000, create=True).start()
-        patch.dict(os.environ, {"GITHUB_STEP_SUMMARY": ""}).start()
+        patch.dict(os.environ, {
+            "GITHUB_STEP_SUMMARY": "", "GITHUB_OUTPUT": "",
+            "GITHUB_REPOSITORY": "", "GITHUB_SHA": "",
+        }).start()
         patch("builtins.print").start()
 
     def write(self, path):
@@ -58,9 +69,9 @@ class ScanTests(unittest.TestCase):
             return subprocess.CompletedProcess(command, code)
         return execute
 
-    def run_with(self, payload, code=0):
+    def run_with(self, payload, code=0, sarif=False):
         with patch.object(scanner.subprocess, "run", side_effect=self.fake_run(payload, code)):
-            return scanner.run_scans(self.root, self.output, "test-scanner")
+            return scanner.run_scans(self.root, self.output, "test-scanner", export_sarif=sarif)
 
     def test_target_scope_includes_support_files_and_bundled_agents(self):
         self.write(".apm/skills/example/references/context.md")
@@ -271,6 +282,161 @@ class ScanTests(unittest.TestCase):
             self.assertEqual(self.run_with(report("HIGH")), 1)
         self.assertIn("| HIGH | CRITICAL |", summary.read_text(encoding="utf-8"))
         self.assertIn("BLOCK", summary.read_text(encoding="utf-8"))
+
+    def test_incomplete_scan_retains_high_findings_and_diagnostics(self):
+        payload = report("HIGH")
+        payload["analysis_completeness"].update({
+            "is_complete": False,
+            "ledger_exceptions": [{
+                "reason_code": "reference_unresolved",
+                "message": "An example output path could not be resolved.",
+                "path": "SKILL.md",
+                "start_line": 1,
+            }],
+        })
+        self.assertEqual(self.run_with(payload, code=1, sarif=True), 2)
+        summary = json.loads((self.output / "summary.json").read_text(encoding="utf-8"))
+        row = summary["scans"][0]
+        self.assertEqual(row["status"], "ERROR")
+        self.assertEqual(row["counts"]["HIGH"], 1)
+        self.assertEqual(row["findings"][0]["path"], ".apm/skills/example/SKILL.md")
+        markdown = (self.output / "summary.md").read_text(encoding="utf-8")
+        self.assertIn("Synthetic explanation", markdown)
+        self.assertIn("Synthetic evidence", markdown)
+        self.assertIn("reference&#95;unresolved", markdown)
+        sarif = json.loads((self.output / "findings.sarif").read_text(encoding="utf-8"))
+        self.assertEqual(len(sarif["runs"][0]["results"]), 1)
+        self.assertFalse(sarif["runs"][0]["invocations"][0]["executionSuccessful"])
+        self.assertFalse(sarif["runs"][0]["properties"]["analysisComplete"])
+        self.assertTrue(sarif["runs"][0]["invocations"][0]["toolExecutionNotifications"])
+
+    def test_failed_process_can_still_publish_available_findings(self):
+        self.assertEqual(self.run_with(report("HIGH"), code=2, sarif=True), 2)
+        summary = json.loads((self.output / "summary.json").read_text(encoding="utf-8"))
+        self.assertEqual(summary["scans"][0]["counts"]["HIGH"], 1)
+        self.assertEqual(summary["scans"][0]["status"], "ERROR")
+        sarif = json.loads((self.output / "findings.sarif").read_text(encoding="utf-8"))
+        self.assertEqual(len(sarif["runs"][0]["results"]), 1)
+
+    def test_missing_report_is_unknown_not_zero_and_not_successful_sarif(self):
+        self.assertEqual(self.run_with(None, sarif=True), 2)
+        summary = json.loads((self.output / "summary.json").read_text(encoding="utf-8"))
+        self.assertIsNone(summary["scans"][0]["counts"])
+        self.assertIn("| - | - | - | - | ERROR |", (self.output / "summary.md").read_text(encoding="utf-8"))
+        sarif = json.loads((self.output / "findings.sarif").read_text(encoding="utf-8"))
+        self.assertFalse(sarif["runs"][0]["invocations"][0]["executionSuccessful"])
+        self.assertEqual(sarif["runs"][0]["results"], [])
+
+    def test_invalid_finding_does_not_hide_other_valid_findings(self):
+        payload = report("HIGH", "MEDIUM")
+        payload["issues"][1]["location"]["file"] = "../../outside.md"
+        self.assertEqual(self.run_with(payload, sarif=True), 2)
+        summary = json.loads((self.output / "summary.json").read_text(encoding="utf-8"))
+        self.assertEqual(summary["scans"][0]["counts"]["HIGH"], 1)
+        self.assertIn("could not be published", summary["errors"][0]["error"])
+        sarif = json.loads((self.output / "findings.sarif").read_text(encoding="utf-8"))
+        self.assertEqual(len(sarif["runs"][0]["results"]), 1)
+
+    def test_untrusted_locations_cannot_escape_the_scan_target(self):
+        for index, filename in enumerate((
+            "../outside.md", "/etc/passwd", "C:\\outside.md", "file:///etc/passwd",
+            "/scan/../outside.md", "/scan-other/SKILL.md", "missing.md", "SKILL.md\nunsafe",
+        )):
+            with self.subTest(filename=filename):
+                self.output = Path(self.temporary.name) / f"location-{index}"
+                payload = report("HIGH")
+                payload["issues"][0]["location"]["file"] = filename
+                self.assertEqual(self.run_with(payload, sarif=True), 2)
+                sarif = json.loads((self.output / "findings.sarif").read_text(encoding="utf-8"))
+                self.assertEqual(sarif["runs"][0]["results"], [])
+
+    def test_invalid_lines_and_ranges_fail_closed(self):
+        for index, line in enumerate((0, -1, True, "1", 1.5, None)):
+            with self.subTest(line=line):
+                self.output = Path(self.temporary.name) / f"line-{index}"
+                payload = report("HIGH")
+                payload["issues"][0]["location"]["start_line"] = line
+                self.assertEqual(self.run_with(payload), 2)
+        self.output = Path(self.temporary.name) / "range"
+        payload = report("HIGH")
+        payload["issues"][0]["location"].update({"start_line": 2, "end_line": 1})
+        self.assertEqual(self.run_with(payload), 2)
+
+    def test_file_targets_and_supporting_files_map_to_repository_paths(self):
+        target = self.write(".apm/example.md")
+        self.assertEqual(scanner.repository_path(self.root, target, "/scan/example.md"), ".apm/example.md")
+        with self.assertRaises(ValueError):
+            scanner.repository_path(self.root, target, "different.md")
+        self.write(".apm/skills/example/references/context.md")
+        self.assertEqual(
+            scanner.repository_path(self.root, self.skill, "/scan/references/context.md"),
+            ".apm/skills/example/references/context.md",
+        )
+
+    def test_sarif_uses_stable_rules_and_repository_relative_encoded_uris(self):
+        self.write(".apm/skills/example/references/a #b.md")
+        payload = report("MEDIUM", "HIGH", "CRITICAL", "LOW")
+        for issue in payload["issues"]:
+            issue["location"]["file"] = "references/a #b.md"
+            issue["location"]["end_line"] = 1
+            issue["finding_id"] = "random-run-specific-id"
+        self.assertEqual(self.run_with(payload, sarif=True), 1)
+        sarif = json.loads((self.output / "findings.sarif").read_text(encoding="utf-8"))
+        self.assertEqual(sarif["version"], "2.1.0")
+        run = sarif["runs"][0]
+        self.assertEqual(run["tool"]["driver"]["version"], "2.11.2")
+        self.assertTrue(run["invocations"][0]["executionSuccessful"])
+        self.assertEqual(run["results"][0]["ruleId"], "R1/critical")
+        self.assertEqual(len(run["tool"]["driver"]["rules"]), 4)
+        self.assertEqual(
+            run["results"][0]["locations"][0]["physicalLocation"]["artifactLocation"]["uri"],
+            ".apm/skills/example/references/a%20%23b.md",
+        )
+        scores = {rule["id"]: rule["properties"]["security-severity"] for rule in run["tool"]["driver"]["rules"]}
+        self.assertEqual(scores["R1/high"], "8.0")
+        self.assertNotIn("random-run-specific-id", json.dumps(sarif))
+        self.output = Path(self.temporary.name) / "second-run"
+        for issue in payload["issues"]:
+            issue["finding_id"] = "different-random-id"
+        self.assertEqual(self.run_with(payload, sarif=True), 1)
+        self.assertEqual(
+            sarif, json.loads((self.output / "findings.sarif").read_text(encoding="utf-8"))
+        )
+
+    def test_summary_links_to_the_scanned_revision_and_escapes_finding_text(self):
+        payload = report("HIGH")
+        payload["issues"][0]["pattern"] = "<script>unsafe</script> | ![tracking](url)"
+        with patch.dict(os.environ, {
+            "GITHUB_REPOSITORY": "owner/repo", "GITHUB_SHA": "abc123",
+            "GITHUB_SERVER_URL": "https://github.com",
+        }):
+            self.assertEqual(self.run_with(payload), 1)
+        markdown = (self.output / "summary.md").read_text(encoding="utf-8")
+        self.assertIn("https://github.com/owner/repo/blob/abc123/.apm/skills/example/SKILL.md#L1", markdown)
+        self.assertNotIn("<script>", markdown)
+        self.assertNotIn("![tracking]", markdown)
+        self.assertIn("&lt;script&gt;", markdown)
+
+    def test_detail_limit_does_not_truncate_sarif_or_full_json(self):
+        payload = report(*(["HIGH"] * (scanner.DETAIL_LIMIT + 1)))
+        self.assertEqual(self.run_with(payload, sarif=True), 1)
+        markdown = (self.output / "summary.md").read_text(encoding="utf-8")
+        self.assertIn(f"Showing the first {scanner.DETAIL_LIMIT} findings", markdown)
+        sarif = json.loads((self.output / "findings.sarif").read_text(encoding="utf-8"))
+        self.assertEqual(len(sarif["runs"][0]["results"]), scanner.DETAIL_LIMIT + 1)
+        summary = json.loads((self.output / "summary.json").read_text(encoding="utf-8"))
+        self.assertEqual(len(summary["scans"][0]["findings"]), scanner.DETAIL_LIMIT + 1)
+
+    def test_sarif_is_opt_in_so_smoke_results_are_not_published(self):
+        self.assertEqual(self.run_with(report("HIGH")), 1)
+        self.assertFalse((self.output / "findings.sarif").exists())
+
+    def test_sarif_output_marker_is_emitted_even_when_gate_fails(self):
+        output = Path(self.temporary.name) / "github-output"
+        output.write_text("existing=true\n", encoding="utf-8")
+        with patch.dict(os.environ, {"GITHUB_OUTPUT": str(output)}):
+            self.assertEqual(self.run_with(report("HIGH"), sarif=True), 1)
+        self.assertEqual(output.read_text(encoding="utf-8"), "existing=true\nsarif_created=true\n")
 
 
 if __name__ == "__main__":

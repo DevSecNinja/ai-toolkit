@@ -51,10 +51,14 @@ def run_smoke_tests(output: Path, image: str) -> None:
                 failures.append(f"{name}: scanner log is missing")
             if not (case_output / "summary.md").is_file():
                 failures.append(f"{name}: Markdown summary is missing")
+            if (case_output / "findings.sarif").exists():
+                failures.append(f"{name}: synthetic smoke findings must not be exported to Code Scanning")
             if name in ("benign", "high") and not (case_output / "001" / "report.json").is_file():
                 failures.append(f"{name}: JSON report is missing")
             if name == "high" and not rows[0]["counts"]["HIGH"]:
                 failures.append("high: expected an individual HIGH finding")
+            if name == "high" and not rows[0]["findings"]:
+                failures.append("high: detailed findings are missing from the summary")
             if name == "timeout" and not any(
                 "Scanner exited 124" in error["error"] for error in summary["errors"]
             ):
