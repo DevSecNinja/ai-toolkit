@@ -326,6 +326,10 @@ def render_summary(rows: list[dict], errors: list[dict]) -> str:
     return "\n".join(lines) + "\n"
 
 
+def gate_exit_code(rows: list[dict], errors: list[dict]) -> int:
+    return 2 if errors else int(any(row["status"] == "BLOCK" for row in rows))
+
+
 def build_sarif(rows: list[dict], errors: list[dict]) -> dict:
     rules = {}
     results = []
@@ -382,6 +386,7 @@ def build_sarif(rows: list[dict], errors: list[dict]) -> dict:
             "results": results,
             "invocations": [{
                 "executionSuccessful": not errors,
+                "exitCode": gate_exit_code(rows, errors),
                 "toolExecutionNotifications": notifications,
             }],
             "properties": {"analysisComplete": not errors, "scanMode": "static"},
@@ -397,7 +402,6 @@ def run_scans(root: Path, output: Path, image: str, export_sarif: bool = False) 
     output.mkdir(parents=True, exist_ok=False)
     rows = []
     errors = []
-    blocked = False
     for index, target in enumerate(targets, start=1):
         relative = target.relative_to(root).as_posix()
         scope_output = output / f"{index:03d}"
@@ -430,7 +434,6 @@ def run_scans(root: Path, output: Path, image: str, export_sarif: bool = False) 
             errors.append({"target": relative, "error": " ".join(target_errors)})
         else:
             status = "BLOCK" if counts["HIGH"] or counts["CRITICAL"] else "PASS"
-        blocked = blocked or status == "BLOCK"
         rows.append({
             "target": relative,
             "report_directory": scope_output.name,
@@ -458,7 +461,7 @@ def run_scans(root: Path, output: Path, image: str, export_sarif: bool = False) 
                 stream.write("sarif_created=true\n")
     print(f"Scanned {len(rows)} targets: {sum(row['status'] == 'BLOCK' for row in rows)} blocked, "
           f"{len(errors)} errors. Reports: {output}")
-    return 2 if errors else int(blocked)
+    return gate_exit_code(rows, errors)
 
 
 def main() -> int:

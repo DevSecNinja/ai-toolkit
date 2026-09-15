@@ -46,7 +46,7 @@ jobs:
       - name: Exercise the real scanner container
         env:
           REPORT_DIR: ${{ runner.temp }}/skillspector-reports/smoke
-        run: python3 tests/smoke-skillspector.py --output-dir "$REPORT_DIR"
+        run: env -u GITHUB_STEP_SUMMARY python3 tests/smoke-skillspector.py --output-dir "$REPORT_DIR"
 
       - name: Scan and enforce severity gate
         id: scan

@@ -307,6 +307,7 @@ class ScanTests(unittest.TestCase):
         sarif = json.loads((self.output / "findings.sarif").read_text(encoding="utf-8"))
         self.assertEqual(len(sarif["runs"][0]["results"]), 1)
         self.assertFalse(sarif["runs"][0]["invocations"][0]["executionSuccessful"])
+        self.assertEqual(sarif["runs"][0]["invocations"][0]["exitCode"], 2)
         self.assertFalse(sarif["runs"][0]["properties"]["analysisComplete"])
         self.assertTrue(sarif["runs"][0]["invocations"][0]["toolExecutionNotifications"])
 
@@ -386,6 +387,7 @@ class ScanTests(unittest.TestCase):
         run = sarif["runs"][0]
         self.assertEqual(run["tool"]["driver"]["version"], "2.11.2")
         self.assertTrue(run["invocations"][0]["executionSuccessful"])
+        self.assertEqual(run["invocations"][0]["exitCode"], 1)
         self.assertEqual(run["results"][0]["ruleId"], "R1/critical")
         self.assertEqual(len(run["tool"]["driver"]["rules"]), 4)
         self.assertEqual(
@@ -426,6 +428,12 @@ class ScanTests(unittest.TestCase):
         self.assertEqual(len(sarif["runs"][0]["results"]), scanner.DETAIL_LIMIT + 1)
         summary = json.loads((self.output / "summary.json").read_text(encoding="utf-8"))
         self.assertEqual(len(summary["scans"][0]["findings"]), scanner.DETAIL_LIMIT + 1)
+
+    def test_sarif_records_successful_gate_exit_code(self):
+        self.assertEqual(self.run_with(report("LOW"), sarif=True), 0)
+        sarif = json.loads((self.output / "findings.sarif").read_text(encoding="utf-8"))
+        self.assertTrue(sarif["runs"][0]["invocations"][0]["executionSuccessful"])
+        self.assertEqual(sarif["runs"][0]["invocations"][0]["exitCode"], 0)
 
     def test_sarif_is_opt_in_so_smoke_results_are_not_published(self):
         self.assertEqual(self.run_with(report("HIGH")), 1)

@@ -127,7 +127,8 @@ security-severity categories, not independently calculated CVSS scores.
 
 The scan job grants only `contents: read` and `security-events: write`; it does
 not need a PR-write token or `pull_request_target`. Only the repository scan opts
-in to SARIF export. Synthetic smoke findings are never uploaded to Code Scanning.
+in to SARIF export. Synthetic smoke findings stay in the artifact; they are
+excluded from the Actions summary and never uploaded to Code Scanning.
 Uploads require a generated SARIF file and are skipped on cancellation.
 
 The `skillspector-reports` artifact retains raw JSON reports, scanner logs,
