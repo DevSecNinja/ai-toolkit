@@ -89,6 +89,62 @@ Run the suite on demand with `mise exec -- lefthook run pre-commit --all-files`.
 To bypass hooks in an emergency, use `git commit --no-verify` (please don't make
 a habit of it).
 
+## SkillSpector security scans
+
+The [SkillSpector workflow](.github/workflows/skillspector.yml) runs on every
+pull request, push to `main`, and manual dispatch. It scans each skill directory
+under `.apm/skills/` separately, including supporting files, plus the other
+`.apm/` primitive directories, committed `.github/agents/` and `.github/prompts/`,
+and the `scripts/git-push-approval/` and `scripts/tool-guardian/` hook implementations.
+Add any new hook implementation directories to `EXTRA_ROOTS` in
+[`scripts/scan-skills.py`](scripts/scan-skills.py).
+
+**Any individual HIGH or CRITICAL finding fails the check.** LOW and MEDIUM
+findings remain visible but do not block it, regardless of the aggregate risk
+score. Scanner errors, missing or invalid reports, and incomplete inspection
+also fail. Every selected directory is checked for descendant symlinks and
+non-regular files without following links; unreadable content fails discovery.
+Reports must explicitly contain an empty `scope_exclusions` list: upstream can
+call an inspection complete even after excluding files, which is not sufficient
+for this gate. No exclusions, findings, or baselines are automatically accepted.
+Review the
+`skillspector-reports` artifact (JSON reports, logs, and summary) for file/line
+evidence before deciding how to remediate a finding; heuristic matches are not
+proof of exploitability. Artifacts are retained for 14 days and may contain
+source excerpts, so treat them with the same sensitivity as the scanned content.
+
+The workflow builds [NVIDIA/SkillSpector](https://github.com/NVIDIA/SkillSpector)
+v2.11.2 from commit `69dcdfb74487d361ba4c811d088cfdea2ff3a9dc` using its upstream
+Dockerfile. Building downloads Python dependencies; the scanner revision and
+upstream base image are pinned, but the upstream install resolves transitive
+dependencies rather than using a frozen lockfile. Scanning then runs as a
+non-root user with read-only input, no network, no host credentials, bounded
+resources, and a three-minute timeout per target. `--no-llm` disables semantic
+analysis; live OSV vulnerability queries and transitive downloads are unavailable
+in the network-isolated container. OSV uses the scanner's offline fallback, so a
+passing check is not a guarantee that a primitive or its dependencies are safe.
+
+Before scanning the toolkit, the workflow exercises the same image and runner
+with benign content, a synthetic HIGH finding, an invalid archive, and a short
+timeout. These cases verify the real gate outcomes and saved diagnostics rather
+than mocking Docker. Their reports live under `smoke/` in the artifact; the
+toolkit's reports live under `repository/`. Smoke failures prevent the toolkit
+scan from running, and diagnostics are uploaded even when a check fails.
+
+For a local run on Linux with Docker, build the same pinned upstream image as
+the workflow, then run:
+
+```bash
+python3 -m unittest discover -s tests -p 'test_skillspector.py'
+python3 tests/smoke-skillspector.py --output-dir /tmp/skillspector-smoke
+python3 scripts/scan-skills.py --output-dir /tmp/skillspector-reports
+```
+
+Use a new output directory for each run; existing reports are never reused.
+No Python packages, scanner service, or reusable scanning skill are added to the
+APM package. To enforce this check at merge time, require **Scan AI primitives**
+in the repository's branch protection or ruleset.
+
 ## 🚀 Submission Process
 
 1. **Fork** this repository
