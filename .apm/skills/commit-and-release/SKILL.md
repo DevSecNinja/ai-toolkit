@@ -72,17 +72,22 @@ git add path/to/changed-file other/changed-file
 
 If the user already staged files, skip this.
 
-### 3. Draft and validate the message
+### 3. Derive and validate the message
 
-Write a clear, accurate Conventional Commit subject from the diff and validate it:
+Review the staged diff (`git diff --cached`) and derive a clear, accurate
+Conventional Commit subject from it. If the user explicitly supplied a desired
+message, preserve that wording and intent while correcting it as needed for
+accuracy and Conventional Commit compliance.
 
 ```sh
 mise exec -- cog verify "fix(parser): handle empty frontmatter"
 ```
 
-Fix and re-run until it exits 0. Don't stop to ask the user to confirm the
-wording — just choose a correct, descriptive message. (If the change is genuinely
-ambiguous about intent — e.g. `feat` vs `fix` — ask only that.)
+If validation fails, fix the message automatically and re-run validation until
+it exits 0. Then commit with the validated message without asking the user to
+approve or confirm it. Ask the user only when the staged change is genuinely
+ambiguous about intent (for example, whether it is a `feat` or `fix`) and the
+correct message cannot be determined from the diff or task context.
 
 ### 4. Run lint/tests before committing
 
