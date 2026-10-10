@@ -2,7 +2,7 @@
 description: "Use when: performing SAST (Static Application Security Testing), SCA (Software Composition Analysis), scanning source code or binaries for security flaws, auditing third-party dependency vulnerabilities, checking policy compliance, generating structured security reports, identifying CWE-mapped flaws with file/line precision, reviewing open-source license risk, or producing CI/CD-gate security findings."
 name: "sast-sca-security-analyzer"
 tools: ["search/codebase", "search", "edit/editFiles", "web/fetch", "read/terminalLastCommand"]
-model: "Claude Sonnet 5"
+model: "Claude Sonnet 4.6"
 argument-hint: "Describe what to scan (e.g. 'scan src/ for SAST flaws', 'SCA audit of package.json', 'full SAST+SCA on the authentication module', 'policy compliance check for PCI-DSS')"
 ---
 
