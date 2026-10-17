@@ -1,0 +1,25 @@
+#!/usr/bin/env python3
+"""Offline gh stand-in: reject every call not explicitly in the test scenario."""
+
+import json
+import os
+from pathlib import Path
+import sys
+
+
+scenario_path = Path(os.environ["RENOVATE_GH_FIXTURE"])
+log_path = Path(os.environ["RENOVATE_GH_LOG"])
+args = sys.argv[1:]
+payload = json.load(sys.stdin) if "--input" in args else None
+with log_path.open("a") as log:
+    log.write(json.dumps({"args": args, "payload": payload}) + "\n")
+scenario = json.loads(scenario_path.read_text())
+if not scenario:
+    sys.exit("Unexpected gh call: exhausted fixture")
+expected = scenario.pop(0)
+scenario_path.write_text(json.dumps(scenario))
+if args != expected["args"] or payload != expected.get("payload"):
+    sys.exit("Unexpected gh arguments or payload")
+print(json.dumps(expected["response"]))
+print(expected.get("stderr", ""), file=sys.stderr)
+sys.exit(expected.get("returncode", 0))

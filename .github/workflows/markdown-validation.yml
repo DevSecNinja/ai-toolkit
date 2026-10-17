@@ -7,11 +7,19 @@ on:
       - main
     paths:
       - '.apm/prompts/**/*.prompt.md'
+      - '.apm/skills/**'
       - '.github/prompts/**/*.md'
+      - 'tests/**'
+      - 'scripts/generate-index.sh'
+      - '.github/workflows/markdown-validation.yml'
   pull_request:
     paths:
       - '.apm/prompts/**/*.prompt.md'
+      - '.apm/skills/**'
       - '.github/prompts/**/*.md'
+      - 'tests/**'
+      - 'scripts/generate-index.sh'
+      - '.github/workflows/markdown-validation.yml'
 
 permissions:
   contents: read
@@ -44,3 +52,6 @@ jobs:
       - name: Run validation script
         run: |-
           bash tests/validate-prompts.sh
+
+      - name: Test Renovate helper with offline fixtures
+        run: PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -p 'test_renovate_prs.py' -v

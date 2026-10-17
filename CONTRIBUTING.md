@@ -55,12 +55,32 @@ filename becomes the installed command name:
 
 ### 5. Testing Your Prompt
 
-Before submitting:
+For AI-assisted work, **all tests and validation must run in a fresh context or
+subsession separate from implementation**, including initial runs and reruns
+after fixes. A fresh testing task/subagent is sufficient; no orchestration
+framework is required. Pause implementation edits while testing. Give the
+tester the exact isolated worktree/revision, acceptance criteria, commands and
+fixtures. Record the context identifier and actual results. Incorporate fixes,
+then start a new tester rather than reusing its conversation. Do not validate
+against a primary/shared checkout.
+
+This includes primitive validation, linting, behavioral tests, generated-index
+checks and validation run by commit hooks. If hooks execute tests, have a fresh
+non-implementation context perform the commit; do not bypass hooks to avoid
+separate-context testing.
+
+Before submitting, in the testing context:
 
 1. Test the prompt with an AI assistant
 2. Verify it produces useful results
 3. Refine based on the output
 4. Include example use cases from your testing
+
+Skills with executable helpers also need deterministic behavioral and CLI
+contract tests, not just frontmatter linting. Use mocks/fixtures for write
+paths; never mutate live third-party systems to exercise a skill. See the
+[Renovate skill testing guide](.apm/skills/renovate-triage-and-merge/references/testing.md)
+for commands and clean-context behavior scenarios.
 
 > **Tip:** Primitives are authored directly under `.apm/`. After adding or
 > editing one, regenerate the [index](/docs/apm.md) with
@@ -82,6 +102,8 @@ mise exec -- lefthook install   # wires up the git hooks
 What runs on **pre-commit**:
 
 - `bash tests/validate-prompts.sh` — validates every primitive's frontmatter.
+- `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -p 'test_renovate_prs.py'`
+  — exercises the Renovate helper with offline GitHub fixtures.
 - `bash scripts/generate-index.sh` — regenerates `INDEX.md` / `README.md` from
   `.apm/` and re-stages them, so the index never drifts from the primitives.
 

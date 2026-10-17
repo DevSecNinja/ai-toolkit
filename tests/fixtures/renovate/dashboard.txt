@@ -1,0 +1,58 @@
+This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.
+
+## Abandoned Dependencies
+
+Packages exceed abandonmentThreshold since their last release. This is release inactivity, not an official deprecation notice.
+
+<details>
+<summary>View abandoned dependencies (3)</summary>
+
+| Datasource | Package | Last Updated |
+|------------|---------|--------------|
+| mise | [shellcheck](https://redirect.github.com/koalaman/shellcheck) | `2025-08-04` |
+| pip_requirements | [ha-ffmpeg](https://redirect.github.com/pvizeli/ha-ffmpeg) | `2024-11-08` |
+| pip_requirements | [psutil-home-assistant](https://redirect.github.com/home-assistant-libs/psutil-home-assistant) | `2022-08-25` |
+
+</details>
+
+## Awaiting Schedule
+
+- [ ] <!-- unschedule-branch=renovate/lock-file-maintenance -->Lock maintenance
+
+## Pending Status Checks
+
+- [ ] <!-- unpend-branch=renovate/homeassistant -->Home Assistant update
+- [ ] <!-- unpend-branch=renovate/node -->[Node update](../pull/20)
+
+## Open
+
+- [ ] <!-- rebase-branch=renovate/tool -->[Tool update](../pull/31)
+- [ ] <!-- rebase-all-open-prs -->Rebase all
+
+## Detected Dependencies
+
+<details><summary>mise (1)</summary>
+<blockquote>
+<details><summary>.mise.toml (1)</summary>
+
+- `shellcheck 0.11.0`
+
+</details>
+</blockquote>
+</details>
+
+<details><summary>pip_requirements (1)</summary>
+<blockquote>
+<details><summary>tests/ha-requirements.txt (3)</summary>
+
+- `homeassistant ==2026.10.1`
+- `ha-ffmpeg ==3.2.2`
+- `psutil-home-assistant ==0.0.1`
+
+</details>
+</blockquote>
+</details>
+
+---
+
+- [ ] <!-- manual job -->Request a new Renovate run

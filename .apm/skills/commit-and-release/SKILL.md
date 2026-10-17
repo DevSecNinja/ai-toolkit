@@ -86,6 +86,13 @@ ambiguous about intent — e.g. `feat` vs `fix` — ask only that.)
 
 ### 4. Run lint/tests before committing
 
+Run all tests/validation in a **fresh testing context/subsession separate from
+implementation**, including initial runs and reruns after fixes. Pause edits
+and provide the exact isolated worktree/revision, acceptance criteria and
+reproducible commands. Record the context identifier and results; after a fix,
+start a new tester rather than reusing its conversation. A fresh task/subagent
+is sufficient; no orchestration framework is needed.
+
 ```sh
 mise exec -- lefthook run pre-commit
 ```
@@ -101,6 +108,9 @@ git push
 ```
 
 The `commit-msg` hook re-runs `cog verify` automatically; both hooks must pass.
+Because hooks execute validation, have a fresh non-implementation context
+perform the commit with the approved message and explicit staged paths.
+Do not bypass hooks to avoid separate-context testing.
 
 ## Opening a pull request
 
