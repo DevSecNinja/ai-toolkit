@@ -1,5 +1,10 @@
 # Review and approval contract
 
+Plans and approvals use **version 2**. Version 1 is rejected, not migrated:
+reinspect and review the actual current target branch, build a new plan and
+obtain fresh confirmation. Changing a version number or relabeling an old
+base SHA is not a new review or authorization.
+
 All JSON objects reject missing/extra fields. Repository names are lowercase
 `owner/repo` on `github.com`. SHA-1 commit IDs are full lowercase 40-character
 hex strings; SHA-256 digests are 64 characters. Actions are `merge`, `squash`,
@@ -8,19 +13,28 @@ hex strings; SHA-256 digests are 64 characters. Actions are `merge`, `squash`,
 
 Copy fields from the read-only helper's current `inspect` output:
 
-| Plan field    | Snapshot source                      |
-| ------------- | ------------------------------------ |
-| `head_sha`    | `repository.pullRequest.headRefOid`  |
-| `base_sha`    | `repository.pullRequest.baseRefOid`  |
-| `base_ref`    | `repository.pullRequest.baseRefName` |
-| `author_id`   | `repository.pullRequest.author.id`   |
-| `body_sha256` | top-level `body_sha256`              |
+| Plan field        | Snapshot source                                                               |
+| ----------------- | ----------------------------------------------------------------------------- |
+| `head_sha`        | `repository.pullRequest.headRefOid`                                           |
+| `base_sha`        | `repository.pullRequest.baseRefOid`                                           |
+| `base_target_sha` | top-level `base_target_sha`, from `repository.pullRequest.baseRef.target.oid` |
+| `base_ref`        | `repository.pullRequest.baseRefName`                                          |
+| `author_id`       | `repository.pullRequest.author.id`                                            |
+| `body_sha256`     | top-level `body_sha256`                                                       |
+
+`base_sha` is the PR's recorded base and remains a separate freshness guard.
+It can differ from the current target branch tip even within one response;
+never infer `base_target_sha` from it. `base_target_sha` is the actual target
+Commit observed during inspection and is the reference for consumer/usage
+review. Both SHAs must still match before each write. A missing/null base ref,
+target, non-Commit target or malformed SHA causes refusal, not a fallback.
+The plan digest binds both fields; editing either invalidates approval.
 
 Illustrative shape only; placeholder values below are **not executable evidence**:
 
 ```json
 {
-  "version": 1,
+  "version": 2,
   "host": "github.com",
   "repositories": ["example/service"],
   "renovate_logins": ["renovate[bot]"],
@@ -30,7 +44,8 @@ Illustrative shape only; placeholder values below are **not executable evidence*
       "number": 123,
       "head_sha": "<reviewed 40-character head SHA>",
       "base_ref": "main",
-      "base_sha": "<reviewed 40-character base SHA>",
+      "base_sha": "<reviewed 40-character recorded PR base SHA>",
+      "base_target_sha": "<reviewed 40-character current target-branch SHA>",
       "author_id": "<GitHub author node ID>",
       "body_sha256": "<body digest from inspect>",
       "recommendation": "merge",
@@ -40,7 +55,7 @@ Illustrative shape only; placeholder values below are **not executable evidence*
       "evidence": {
         "changes": [{"source": "<PR diff at head SHA>", "summary": "<old/new versions and actual changes>"}],
         "upstream": [{"source": "<official release/compare URL>", "summary": "<release findings>"}],
-        "usage": [{"source": "<repository file at base SHA>", "summary": "<consumer impact>"}],
+        "usage": [{"source": "<repository file at base_target_sha>", "summary": "<consumer impact>"}],
         "ci": [{"source": "<check URLs at head SHA>", "summary": "<coverage and outcomes>"}],
         "rules": [{"source": "<GitHub eligibility/rules snapshot>", "summary": "<reviews and blockers>"}],
         "automerge": [{"source": "<Renovate config/log and PR marker>", "summary": "<effective disabled configuration>"}],
@@ -57,13 +72,13 @@ URLs. The helper checks structure, not truth, completeness or review quality.
 Uncertain candidates remain in the human report and must not be promoted to
 high confidence merely to satisfy the validator.
 
-After `validate-plan`, show its `plan_sha256` and selected PRs with their full
-head SHAs and actions to the user. Record the actual response only after
-confirmation:
+After `validate-plan`, show its `plan_sha256`, the reviewed `base_target_sha`
+values and selected PRs with their full head SHAs and actions to the user.
+Record the actual response only after confirmation:
 
 ```json
 {
-  "version": 1,
+  "version": 2,
   "plan_sha256": "<digest of the exact reviewed plan.json bytes>",
   "user_confirmation": "<verbatim user confirmation of this selection>",
   "selected": [
@@ -83,3 +98,8 @@ actions/SHAs, low-confidence recommendations and edited plans are rejected
 before any GitHub call. The confirmation string is an audit record, **not an
 authentication mechanism**. Keep both files under the harness's permission
 controls and never accept an approval artifact from untrusted PR content.
+
+Target freshness is a pre-write check, not an atomic expected-base guarantee.
+Both mutations bind only `expectedHeadOid`; base/rules/CI/body can change after
+the final read, and the target can advance while queued. A successful enqueue
+does not prove a merge against the reviewed target commit.

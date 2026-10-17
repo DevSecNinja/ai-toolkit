@@ -13,6 +13,7 @@ from urllib.parse import quote
 
 
 HOST = "github.com"
+PLAN_VERSION = 2
 DEFAULT_LOGINS = ["renovate[bot]"]
 DISABLED = (
     "\U0001f6a6 **Automerge**: Disabled by config. "
@@ -33,6 +34,7 @@ query Snapshot($owner: String!, $name: String!, $number: Int!, $cursor: String) 
       autoMergeRequest { enabledAt }
       isMergeQueueEnabled isInMergeQueue mergeable mergeStateStatus reviewDecision
       baseRef {
+        target { __typename oid }
         branchProtectionRule {
           requiresApprovingReviews requiredApprovingReviewCount
           requiredStatusCheckContexts
@@ -287,9 +289,23 @@ def check_connection(pr):
     return rollup
 
 
+def base_target_sha(pr):
+    ref = pr.get("baseRef")
+    require(isinstance(ref, dict), "current base ref is absent or unreadable; retriage")
+    target = ref.get("target")
+    require(
+        isinstance(target, dict) and target.get("__typename") == "Commit"
+        and isinstance(target.get("oid"), str)
+        and re.fullmatch(r"[0-9a-f]{40}", target["oid"]),
+        "current base target commit is absent or unreadable; retriage",
+    )
+    return target["oid"]
+
+
 def inspect_pr(gh, repo, number):
     initial = gh.snapshot(repo, number)
     pr = initial["pullRequest"]
+    target_sha = base_target_sha(pr)
     stable = {key: value for key, value in pr.items() if key != "commits"}
     rollup = check_connection(pr)
     contexts, cursors = [], set()
@@ -314,7 +330,7 @@ def inspect_pr(gh, repo, number):
     rules = gh.rules(repo, pr["baseRefName"])
     require(all(isinstance(rule, dict) and text(rule.get("type")) for rule in rules), "rules are unreadable")
     require(gh.snapshot(repo, number) == initial, "PR or CI changed during inspection; retriage")
-    return {"repository": initial, "checks": contexts, "rules": rules}
+    return {"repository": initial, "base_target_sha": target_sha, "checks": contexts, "rules": rules}
 
 
 def eligibility(snapshot, candidate, allowed):
@@ -328,7 +344,8 @@ def eligibility(snapshot, candidate, allowed):
     require(pr["author"]["id"] == candidate["author_id"], "author identity changed")
     require(pr["headRefOid"] == candidate["head_sha"], "head changed; retriage and reconfirm")
     require(pr["baseRefName"] == candidate["base_ref"], "base branch changed; retriage")
-    require(pr["baseRefOid"] == candidate["base_sha"], "base advanced; retriage and reconfirm")
+    require(pr["baseRefOid"] == candidate["base_sha"], "recorded PR base changed; retriage and reconfirm")
+    require(base_target_sha(pr) == candidate["base_target_sha"], "current base advanced; retriage and reconfirm")
     require(body_digest(pr["body"]) == candidate["body_sha256"], "PR body changed; retriage")
     manual, reason = classify(pr["body"], pr["autoMergeRequest"], pr["isInMergeQueue"])
     require(manual == "manual", f"not manual-only: {reason}")
@@ -384,7 +401,10 @@ def sha(value, length=40):
 
 def plan_data(plan):
     strict_object(plan, ("version", "host", "repositories", "renovate_logins", "candidates"), "plan")
-    require(type(plan["version"]) is int and plan["version"] == 1 and plan["host"] == HOST, "unsupported plan version or host")
+    require(
+        type(plan["version"]) is int and plan["version"] == PLAN_VERSION and plan["host"] == HOST,
+        "unsupported plan version or host; retriage with a version 2 plan and reconfirm",
+    )
     repos = unique([repository(repo) for repo in plan["repositories"]], "repositories")
     require(repos == plan["repositories"], "plan repositories must be lowercase")
     allowed = logins(plan["renovate_logins"])
@@ -392,7 +412,7 @@ def plan_data(plan):
     index = {}
     for candidate in plan["candidates"]:
         strict_object(candidate, (
-            "repo", "number", "head_sha", "base_ref", "base_sha", "author_id", "body_sha256",
+            "repo", "number", "head_sha", "base_ref", "base_sha", "base_target_sha", "author_id", "body_sha256",
             "recommendation", "reasons", "confidence", "evidence", "action",
         ), "candidate")
         require(candidate["repo"] in repos, "candidate outside repository scope")
@@ -401,6 +421,7 @@ def plan_data(plan):
         require(key not in index, "duplicate candidate")
         sha(candidate["head_sha"])
         sha(candidate["base_sha"])
+        sha(candidate["base_target_sha"])
         sha(candidate["body_sha256"], 64)
         require(text(candidate["base_ref"]) and text(candidate["author_id"]), "missing base or author")
         require(candidate["recommendation"] in ("merge", "hold"), "invalid recommendation")
@@ -420,7 +441,10 @@ def plan_data(plan):
 
 def approval_data(approval, plan_bytes, index, selected):
     strict_object(approval, ("version", "plan_sha256", "user_confirmation", "selected"), "approval")
-    require(type(approval["version"]) is int and approval["version"] == 1, "unsupported approval version")
+    require(
+        type(approval["version"]) is int and approval["version"] == PLAN_VERSION,
+        "unsupported approval version; retriage and reconfirm the version 2 plan",
+    )
     require(approval["plan_sha256"] == digest(plan_bytes), "plan changed since confirmation")
     require(text(approval["user_confirmation"]), "explicit user confirmation is required")
     unique(selected, "selected PRs")

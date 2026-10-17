@@ -20,6 +20,7 @@ helper = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(helper)
 HEAD = "a" * 40
 BASE = "b" * 40
+BASE_TARGET = "d" * 40
 REPO = "example/service"
 
 
@@ -42,7 +43,7 @@ def snapshot(number=1, repo=REPO):
             "autoMergeRequest": None, "isMergeQueueEnabled": False,
             "isInMergeQueue": False, "mergeable": "MERGEABLE",
             "mergeStateStatus": "CLEAN", "reviewDecision": "APPROVED",
-            "baseRef": {"branchProtectionRule": {
+            "baseRef": {"target": {"__typename": "Commit", "oid": BASE_TARGET}, "branchProtectionRule": {
                 "requiresApprovingReviews": True, "requiredApprovingReviewCount": 1,
                 "requiredStatusCheckContexts": ["tests"],
             }},
@@ -67,7 +68,8 @@ def snapshot(number=1, repo=REPO):
 def candidate(number=1, repo=REPO):
     return {
         "repo": repo, "number": number, "head_sha": HEAD,
-        "base_ref": "main", "base_sha": BASE, "author_id": "BOT_renovate",
+        "base_ref": "main", "base_sha": BASE, "base_target_sha": BASE_TARGET,
+        "author_id": "BOT_renovate",
         "body_sha256": helper.body_digest(helper.DISABLED),
         "recommendation": "merge", "reasons": ["Reviewed migration and consumers"],
         "confidence": "high", "action": "squash",
@@ -80,7 +82,7 @@ def candidate(number=1, repo=REPO):
 
 def plan(*candidates):
     return {
-        "version": 1, "host": "github.com",
+        "version": 2, "host": "github.com",
         "repositories": list(dict.fromkeys(item["repo"] for item in candidates)),
         "renovate_logins": ["renovate[bot]"], "candidates": list(candidates),
     }
@@ -88,7 +90,7 @@ def plan(*candidates):
 
 def approval(plan_bytes, candidates):
     return {
-        "version": 1, "plan_sha256": helper.digest(plan_bytes),
+        "version": 2, "plan_sha256": helper.digest(plan_bytes),
         "user_confirmation": "Yes, merge exactly these fixture PRs at the displayed SHAs.",
         "selected": [
             {key: item[key] for key in ("repo", "number", "head_sha", "action")}
@@ -250,6 +252,7 @@ class HandoffTests(unittest.TestCase):
             with self.subTest(category=category), self.assertRaises(helper.Refusal):
                 helper.plan_data(value)
         for field, value in (("reasons", []), ("head_sha", "abc"), ("base_sha", ""),
+                             ("base_target_sha", ""), ("base_target_sha", None),
                              ("author_id", ""), ("body_sha256", ""), ("number", True)):
             changed = copy.deepcopy(self.plan)
             changed["candidates"][0][field] = value
@@ -276,6 +279,29 @@ class HandoffTests(unittest.TestCase):
     def test_changed_plan_bytes_rejected(self):
         with self.assertRaises(helper.Refusal):
             helper.approval_data(self.approval, self.raw + b"\n", self.index, [f"{REPO}#1"])
+
+    def test_old_plans_and_approvals_require_retriage(self):
+        old = copy.deepcopy(self.plan)
+        old["version"] = 1
+        for item in old["candidates"]:
+            del item["base_target_sha"]
+        with self.assertRaisesRegex(helper.Refusal, "retriage"):
+            helper.plan_data(old)
+        old["version"] = 2
+        with self.assertRaisesRegex(helper.Refusal, "candidate fields"):
+            helper.plan_data(old)
+        old_approval = copy.deepcopy(self.approval)
+        old_approval["version"] = 1
+        with self.assertRaisesRegex(helper.Refusal, "retriage"):
+            helper.approval_data(old_approval, self.raw, self.index, [f"{REPO}#1"])
+
+    def test_changed_base_target_invalidates_confirmation(self):
+        changed = copy.deepcopy(self.plan)
+        changed["candidates"][0]["base_target_sha"] = "c" * 40
+        raw = json.dumps(changed).encode()
+        index, _ = helper.plan_data(changed)
+        with self.assertRaisesRegex(helper.Refusal, "plan changed"):
+            helper.approval_data(self.approval, raw, index, [f"{REPO}#1"])
 
     def test_exact_set_and_order(self):
         for selected in ([f"{REPO}#2"], [f"{REPO}#1", f"{REPO}#2"], [f"{REPO}#1"] * 2):
@@ -323,6 +349,64 @@ class ExecutionTests(unittest.TestCase):
         self.assertEqual(result["status"], "merged")
         self.assertEqual([event for event in gh.events if event[0] == "write"],
                          [("write", 1, "squash", HEAD)])
+
+    def test_recorded_base_and_current_target_are_distinct(self):
+        state = snapshot()
+        pr = state["pullRequest"]
+        pr["baseRefOid"] = "cb0a7c593b1a69702bbf0a3468a107144a7fb6a1"
+        pr["baseRef"]["target"]["oid"] = "e146d08aecfae1363c0268451d5f6d65efbb53d7"
+        item = candidate()
+        item.update(base_sha=pr["baseRefOid"], base_target_sha=pr["baseRef"]["target"]["oid"])
+        inspected = helper.inspect_pr(MemoryGitHub(state), REPO, 1)
+        self.assertEqual(inspected["base_target_sha"], item["base_target_sha"])
+        self.assertNotEqual(inspected["base_target_sha"], pr["baseRefOid"])
+        self.assertEqual(self.execute(state, item)[0]["status"], "merged")
+        item["base_target_sha"] = pr["baseRefOid"]
+        self.assert_blocked(state, item)
+
+    def test_missing_or_invalid_current_base_fails_closed(self):
+        changes = [
+            lambda pr: pr.pop("baseRef"),
+            lambda pr: pr.update(baseRef=None),
+            lambda pr: pr["baseRef"].pop("target"),
+            lambda pr: pr["baseRef"].update(target=None),
+            lambda pr: pr["baseRef"].update(target={}),
+            lambda pr: pr["baseRef"].update(target="unreadable"),
+            lambda pr: pr["baseRef"]["target"].pop("__typename"),
+            lambda pr: pr["baseRef"]["target"].update(__typename="Tag"),
+            lambda pr: pr["baseRef"]["target"].pop("oid"),
+            lambda pr: pr["baseRef"]["target"].update(oid=None),
+            lambda pr: pr["baseRef"]["target"].update(oid=""),
+            lambda pr: pr["baseRef"]["target"].update(oid="not-a-sha"),
+        ]
+        for change in changes:
+            for action in ("squash", "queue"):
+                with self.subTest(change=change, action=action):
+                    state, item = snapshot(), candidate()
+                    state["pullRequest"]["isMergeQueueEnabled"] = action == "queue"
+                    item["action"] = action
+                    change(state["pullRequest"])
+                    with self.assertRaisesRegex(helper.Refusal, "current base"):
+                        helper.inspect_pr(MemoryGitHub(state), REPO, 1)
+                    self.assert_blocked(state, item)
+
+    def test_target_advance_during_inspection_and_check_pagination(self):
+        for paginated in (False, True):
+            for action in ("squash", "queue"):
+                with self.subTest(paginated=paginated, action=action):
+                    first, item = snapshot(), candidate()
+                    first["pullRequest"]["isMergeQueueEnabled"] = action == "queue"
+                    item["action"] = action
+                    if paginated:
+                        rollup(first)["contexts"]["pageInfo"].update(hasNextPage=True, endCursor="next")
+                    changed = copy.deepcopy(first)
+                    changed["pullRequest"]["baseRef"]["target"]["oid"] = "c" * 40
+                    gh = MemoryGitHub(first)
+                    with patch.object(gh, "snapshot", side_effect=[first, changed]):
+                        result, _ = self.execute(item=item, gh=gh)
+                    self.assertEqual(result["status"], "blocked")
+                    self.assertIn("changed", result["reason"])
+                    self.assertFalse(any(event[0] == "write" for event in gh.events))
 
     def test_ineligible_pr_states(self):
         cases = {
@@ -448,11 +532,19 @@ class ExecutionTests(unittest.TestCase):
         self.assertLess(write_index, read_second)
 
     def test_base_advance_after_first_merge_requires_retriage(self):
-        gh = MemoryGitHub(snapshot(1), snapshot(2))
-        gh.after_write = lambda: gh.states[2]["pullRequest"].update(baseRefOid="c" * 40)
-        result = helper.execute(gh, [candidate(1), candidate(2)], helper.DEFAULT_LOGINS)
-        self.assertEqual([item["status"] for item in result], ["merged", "blocked"])
-        self.assertIn("base advanced", result[1]["reason"])
+        for action in ("squash", "queue"):
+            with self.subTest(next_action=action):
+                gh = MemoryGitHub(snapshot(1), snapshot(2))
+                second = candidate(2)
+                second["action"] = action
+                gh.states[2]["pullRequest"]["isMergeQueueEnabled"] = action == "queue"
+                gh.after_write = lambda: gh.states[2]["pullRequest"]["baseRef"]["target"].update(oid="c" * 40)
+                result = helper.execute(gh, [candidate(1), second], helper.DEFAULT_LOGINS)
+                self.assertEqual([item["status"] for item in result], ["merged", "blocked"])
+                self.assertIn("current base advanced", result[1]["reason"])
+                self.assertEqual(gh.states[2]["pullRequest"]["baseRefOid"], BASE)
+                self.assertEqual([event for event in gh.events if event[0] == "write"],
+                                 [("write", 1, "squash", HEAD)])
 
     def test_failure_and_queue_halt_remaining_writes(self):
         for mode in ("failure", "queue", "unconfirmed"):
@@ -490,6 +582,9 @@ class ExecutionTests(unittest.TestCase):
 
 
 class CliContractTests(unittest.TestCase):
+    def test_snapshot_requests_actual_base_target_commit(self):
+        self.assertRegex(helper.SNAPSHOT, r"baseRef\s*\{\s*target\s*\{\s*__typename\s+oid\s*\}")
+
     def test_transport_uses_fixed_host_json_and_no_shell(self):
         gh = helper.GitHub()
         response = subprocess.CompletedProcess([], 0, '{"data":{"ok":true}}', "")
@@ -616,6 +711,8 @@ class OfflineCliTests(unittest.TestCase):
         self.assertEqual(data["body_sha256"], helper.body_digest(helper.DISABLED))
         self.assertEqual(data["classification"], "manual")
         self.assertEqual(data["repository"], state)
+        self.assertEqual(data["base_target_sha"], BASE_TARGET)
+        self.assertNotEqual(data["base_target_sha"], data["repository"]["pullRequest"]["baseRefOid"])
         self.assertEqual(data["rules"], [])
         self.assertEqual(len(data["checks"]), 1)
         self.assertNotIn("mutation", self.log.read_text())
@@ -636,6 +733,62 @@ class OfflineCliTests(unittest.TestCase):
         result = self.invoke(args, [])
         self.assertEqual(result.returncode, 1)
         self.assertFalse(self.log.exists())
+
+    def test_old_plan_and_approval_cli_rejected_without_remote_access(self):
+        for legacy in ("plan", "approval"):
+            with self.subTest(legacy=legacy):
+                args = self.merge_files()
+                path = self.path / f"{legacy}.json"
+                data = json.loads(path.read_text())
+                data["version"] = 1
+                if legacy == "plan":
+                    del data["candidates"][0]["base_target_sha"]
+                path.write_text(json.dumps(data))
+                if legacy == "plan":
+                    result = self.invoke(["validate-plan", "--plan", str(path)], [])
+                    self.assertEqual(result.returncode, 1)
+                    self.assertIn("retriage", result.stderr)
+                result = self.invoke(args, [])
+                self.assertEqual(result.returncode, 1)
+                self.assertIn("retriage", result.stderr)
+                self.assertFalse(self.log.exists())
+
+    def test_real_cli_inspect_missing_current_base_is_explicit_error(self):
+        state = snapshot()
+        state["pullRequest"]["baseRef"]["target"] = None
+        read = self.gql_step(helper.SNAPSHOT, {
+            "owner": "example", "name": "service", "number": 1, "cursor": None,
+        }, {"repository": state})
+        result = self.invoke(["inspect", "--repo", REPO, "--number", "1"], [read])
+        self.assertEqual(result.returncode, 1)
+        self.assertEqual(result.stdout, "")
+        self.assertIn("current base target commit is absent or unreadable", result.stderr)
+        self.assertNotIn("mutation", self.log.read_text())
+
+    def test_real_cli_stale_target_blocks_merge_and_queue_without_writes(self):
+        for action in ("squash", "queue"):
+            with self.subTest(action=action):
+                state, item = snapshot(), candidate()
+                state["pullRequest"]["baseRef"]["target"]["oid"] = "c" * 40
+                state["pullRequest"]["isMergeQueueEnabled"] = action == "queue"
+                item["action"] = action
+                args = self.merge_files(item)
+                read = self.gql_step(helper.SNAPSHOT, {
+                    "owner": "example", "name": "service", "number": 1, "cursor": None,
+                }, {"repository": state})
+                result = self.invoke(args, [
+                    read,
+                    {"args": ["api", "--hostname", "github.com", "--method", "GET",
+                              f"repos/{REPO}/rules/branches/main?per_page=100&page=1"], "response": []},
+                    read,
+                ])
+                self.assertEqual(result.returncode, 1, result.stderr)
+                row = json.loads(result.stdout)["results"][0]
+                self.assertEqual(row["status"], "blocked")
+                self.assertIn("current base advanced", row["reason"])
+                self.assertEqual(state["pullRequest"]["baseRefOid"], item["base_sha"])
+                self.assertNotIn("mutation", self.log.read_text())
+                self.log.unlink()
 
     def test_real_cli_merge_and_queue_roundtrips(self):
         for action in ("squash", "queue"):
