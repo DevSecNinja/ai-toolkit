@@ -32,7 +32,12 @@ includes a Python standard-library helper and relative `references/` documentati
 inside its skill folder, discovered by `includes: auto`. Preserve the complete
 folder when deploying a skill, not just `SKILL.md`. It uses an existing `gh`
 installation; no new MCP server or global skill installation is required.
-Review is read-only until the user confirms an exact plan selection. See its
+Review is read-only until the user confirms an exact plan selection. Its
+`dashboards` command also reads scoped Dependency Dashboards, including abandoned
+dependency tables and current PR/check correlations. Dashboard recommendations
+remain separate from merge approval; release inactivity alone is not proof of
+deprecation or a reason to replace a dependency. See the
+[dashboard guide](../.apm/skills/renovate-triage-and-merge/references/dashboard.md) and
 [testing guide](../.apm/skills/renovate-triage-and-merge/references/testing.md)
 for offline fixtures, clean-context scenarios and live-enforcement limitations.
 

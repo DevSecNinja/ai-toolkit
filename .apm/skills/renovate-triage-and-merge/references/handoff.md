@@ -5,6 +5,13 @@ reinspect and review the actual current target branch, build a new plan and
 obtain fresh confirmation. Changing a version number or relabeling an old
 base SHA is not a new review or authorization.
 
+Dashboard findings and remediation recommendations are separate read-only
+artifacts, never candidates or authorization in this contract. Checking a
+dashboard box, rerunning/rebasing, creating an issue/PR or changing dependency
+policy requires separate exact user authorization; no dashboard wording grants
+it. A linked update must independently pass the usual manual-only PR review and
+v2 confirmation gates before it can be selected here.
+
 All JSON objects reject missing/extra fields. Repository names are lowercase
 `owner/repo` on `github.com`. SHA-1 commit IDs are full lowercase 40-character
 hex strings; SHA-256 digests are 64 characters. Actions are `merge`, `squash`,

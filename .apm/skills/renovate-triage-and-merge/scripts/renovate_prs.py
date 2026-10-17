@@ -2,6 +2,7 @@
 """Read-only discovery and explicitly approved, SHA-bound Renovate merges."""
 
 import argparse
+from datetime import date, datetime, timezone
 import hashlib
 import json
 import os
@@ -9,7 +10,7 @@ from pathlib import Path
 import re
 import subprocess
 import sys
-from urllib.parse import quote
+from urllib.parse import quote, urlsplit
 
 
 HOST = "github.com"
@@ -22,6 +23,19 @@ DISABLED = (
 ENABLED = "\U0001f6a6 **Automerge**: Enabled."
 EVIDENCE = ("changes", "upstream", "usage", "ci", "rules", "automerge", "breaking")
 METHODS = {"merge": "MERGE", "squash": "SQUASH", "rebase": "REBASE"}
+DASHBOARD_INTRO = "This issue lists Renovate updates and detected dependencies."
+DASHBOARD_SECTIONS = {
+    "Abandoned Dependencies": "release_inactivity",
+    "Deprecated Dependencies": "reported_deprecation",
+    "Repository Problems": "warning",
+    "Errored": "warning",
+    "Pending Approval": "approval_wait",
+    "Awaiting Schedule": "schedule",
+    "Pending Status Checks": "pending",
+    "Rate-Limited": "rate_limit",
+    "Open": "open_updates",
+    "Detected Dependencies": "inventory",
+}
 
 SNAPSHOT = """
 query Snapshot($owner: String!, $name: String!, $number: Int!, $cursor: String) {
@@ -29,7 +43,7 @@ query Snapshot($owner: String!, $name: String!, $number: Int!, $cursor: String) 
     nameWithOwner isArchived viewerPermission
     mergeCommitAllowed squashMergeAllowed rebaseMergeAllowed
     pullRequest(number: $number) {
-      id number url title body state merged isDraft headRefOid baseRefOid baseRefName
+      id number url title body state merged isDraft headRefOid baseRefOid baseRefName updatedAt
       author { login __typename ... on Bot { id } ... on User { id } }
       autoMergeRequest { enabledAt }
       isMergeQueueEnabled isInMergeQueue mergeable mergeStateStatus reviewDecision
@@ -49,8 +63,8 @@ query Snapshot($owner: String!, $name: String!, $number: Int!, $cursor: String) 
               contexts(first: 100, after: $cursor) {
                 nodes {
                   __typename
-                  ... on CheckRun { name status conclusion detailsUrl }
-                  ... on StatusContext { context state targetUrl }
+                  ... on CheckRun { name status conclusion detailsUrl startedAt completedAt }
+                  ... on StatusContext { context state targetUrl createdAt }
                 }
                 pageInfo { hasNextPage endCursor }
               }
@@ -302,10 +316,8 @@ def base_target_sha(pr):
     return target["oid"]
 
 
-def inspect_pr(gh, repo, number):
-    initial = gh.snapshot(repo, number)
+def read_check_contexts(gh, repo, number, initial):
     pr = initial["pullRequest"]
-    target_sha = base_target_sha(pr)
     stable = {key: value for key, value in pr.items() if key != "commits"}
     rollup = check_connection(pr)
     contexts, cursors = [], set()
@@ -327,10 +339,272 @@ def inspect_pr(gh, repo, number):
         )
         rollup = check_connection(next_pr)
         require(rollup["state"] == check_connection(pr)["state"], "CI changed during pagination")
+    return contexts
+
+
+def inspect_pr(gh, repo, number):
+    initial = gh.snapshot(repo, number)
+    pr = initial["pullRequest"]
+    target_sha = base_target_sha(pr)
+    contexts = read_check_contexts(gh, repo, number, initial)
     rules = gh.rules(repo, pr["baseRefName"])
     require(all(isinstance(rule, dict) and text(rule.get("type")) for rule in rules), "rules are unreadable")
     require(gh.snapshot(repo, number) == initial, "PR or CI changed during inspection; retriage")
     return {"repository": initial, "base_target_sha": target_sha, "checks": contexts, "rules": rules}
+
+
+def issue_reference(value, repos):
+    match = re.fullmatch(r"([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)#([1-9][0-9]*)", value)
+    if not match:
+        match = re.fullmatch(r"https://github\.com/([^/]+/[^/]+)/issues/([1-9][0-9]*)", value)
+    require(match is not None, "issue must be owner/repo#number or a github.com issue URL")
+    repo = repository(match[1])
+    require(repo in repos, "dashboard issue is outside the explicit repository scope")
+    return repo, int(match[2])
+
+
+def timestamp(value):
+    require(isinstance(value, str), "timestamp is missing")
+    try:
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError as exc:
+        raise Refusal("timestamp is malformed") from exc
+    require(parsed.tzinfo is not None, "timestamp has no timezone")
+    return parsed
+
+
+def abandoned_rows(body, today):
+    rows, warnings, columns, fence = [], [], None, None
+    for line in body.splitlines():
+        delimiter = re.match(r"^\s*(`{3,}|~{3,})", line)
+        if delimiter:
+            token = delimiter[1]
+            if fence is None:
+                fence = token
+            elif token[0] == fence[0] and len(token) >= len(fence):
+                fence = None
+            continue
+        if fence is not None:
+            continue
+        if not line.strip().startswith("|"):
+            continue
+        cells = [cell.strip().strip("`") for cell in line.strip().strip("|").split("|")]
+        if all(re.fullmatch(r":?-+:?", cell) for cell in cells):
+            continue
+        if "Datasource" in cells and "Package" in cells and "Last Updated" in cells:
+            columns = cells
+            continue
+        if columns is None or len(cells) != len(columns):
+            warnings.append("unrecognized abandoned-dependency table row: " + line)
+            continue
+        fields = dict(zip(columns, cells))
+        package = re.fullmatch(r"\[([^\]]+)\]\((https://[^\s)]+)\)", fields["Package"])
+        if not package or not text(fields["Datasource"]):
+            warnings.append("unreadable abandoned-dependency identity: " + line)
+            continue
+        source = urlsplit(package[2])
+        if not source.hostname or source.username or source.password:
+            warnings.append("unreadable upstream link: " + line)
+            continue
+        last_updated = fields["Last Updated"]
+        age = None
+        try:
+            require(re.fullmatch(r"\d{4}-\d{2}-\d{2}", last_updated), "unknown release date")
+            released = date.fromisoformat(last_updated)
+            require(released <= today, "reported release date is in the future")
+            age = (today - released).days
+        except (Refusal, ValueError) as exc:
+            warnings.append(f"{package[1]}: {exc}; preserve the reported date without an age claim")
+        rows.append({
+            "datasource": fields["Datasource"], "dependency": package[1],
+            "upstream_url": package[2], "reported_last_updated": last_updated,
+            "reported_release_age_days": age, "evidence": line,
+        })
+    if not rows:
+        warnings.append("no readable abandoned-dependency rows; inspect the original section")
+    count = re.search(r"View abandoned dependencies \(([0-9]+)\)", body)
+    if count and int(count[1]) != len(rows):
+        warnings.append("abandoned-dependency count differs from parsed rows; inspect original section")
+    return rows, warnings
+
+
+def dashboard_sections(body, today):
+    sections, current, fence = [], None, None
+    for number, line in enumerate(body.splitlines(), 1):
+        delimiter = re.match(r"^\s*(`{3,}|~{3,})", line)
+        if delimiter:
+            token = delimiter[1]
+            if fence is None:
+                fence = token
+            elif token[0] == fence[0] and len(token) >= len(fence):
+                fence = None
+        heading = re.fullmatch(r"##[ \t]+(.+?)\s*", line) if fence is None else None
+        if heading:
+            current = {
+                "title": heading[1], "kind": DASHBOARD_SECTIONS.get(heading[1], "unknown"),
+                "line": number, "body": "", "entries": [], "dependencies": [], "warnings": [],
+            }
+            sections.append(current)
+        elif current is not None:
+            current["body"] += line + "\n"
+            if fence is None and re.match(r"^\s*[-*] \[[ xX]\]", line):
+                current["entries"].append({"evidence": line, "pr_references": []})
+    for section in sections:
+        if section["kind"] == "release_inactivity":
+            section["dependencies"], section["warnings"] = abandoned_rows(section["body"], today)
+        elif section["kind"] == "unknown":
+            section["warnings"].append("unrecognized section; preserved for manual review")
+    return sections
+
+
+def dashboard_pr(gh, repo, number, observed):
+    result = {"repo": repo, "number": number, "observed_at": observed.isoformat(), "errors": []}
+    try:
+        initial = gh.snapshot(repo, number)
+        pr = initial["pullRequest"]
+        require(pr["state"] in ("OPEN", "CLOSED", "MERGED"), "unreadable PR state")
+        result.update(url=pr["url"], state=pr["state"], head_sha=pr["headRefOid"],
+                      updated_at=pr.get("updatedAt"), ci={"state": "not_evaluated", "checks": []})
+        if pr["state"] != "OPEN":
+            return result
+        checks = read_check_contexts(gh, repo, number, initial)
+        require(gh.snapshot(repo, number) == initial, "PR or CI changed while correlating dashboard")
+        states, details = [], []
+        for check in checks:
+            kind = check["__typename"]
+            state = "unknown"
+            if kind == "CheckRun":
+                if check["status"] in ("QUEUED", "IN_PROGRESS", "WAITING", "REQUESTED", "PENDING"):
+                    state = "pending"
+                elif check["status"] == "COMPLETED":
+                    state = {
+                        "SUCCESS": "successful", "FAILURE": "failing", "TIMED_OUT": "failing",
+                        "CANCELLED": "not_successful", "NEUTRAL": "not_successful", "SKIPPED": "not_successful",
+                    }.get(check["conclusion"], "unknown")
+            elif kind == "StatusContext":
+                state = {"SUCCESS": "successful", "FAILURE": "failing", "ERROR": "failing",
+                         "PENDING": "pending"}.get(check["state"], "unknown")
+            details.append({"state": state, "evidence": check})
+            states.append(state)
+        summary = next((state for state in ("failing", "unknown", "pending", "not_successful")
+                        if state in states), "successful" if states else "absent")
+        if summary == "successful" and check_connection(pr)["state"] != "SUCCESS":
+            summary = "unknown"
+        if summary == "unknown":
+            result["errors"].append("unknown or inconsistent CI state; inspect current checks")
+        result["ci"] = {"state": summary, "rollup": check_connection(pr)["state"], "checks": details}
+    except (Refusal, KeyError, TypeError, ValueError) as exc:
+        result["errors"].append(str(exc))
+        result["ci"] = {"state": "unknown", "checks": []}
+        if "state" not in result:
+            result["state"] = "missing_or_unreadable"
+    return result
+
+
+def read_dashboard(gh, repo, issue, allowed, observed, explicit, pr_cache):
+    number = issue["number"]
+    require(type(number) is int and number > 0, "invalid dashboard issue number")
+    require("pull_request" not in issue, "explicit dashboard reference is a pull request")
+    require(
+        isinstance(issue.get("html_url"), str)
+        and issue["html_url"].lower() == f"https://github.com/{repo}/issues/{number}",
+        "out-of-scope or unreadable dashboard issue URL",
+    )
+    require(identity(issue["user"], allowed), "dashboard is not authored by a configured Renovate identity")
+    require(text(issue["user"]["node_id"]), "dashboard author node ID is unreadable")
+    body = issue["body"]
+    require(isinstance(body, str), "dashboard body is unreadable")
+    require(issue["state"] in ("open", "closed"), "dashboard state is unreadable")
+    sections = dashboard_sections(body, observed.date())
+    warnings = []
+    if not body.startswith(DASHBOARD_INTRO):
+        warnings.append("canonical dashboard introduction absent; explicit reference needs provenance/config verification")
+    if not sections:
+        warnings.append("no readable dashboard sections; inspect original issue/configuration")
+    if issue["state"] != "open":
+        warnings.append("dashboard issue is closed; do not treat it as a current backlog")
+    try:
+        require(timestamp(issue.get("updated_at")) <= observed, "dashboard updated_at is in the future")
+    except Refusal as exc:
+        warnings.append(str(exc))
+    for section in sections:
+        for entry in section["entries"]:
+            for target in re.findall(r"\]\(([^)\s]+)\)", entry["evidence"]):
+                match = re.fullmatch(r"\.\./pull/([1-9][0-9]*)(?:#[^\s]*)?", target)
+                if not match:
+                    match = re.fullmatch(rf"https://github\.com/{re.escape(repo)}/pull/([1-9][0-9]*)(?:#[^\s]*)?",
+                                         target, re.IGNORECASE)
+                if match:
+                    pr_number = int(match[1])
+                    key = (repo, pr_number)
+                    if key not in pr_cache:
+                        pr_cache[key] = dashboard_pr(gh, repo, pr_number, observed)
+                    current = pr_cache[key]
+                    entry["pr_references"].append({
+                        "reference": target, "current": current,
+                        "stale": current["state"] in ("CLOSED", "MERGED")
+                        and section["kind"] in ("pending", "open_updates", "schedule", "approval_wait"),
+                    })
+                else:
+                    entry["pr_references"].append({"reference": target, "status": "not_followed",
+                                                   "reason": "not a same-repository github.com PR link"})
+            if not entry["pr_references"]:
+                entry["correlation"] = "no_pr_reference; branch markers are not proof that a PR or CI run exists"
+    errors = [error for section in sections for entry in section["entries"]
+              for ref in entry["pr_references"] for error in ref.get("current", {}).get("errors", [])]
+    return {
+        "repo": repo, "number": number, "url": issue["html_url"], "title": issue["title"],
+        "state": issue["state"], "author": issue["user"], "updated_at": issue.get("updated_at"),
+        "body_sha256": body_digest(body), "body": body,
+        "identification": "explicit_reference_and_author" if explicit else "canonical_introduction_and_author",
+        "sections": sections, "warnings": warnings, "errors": errors,
+        "complete": not errors and not warnings and all(not section["warnings"] for section in sections),
+    }
+
+
+def dashboards(gh, repos, allowed, references, observed=None):
+    observed = observed or datetime.now(timezone.utc)
+    selected = [issue_reference(value, repos) for value in references]
+    require(len(selected) == len(set(selected)), "duplicate dashboard issue references")
+    reports, pr_cache = [], {}
+    for repo in repos:
+        report = {"repo": repo, "discovery": "none", "dashboards": [], "excluded": [], "errors": []}
+        numbers = [number for scope, number in selected if scope == repo]
+        try:
+            if numbers:
+                issues = ((number, gh.call(["--method", "GET", f"repos/{repo}/issues/{number}"]))
+                          for number in numbers)
+            else:
+                issues = ((None, issue) for issue in gh.pages(f"repos/{repo}/issues?state=open"))
+            seen = set()
+            for requested, issue in issues:
+                require(isinstance(issue, dict), "dashboard issue is unreadable")
+                if not numbers and "pull_request" in issue:
+                    continue
+                number = issue["number"]
+                require(type(number) is int and number > 0 and number not in seen, "invalid or duplicate issue during pagination")
+                seen.add(number)
+                if numbers:
+                    require(number == requested, "explicit issue response has the wrong number")
+                else:
+                    if not identity(issue["user"], allowed):
+                        continue
+                    require(isinstance(issue["body"], str), "Renovate issue body is unreadable")
+                    if not issue["body"].startswith(DASHBOARD_INTRO):
+                        report["excluded"].append({"number": number, "reason": "no canonical dashboard introduction; specify an explicit issue if customized"})
+                        continue
+                report["dashboards"].append(read_dashboard(gh, repo, issue, allowed, observed, bool(numbers), pr_cache))
+        except (Refusal, KeyError, TypeError, ValueError) as exc:
+            report["errors"].append(str(exc))
+        count = len(report["dashboards"])
+        report["discovery"] = "multiple" if count > 1 else "single" if count else "unreadable" if report["errors"] else "none"
+        report["complete"] = not report["errors"] and all(item["complete"] for item in report["dashboards"])
+        reports.append(report)
+    return {
+        "version": 1, "host": HOST, "repositories": repos, "renovate_logins": allowed,
+        "observed_at": observed.isoformat(), "reports": reports, "complete": all(item["complete"] for item in reports),
+        "authorized": False,
+    }
 
 
 def eligibility(snapshot, candidate, allowed):
@@ -515,6 +789,10 @@ def main(argv=None):
     discovery = commands.add_parser("discover", help="read-only, explicitly scoped discovery")
     discovery.add_argument("--repo", action="append", required=True)
     discovery.add_argument("--renovate-login", action="append")
+    dashboard = commands.add_parser("dashboards", help="read-only scoped Dependency Dashboard evidence and current PR state")
+    dashboard.add_argument("--repo", action="append", required=True)
+    dashboard.add_argument("--renovate-login", action="append")
+    dashboard.add_argument("--issue", action="append", default=[], help="explicit scoped owner/repo#number or github.com issue URL")
     inspect = commands.add_parser("inspect", help="read-only current CI, rules and PR evidence")
     inspect.add_argument("--repo", required=True)
     inspect.add_argument("--number", type=int, required=True)
@@ -527,9 +805,10 @@ def main(argv=None):
     args = parser.parse_args(argv)
     try:
         gh = GitHub()
-        if args.command == "discover":
+        if args.command in ("discover", "dashboards"):
             repos = unique([repository(repo) for repo in args.repo], "repositories")
-            result = discover(gh, repos, logins(args.renovate_login or DEFAULT_LOGINS))
+            allowed = logins(args.renovate_login or DEFAULT_LOGINS)
+            result = dashboards(gh, repos, allowed, args.issue) if args.command == "dashboards" else discover(gh, repos, allowed)
             code = 0 if result["complete"] else 1
         elif args.command == "inspect":
             require(args.number > 0, "PR number must be positive")
