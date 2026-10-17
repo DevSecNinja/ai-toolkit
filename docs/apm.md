@@ -27,6 +27,15 @@ under [`.apm/agents/`](../.apm/agents/), and **skill primitives**
 under [`.apm/skills/<name>/`](../.apm/skills/). The structure is built to grow
 further into `.apm/hooks/` — just add the folder and author the primitive.
 
+The [Renovate triage and merge skill](../.apm/skills/renovate-triage-and-merge/SKILL.md)
+includes a Python standard-library helper and relative `references/` documentation
+inside its skill folder, discovered by `includes: auto`. Preserve the complete
+folder when deploying a skill, not just `SKILL.md`. It uses an existing `gh`
+installation; no new MCP server or global skill installation is required.
+Review is read-only until the user confirms an exact plan selection. See its
+[testing guide](../.apm/skills/renovate-triage-and-merge/references/testing.md)
+for offline fixtures, clean-context scenarios and live-enforcement limitations.
+
 | File / directory                      | Role                                                                          |
 | ------------------------------------- | ----------------------------------------------------------------------------- |
 | `apm.yml`                             | The producer manifest — package name, version, MCP servers, and what ships.   |
@@ -69,6 +78,10 @@ exposed as `coding-code-review-assistant`. The `<category>-` prefix avoids
 cross-category collisions in the flat command namespace.
 
 ## 🛠️ Generating the index
+
+For AI-assisted changes, run these validation steps in a fresh testing
+context/subsession, separate from implementation (see
+[contributor guidance](../CONTRIBUTING.md#5-testing-your-prompt)).
 
 ```bash
 bash tests/validate-prompts.sh   # validate the .apm primitives

@@ -9,7 +9,9 @@
 #   - have a non-empty body after the frontmatter (delivered to the harness)
 
 set -euo pipefail
-shopt -s globstar nullglob
+
+file_list=$(mktemp)
+trap 'rm -f "${file_list}"' EXIT
 
 EXIT_CODE=0
 
@@ -21,7 +23,8 @@ body_after_frontmatter() {
     awk 'BEGIN{n=0} /^---$/{n++; next} n>=2{print}' "$1"
 }
 
-for file in .apm/prompts/**/*.prompt.md; do
+find .apm/prompts -type f -name '*.prompt.md' -print0 >"${file_list}"
+while IFS= read -r -d '' file; do
     [ -f "${file}" ] || continue
     echo "Checking ${file}..."
     FILE_VALID=1
@@ -53,10 +56,11 @@ for file in .apm/prompts/**/*.prompt.md; do
 
     [ "${FILE_VALID}" -eq 1 ] && echo "✅ ${file} is valid"
     echo ""
-done
+done <"${file_list}"
 
 # Repo-local Copilot prompts (not part of the shipped package).
-for file in .github/prompts/**/*.md; do
+find .github/prompts -type f -name '*.md' -print0 >"${file_list}"
+while IFS= read -r -d '' file; do
     [ -f "${file}" ] || continue
     # Skip APM-deployed copies (their .apm/prompts source is validated above).
     base=$(basename "${file}")
@@ -71,10 +75,11 @@ for file in .github/prompts/**/*.md; do
         EXIT_CODE=1
     fi
     echo ""
-done
+done <"${file_list}"
 
 # APM instruction primitives: require description + applyTo + a non-empty body.
-for file in .apm/instructions/**/*.instructions.md; do
+find .apm/instructions -type f -name '*.instructions.md' -print0 >"${file_list}"
+while IFS= read -r -d '' file; do
     [ -f "${file}" ] || continue
     echo "Checking ${file}..."
     FILE_VALID=1
@@ -106,10 +111,11 @@ for file in .apm/instructions/**/*.instructions.md; do
 
     [ "${FILE_VALID}" -eq 1 ] && echo "✅ ${file} is valid"
     echo ""
-done
+done <"${file_list}"
 
 # APM skill primitives: require name + description + a non-empty body.
-for file in .apm/skills/**/SKILL.md; do
+find .apm/skills -type f -name SKILL.md -print0 >"${file_list}"
+while IFS= read -r -d '' file; do
     [ -f "${file}" ] || continue
     echo "Checking ${file}..."
     FILE_VALID=1
@@ -150,10 +156,11 @@ for file in .apm/skills/**/SKILL.md; do
 
     [ "${FILE_VALID}" -eq 1 ] && echo "✅ ${file} is valid"
     echo ""
-done
+done <"${file_list}"
 
 # APM agent primitives: require name + description + a non-empty body.
-for file in .apm/agents/**/*.agent.md; do
+find .apm/agents -type f -name '*.agent.md' -print0 >"${file_list}"
+while IFS= read -r -d '' file; do
     [ -f "${file}" ] || continue
     echo "Checking ${file}..."
     FILE_VALID=1
@@ -185,7 +192,7 @@ for file in .apm/agents/**/*.agent.md; do
 
     [ "${FILE_VALID}" -eq 1 ] && echo "✅ ${file} is valid"
     echo ""
-done
+done <"${file_list}"
 
 if [ "${EXIT_CODE}" -eq 0 ]; then
     echo "✅ All primitives are properly structured!"

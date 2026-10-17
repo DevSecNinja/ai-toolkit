@@ -4,11 +4,12 @@
 
 This is a **content repository** that ships a curated, multi-harness toolkit of
 **APM (Agent Package Manager) primitives**. It's a small, lightweight project
-focused on Markdown primitives with bash automation scripts.
+focused on Markdown primitives with Bash automation and dependency-free Python
+skill helpers.
 
 **Repository Type**: APM producer / content repository
 **Primary Language**: Markdown (with YAML frontmatter)
-**Automation**: Bash scripts
+**Automation**: Bash scripts and Python standard-library skill helpers
 **No Dependencies**: No package.json, requirements.txt, or external build deps
 
 **Producer vs. consumer**: `ai-toolkit` is the **producer** — the single source
@@ -109,6 +110,28 @@ bash scripts/generate-index.sh   # regenerate INDEX.md + README index (~1s)
 
 **Common mistake**: forgetting to commit the regenerated `INDEX.md` / `README.md`.
 
+## Separate-context testing
+
+All test/validation execution must happen in a **fresh testing context/subsession
+separate from implementation**, including initial runs and every rerun after a
+fix. Use a fresh testing task/subagent, pause implementation edits, and provide
+the exact isolated worktree/revision, complete acceptance criteria, reproducible
+commands and fixtures. Record the testing context identifier and actual results.
+Fix findings in the implementation context, then launch a new tester; do not
+reuse the previous testing conversation.
+
+This applies to tests, lint, primitive validation, generated-index checks and
+commit-hook validation. If hooks run tests, delegate the commit to a fresh
+non-implementation context rather than bypassing hooks. Never use primary/shared
+checkouts for testing. No extra orchestration framework is required.
+
+Executable skills require automated fixture-based behavior and CLI contract
+tests as well as clean-context skill scenarios. Never exercise remote writes
+against live PRs or other user data merely to test behavior. For the Renovate
+helper, run `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -p
+'test_renovate_prs.py'` from the repo root in the tester context. See
+`.apm/skills/renovate-triage-and-merge/references/testing.md`.
+
 ## Markdown Configuration
 
 ### Linting Rules (`.markdownlint.json`)
@@ -127,7 +150,7 @@ bash scripts/generate-index.sh   # regenerate INDEX.md + README index (~1s)
 
 1. **`.apm/` is the source of truth** — author primitives there; never hand-edit
    `INDEX.md` or the generated README block.
-2. **No compilation required** — only bash scripts; both run in ~1s.
+2. **No compilation required** — Bash scripts and Python standard-library tests.
 3. **`description` and `category` are required** in every primitive's frontmatter.
 4. **Bash scripts are executable** — run as `bash script-name.sh`.
 5. **No background processes** — all commands complete immediately.

@@ -10,9 +10,12 @@ parallel = false
 [pre-commit.commands.validate-prompts]
 run = "bash tests/validate-prompts.sh"
 
+[pre-commit.commands.renovate-helper]
+run = "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -p 'test_renovate_prs.py'"
+
 # Regenerate INDEX.md / README index from .apm/ and re-stage the result, so the
 # generated index never drifts from the primitives (the common contributor miss).
 [pre-commit.commands.generate-index]
 run = "bash scripts/generate-index.sh"
-glob = [".apm/prompts/*.prompt.md"]
+glob = [".apm/prompts/*.prompt.md", ".apm/instructions/*.instructions.md", ".apm/skills/**", ".apm/agents/*.agent.md"]
 stage_fixed = true
