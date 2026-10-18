@@ -181,6 +181,8 @@ def classify(body, native_auto, queued=False):
         if "**Automerge**:" in line:
             if fence is not None:
                 return "unknown", "automerge marker occurs in a code example"
+            if line.expandtabs(4).startswith("    "):
+                return "unknown", "automerge marker is indented; manual review required"
             markers.append(line.strip())
     if markers == [DISABLED]:
         return "manual", "canonical Renovate Disabled by config marker"
@@ -402,9 +404,14 @@ def abandoned_rows(body, today):
         if not package or not text(fields["Datasource"]):
             warnings.append("unreadable abandoned-dependency identity: " + line)
             continue
-        source = urlsplit(package[2])
-        if not source.hostname or source.username or source.password:
-            warnings.append("unreadable upstream link: " + line)
+        try:
+            source = urlsplit(package[2])
+            # Port syntax and range are validated lazily by this property.
+            _ = source.port
+            require(source.hostname and not source.username and not source.password,
+                    "missing hostname or credentials present")
+        except (Refusal, ValueError) as exc:
+            warnings.append(f"unreadable upstream link ({exc}): {line}")
             continue
         last_updated = fields["Last Updated"]
         age = None

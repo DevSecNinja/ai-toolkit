@@ -33,12 +33,19 @@ context separation.
 The tests import the shipped helper, use deterministic snapshots, and invoke its
 real CLI with a strict fake `gh` executable first on `PATH`. The fake rejects
 unexpected arguments/JSON, records every request, and never delegates to real
-`gh`. Fixtures and logs live in a temporary directory and are cleaned up.
+`gh`. Rejected requests leave their scenario step unconsumed, including any
+following readback; matching requests consume their step even when scripted to
+fail. Happy-path merge/queue results must have no warning and exact request
+logs. Separate transport-failure scenarios require warning-bearing reconciliation
+without retries. Fixtures and logs live in a temporary directory and are cleaned up.
 
 Coverage includes:
 
 - Explicit scope, multi-page/multi-repository discovery, partial errors, identity
   verification, major updates retained, manual/enabled/waiting/unknown signals.
+- Canonical markers with zero-to-three spaces remain valid; four-column/tabbed
+  examples stay unknown and cannot pass merge/queue preflight, even with matching
+  body digests. Deeply indented paragraph continuations are conservatively held.
 - Complete evidence and handoff shape, exact selection/order/action/SHA,
   confirmation/digest drift, no recommendation-to-authorization promotion.
 - Stale head/base/body, drafts, closed/conflicted/unknown/blocked/unapproved PRs;
@@ -58,6 +65,11 @@ Coverage includes:
   references, author/URL/scope provenance, none/multiple/partial-error results.
   Fixed-time nested abandoned-table fixtures cover three dependencies, invalid
   dates/layouts and unknown sections without invented maintenance conclusions.
+- Malformed upstream URL fixtures preserve valid rows on both sides, original
+  body/digest and row warnings, while later issues/pages continue and completeness
+  stays false. URLs include unmatched brackets, invalid IPv6, invalid authority
+  characters and nonnumeric/out-of-range ports. No-port URLs and valid explicit
+  ports (including 0 and 65535) remain accepted without warnings.
 - Current PR/check correlation, closed/missing references, pending release-age
   contexts versus failed jobs, check-page drift, and inert HTML checkbox/prompt
   instructions. Dashboard results never grant approval or invoke writes.

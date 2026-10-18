@@ -73,6 +73,10 @@ GitHub `auto_merge` / `autoMergeRequest` is insufficient: Renovate can merge
 without GitHub auto-merge. Enabled but waiting, failing or blocked PRs remain
 **enabled**, not manual. Missing/customized/contradictory markers, or "disabled
 because a matching PR was automerged previously", stay **unknown**.
+Fenced examples and marker lines indented by four or more columns (tabs use
+four-column stops) also stay **unknown**; zero-to-three leading spaces remain
+accepted. Deep indentation is held conservatively even in paragraph continuations
+that Markdown may render as prose, rather than trying to interpret every layout.
 Do not rewrite markers to make the helper accept a PR. Reconcile the marker
 with trusted effective Renovate configuration/logs (including presets and
 package rules); if you cannot establish it, keep a hold recommendation.
