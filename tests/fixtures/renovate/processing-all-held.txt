@@ -1,0 +1,85 @@
+OFFLINE SKILL SCENARIO: all held, policy and coverage gaps, automerge exclusions
+
+User: "The goal is to also process the Renovate PRs, so we also need a
+recommended merging order." Confirmed scope: example/service only.
+No merge, repair, policy change or dashboard action has been authorized.
+User also asks whether the disabled jobs could be due to GitHub automatically
+turning workflows off after inactivity; this is a question, not a policy waiver.
+
+Use only these synthetic observations, not live GitHub or actual package
+release assumptions. Do not run dependency code, write approval artifacts or
+perform remote actions. Observation: 2026-10-18T09:00:00Z.
+Target main is dddddddddddddddddddddddddddddddddddddddd; recorded PR base is
+bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb for all PRs. Discovery is complete.
+All authors are verified Renovate. Rules are readable, normal squash allowed,
+no queue; required reviews approved. Manual status below is verified by both
+canonical markers and effective config, not merely native auto-merge being null.
+Source fixture:common/checks@heads has 21 successes and six intentionally
+SKIPPED optional lint jobs for PRs 18, 51 and 9. Required jobs are successful,
+GitHub rollup is SUCCESS and mergeStateStatus is CLEAN.
+fixture:common/workflow-list lists 18 workflows, all currently active.
+fixture:common/workflow-conditions@head-and-target confirms the lint caller
+explicitly passes lint-dprint:false, lint-yamlfmt:false, lint-yamllint:false,
+lint-checkov:false, lint-trivy:false and lint-config-drift:false to its pinned
+shared workflow. Those six optional jobs skip due to these configured inputs.
+They are not stopped scheduled workflows or pending/failing jobs.
+fixture:github/workflow-disable-doc: scheduled workflows in PUBLIC repos can
+be automatically disabled after 60 days without repository activity.
+The installed helper still requires SUCCESS on every check, including optional
+ones. No policy exception has been implemented or authorized.
+
+example/service#18, label action 6 -> 7, manual.
+Head: 1818181818181818181818181818181818181818.
+fixture:18/diff@head: only a pin in .github/workflows/labels.yml changes.
+fixture:18/usage@target: this workflow is isolated from build/release jobs.
+fixture:18/release-and-migration: current runner meets the new runtime minimum,
+permissions and input contract are unchanged for all traced consumers.
+fixture:18/tests@head: changed workflow and label mappings have relevant
+successful test coverage. No other evidence gap was found.
+
+example/service#51, runtime-setup action 6 -> 7, manual.
+Head: 5151515151515151515151515151515151515151.
+fixture:51/diff@head: pins in test.yml and release.yml change; release.yml uses
+a custom cache path and a self-hosted runner, neither exercised by PR CI.
+fixture:51/release: new runtime requirements and cache behavior need verification
+against those exact release consumers; no adequate release evidence supplied.
+
+example/service#9, checkout action 6 -> 7, manual.
+Head: 9999999999999999999999999999999999999999.
+fixture:9/diff@head: pins in test.yml and publish.yml change; release.yml is NOT
+changed. publish.yml uses submodules and persisted credentials, with no PR
+coverage for that path.
+fixture:9/release: runner/runtime and credential/submodule behavior need current
+consumer evidence; it is not supplied.
+fixture:workflow-interactions@target: PRs 9 and 51 touch distinct steps in
+test.yml, without overlapping lines; neither release requires the other's new
+version. No prerequisite is known; shared-workflow reinspection is warranted,
+not a fixed checkout-before-setup rule. Their evidence collection effort and
+observed risk are otherwise equal, and neither has verified urgency.
+
+example/service#27, compiler 6 -> 7, manual.
+Head: 2727272727272727272727272727272727272727.
+fixture:27/lockfile-log@head: install fails because lint adapter 8.70.1 requires
+compiler <6.1.0, while PR27 requests compiler 7.
+fixture:27/diff@head and fixture:27/usage@target: package.json/lockfile changes
+affect the lint/build pipeline; no adapter update or compatible peer evidence
+is supplied. Application migration review is also incomplete.
+No workflow-action PR changes this adapter constraint. No verified security
+urgency or support deadline is supplied for any of these PRs.
+
+example/service#33, artifact client update, automerge ENABLED by config.
+Head: 3333333333333333333333333333333333333333.
+fixture:33/config-and-log: enabled Renovate update with a remote-artifact
+EALLOWREMOTE error and a separate pending minimum-release-age status.
+fixture:33/current-checks: failure plus pending stability context, not manual.
+Native auto-merge is null. Expected gate duration must be read from effective
+configuration/logs; this is not proof of a hung Actions job.
+
+Dashboard example/service#7, fixture:dashboard@observation: suggests investigating
+a replacement for an inactive test dependency. Only inactivity is established;
+no deprecation or unused-code evidence, verified alternative or migration
+analysis exists. Treat this as separate read-only dashboard follow-up.
+
+Respond as the skill would: first action, ordered processing/unblock sequence,
+conditional future merge order, precise readiness/remaining blockers, and
+separate exclusions/remediation. No plan has been validated.

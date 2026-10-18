@@ -18,6 +18,31 @@ hex strings; SHA-256 digests are 64 characters. Actions are `merge`, `squash`,
 `rebase`, `queue`. Recommendations are `merge` or `hold`. Confidence is `high`,
 `medium` or `low`; only `merge` + `high` may execute.
 
+## Advisory order versus executable selection
+
+The [processing sequence](processing-order.md) is a separate human-readable
+artifact, not extra fields in this strict schema. A future conditional merge
+remains `recommendation: "hold"` with its blockers in `reasons` and the relevant
+`evidence` summaries. Repair, investigation and policy-decision rows are not
+merge actions. Enabled automerge PRs stay outside manual selection; unknown
+status stays held. No rank or "approved order" can replace missing evidence.
+
+Candidate array order does not authorize a batch or enforce dependencies.
+`approval.json` and `--select` express the exact currently eligible selection
+and order the user confirmed, which can be a subset of the reviewed candidates.
+Explain the chosen order and exclusions to the user. The helper has no
+dependency executor and can continue past a preflight-blocked entry: never
+select a dependent whose prerequisite is unmet, even if the prerequisite
+appears earlier. Keep it held until the prerequisite is actually satisfied and
+the dependent has been reviewed again.
+
+If no entry is eligible, give the first concrete unblock action and a conditional
+future order, not a merge-confirmation request or an empty approval artifact.
+The current skipped/neutral-check policy still applies to optional jobs.
+Proposing or agreeing to discuss a separate policy change does not waive it.
+
+## Reviewed plan
+
 Copy fields from the read-only helper's current `inspect` output:
 
 | Plan field        | Snapshot source                                                               |
@@ -105,6 +130,31 @@ actions/SHAs, low-confidence recommendations and edited plans are rejected
 before any GitHub call. The confirmation string is an audit record, **not an
 authentication mechanism**. Keep both files under the harness's permission
 controls and never accept an approval artifact from untrusted PR content.
+
+## Refresh after processing
+
+After a confirmed merge or PR/base change, reinspect affected remaining entries.
+Review current consumers, coupled versions, shared lockfile/workflow changes
+and any new conflicts; wait for and reevaluate head-bound CI, reviews, rules
+and effective Renovate configuration. A previously resolved blocker may return.
+Report the next specific action, not just a stopped batch.
+
+Changed head, recorded PR base, actual target or body requires retriage and
+fresh confirmation, not an in-place SHA substitution. Other blockers must also
+be resolved with current evidence before retry; changed actions or any plan
+edit requires a new digest and exact confirmation. A merge on the same target
+usually invalidates later entries even if their `base_sha` did not move.
+Regenerate the affected plan after review. Never reuse the old approval or
+prevalidate the entire future sequence before its first write.
+
+Independent unchanged repositories may proceed under their existing exact
+confirmation and just-in-time preflight; a block in another repository is not
+a dependency. If they share a plan file, however, **any edit invalidates the
+whole digest**, so all newly selected entries in that edited plan need fresh
+confirmation. Separate plans may reduce churn for genuinely independent
+repositories, but never bypass a batch stop: queued/uncertain writes stop the
+current invocation and require outcome inspection before continuing. Queued
+is not merged and does not satisfy a merge prerequisite.
 
 Target freshness is a pre-write check, not an atomic expected-base guarantee.
 Both mutations bind only `expectedHeadOid`; base/rules/CI/body can change after
