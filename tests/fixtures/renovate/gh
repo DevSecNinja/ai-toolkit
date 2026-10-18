@@ -16,10 +16,10 @@ with log_path.open("a") as log:
 scenario = json.loads(scenario_path.read_text())
 if not scenario:
     sys.exit("Unexpected gh call: exhausted fixture")
-expected = scenario.pop(0)
-scenario_path.write_text(json.dumps(scenario))
+expected = scenario[0]
 if args != expected["args"] or payload != expected.get("payload"):
     sys.exit("Unexpected gh arguments or payload")
+scenario_path.write_text(json.dumps(scenario[1:]))
 print(json.dumps(expected["response"]))
 print(expected.get("stderr", ""), file=sys.stderr)
 sys.exit(expected.get("returncode", 0))

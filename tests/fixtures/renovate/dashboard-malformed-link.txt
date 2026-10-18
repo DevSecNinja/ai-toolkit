@@ -1,0 +1,19 @@
+This issue lists Renovate updates and detected dependencies.
+
+## Abandoned Dependencies
+
+<details>
+<summary>View abandoned dependencies (3)</summary>
+
+| Datasource | Package | Last Updated |
+|------------|---------|--------------|
+| mise | [before](https://example.test/before) | `2025-08-04` |
+| mise | [broken](https://[invalid) | `2025-08-04` |
+| pip_requirements | [after](https://example.test/after) | `2024-11-08` |
+
+</details>
+
+## Detected Dependencies
+
+- `before 1.0.0`
+- `after 2.0.0`
