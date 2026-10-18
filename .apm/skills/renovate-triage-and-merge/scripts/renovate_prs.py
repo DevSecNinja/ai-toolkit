@@ -406,6 +406,8 @@ def abandoned_rows(body, today):
             continue
         try:
             source = urlsplit(package[2])
+            # Port syntax and range are validated lazily by this property.
+            _ = source.port
             require(source.hostname and not source.username and not source.password,
                     "missing hostname or credentials present")
         except (Refusal, ValueError) as exc:

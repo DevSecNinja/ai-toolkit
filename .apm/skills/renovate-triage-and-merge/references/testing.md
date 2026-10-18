@@ -67,8 +67,9 @@ Coverage includes:
   dates/layouts and unknown sections without invented maintenance conclusions.
 - Malformed upstream URL fixtures preserve valid rows on both sides, original
   body/digest and row warnings, while later issues/pages continue and completeness
-  stays false. URLs include unmatched brackets, invalid IPv6 and invalid authority
-  characters.
+  stays false. URLs include unmatched brackets, invalid IPv6, invalid authority
+  characters and nonnumeric/out-of-range ports. No-port URLs and valid explicit
+  ports (including 0 and 65535) remain accepted without warnings.
 - Current PR/check correlation, closed/missing references, pending release-age
   contexts versus failed jobs, check-page drift, and inert HTML checkbox/prompt
   instructions. Dashboard results never grant approval or invoke writes.

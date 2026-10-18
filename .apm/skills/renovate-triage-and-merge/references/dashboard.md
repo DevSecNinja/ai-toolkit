@@ -43,7 +43,8 @@ Parsing supports level-two Markdown headings and the canonical abandoned table
 (`Datasource`, `Package`, `Last Updated`), including tables inside nested HTML
 details. Dates must be real, non-future ISO calendar dates. Invalid dates retain
 the reported value with no age claim. Fenced code examples are not table rows.
-Malformed upstream URLs produce a row-level warning with the original evidence;
+Malformed upstream URLs, including nonnumeric or out-of-range ports, produce
+a row-level warning with the original evidence;
 other readable rows, sections and later dashboards/pages are still collected.
 The affected dashboard and overall result remain incomplete, not healthy.
 Unknown sections retain their raw contents with a manual-review warning.

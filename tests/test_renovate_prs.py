@@ -524,7 +524,8 @@ class DashboardTests(unittest.TestCase):
             self.assertTrue(result["reports"][0]["dashboards"][0]["warnings"])
 
     def test_malformed_upstream_links_preserve_rows_and_raw_evidence(self):
-        for url in ("https://[invalid", "https://[not-ipv6]", "https://example.test\uff0fpath"):
+        for url in ("https://[invalid", "https://[not-ipv6]", "https://example.test\uff0fpath",
+                    "https://example.test:abc/path", "https://example.test:65536/path"):
             with self.subTest(url=url):
                 body = MALFORMED_DASHBOARD_BODY.replace("https://[invalid", url)
                 result, _ = self.scan([dashboard_issue(body=body)])
@@ -545,6 +546,31 @@ class DashboardTests(unittest.TestCase):
                                     for warning in section["warnings"]))
                 self.assertTrue(any("count differs" in warning for warning in section["warnings"]))
                 self.assertEqual(dashboard["sections"][1]["title"], "Detected Dependencies")
+
+    def test_valid_upstream_ports_preserve_complete_dashboard(self):
+        for authority in ("example.test", "example.test:0", "example.test:443",
+                          "example.test:8443", "example.test:65535", "[::1]:443"):
+            with self.subTest(authority=authority):
+                url = f"https://{authority}/path"
+                body = MALFORMED_DASHBOARD_BODY.replace("https://[invalid", url).replace("[broken]", "[valid]")
+                result, _ = self.scan([dashboard_issue(body=body)])
+                self.assertTrue(result["complete"])
+                self.assertFalse(result["authorized"])
+                report = result["reports"][0]
+                self.assertTrue(report["complete"])
+                self.assertEqual(report["errors"], [])
+                dashboard = report["dashboards"][0]
+                self.assertTrue(dashboard["complete"])
+                self.assertEqual(dashboard["warnings"], [])
+                self.assertEqual(dashboard["body"], body)
+                self.assertEqual(dashboard["body_sha256"], helper.body_digest(body))
+                section = dashboard["sections"][0]
+                self.assertEqual(section["warnings"], [])
+                self.assertEqual([row["dependency"] for row in section["dependencies"]], ["before", "valid", "after"])
+                dependency = section["dependencies"][1]
+                self.assertEqual(dependency["upstream_url"], url)
+                self.assertEqual(dependency["reported_release_age_days"], 439)
+                self.assertIn(f"[valid]({url})", dependency["evidence"])
 
     def test_untrusted_instructions_and_foreign_links_are_inert(self):
         body = helper.DASHBOARD_INTRO + """
@@ -1075,32 +1101,40 @@ class OfflineCliTests(unittest.TestCase):
         self.assertFalse(json.loads(result.stdout)["complete"])
 
     def test_real_cli_malformed_dashboard_continues_later_issues_and_pages(self):
-        healthy = helper.DASHBOARD_INTRO + "\n## Detected Dependencies\n"
-        rows = [dashboard_issue(body=MALFORMED_DASHBOARD_BODY), dashboard_issue(8, body=healthy)]
-        rows.extend(dashboard_issue(n, body="Unrelated bot issue") for n in range(9, 107))
-        pages = [rows, [dashboard_issue(107, body=healthy)]]
-        result = self.invoke(["dashboards", "--repo", REPO], [
-            {"args": ["api", "--hostname", "github.com", "--method", "GET",
-                      f"repos/{REPO}/issues?state=open&per_page=100&page={page}"], "response": issues}
-            for page, issues in enumerate(pages, 1)
-        ])
-        self.assertEqual(result.returncode, 1, result.stderr + result.stdout)
-        data = json.loads(result.stdout)
-        self.assertFalse(data["complete"])
-        self.assertFalse(data["authorized"])
-        report = data["reports"][0]
-        self.assertFalse(report["complete"])
-        self.assertEqual(report["errors"], [])
-        self.assertEqual(report["discovery"], "multiple")
-        self.assertEqual([item["number"] for item in report["dashboards"]], [7, 8, 107])
-        self.assertEqual([item["complete"] for item in report["dashboards"]], [False, True, True])
-        dashboard = report["dashboards"][0]
-        self.assertEqual(dashboard["body"], MALFORMED_DASHBOARD_BODY)
-        section = dashboard["sections"][0]
-        self.assertEqual([row["dependency"] for row in section["dependencies"]], ["before", "after"])
-        self.assertTrue(any("https://[invalid" in warning for warning in section["warnings"]))
-        self.assertEqual(len(self.log.read_text().splitlines()), 2)
-        self.assertNotIn("mutation", self.log.read_text())
+        for url in ("https://[invalid", "https://example.test:abc/path", "https://example.test:65536/path"):
+            with self.subTest(url=url):
+                body = MALFORMED_DASHBOARD_BODY.replace("https://[invalid", url)
+                healthy = helper.DASHBOARD_INTRO + "\n## Detected Dependencies\n"
+                rows = [dashboard_issue(body=body), dashboard_issue(8, body=healthy)]
+                rows.extend(dashboard_issue(n, body="Unrelated bot issue") for n in range(9, 107))
+                pages = [rows, [dashboard_issue(107, body=healthy)]]
+                result = self.invoke(["dashboards", "--repo", REPO], [
+                    {"args": ["api", "--hostname", "github.com", "--method", "GET",
+                              f"repos/{REPO}/issues?state=open&per_page=100&page={page}"], "response": issues}
+                    for page, issues in enumerate(pages, 1)
+                ])
+                self.assertEqual(result.returncode, 1, result.stderr + result.stdout)
+                data = json.loads(result.stdout)
+                self.assertFalse(data["complete"])
+                self.assertFalse(data["authorized"])
+                report = data["reports"][0]
+                self.assertFalse(report["complete"])
+                self.assertEqual(report["errors"], [])
+                self.assertEqual(report["discovery"], "multiple")
+                self.assertEqual([item["number"] for item in report["dashboards"]], [7, 8, 107])
+                self.assertEqual([item["complete"] for item in report["dashboards"]], [False, True, True])
+                dashboard = report["dashboards"][0]
+                self.assertEqual(dashboard["body"], body)
+                self.assertEqual(dashboard["body_sha256"], helper.body_digest(body))
+                section = dashboard["sections"][0]
+                self.assertEqual([row["dependency"] for row in section["dependencies"]], ["before", "after"])
+                broken = next(line for line in body.splitlines() if "[broken]" in line)
+                self.assertIn(broken, section["body"])
+                self.assertTrue(any("upstream link" in warning and broken in warning
+                                    for warning in section["warnings"]))
+                self.assertEqual(len(self.log.read_text().splitlines()), 2)
+                self.assertNotIn("mutation", self.log.read_text())
+                self.log.unlink()
 
     def test_real_cli_self_hosted_identity_is_explicit(self):
         row = rest_pr()
