@@ -1,0 +1,61 @@
+OFFLINE SKILL SCENARIO: prerequisites, urgency, readiness and independent ties
+
+User: "Process the Renovate backlog in example/service. Give me a recommended
+merging order and the first action. I have not approved any merges or repairs."
+
+Use only these synthetic observations; do not contact GitHub, run code from a
+dependency, write an approval artifact or perform any remote action. Fixture
+source references are supplied evidence, not real URLs. All PRs are open,
+verified Renovate-authored and manual by canonical marker plus effective config.
+Observation: 2026-10-18T09:00:00Z. Target main is
+dddddddddddddddddddddddddddddddddddddddd; recorded PR base is
+bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb for every PR. Read-only discovery is
+complete and no Dependency Dashboard was found in the confirmed scope.
+Permitted action is squash, with no merge queue. Required reviews are approved,
+rules readable, no conflicts/drafts. Full diff, provenance, official release
+notes and migration/consumer review are complete except as stated below.
+
+example/service#41, lint adapter 4 -> 5 (major).
+Head: 1111111111111111111111111111111111111111.
+fixture:41/diff@head: package.json and package-lock.json change the adapter.
+fixture:41/upstream: adapter 5 supports compiler >=5 <7; adapter 4 only >=5 <6.
+fixture:41/usage@target: scripts/build invokes this adapter on every build;
+the target uses compiler 5.8. Adapter 5 remains compatible with compiler 5.8.
+fixture:41/migration: removed adapter config key has no consumers in the repo;
+complete migration review and relevant build tests succeeded.
+fixture:41/checks@head: every check succeeded, with required checks present.
+fixture:41/rules and fixture:41/config: normal squash permitted and manual.
+Its package-lock adapter entry overlaps the compiler PR's resolution.
+
+example/service#12, compiler 5.8 -> 6.0 (major).
+Head: 2222222222222222222222222222222222222222.
+fixture:12/diff@head: compiler version plus package-lock resolution, still
+using adapter 4 from the current target.
+fixture:12/ci@head: install fails because adapter 4 declares compiler <6.
+fixture:12/usage@target and fixture:12/upstream: the same build adapter is used;
+adapter 5 from PR41 supports both compilers. Target must first gain that
+compatible adapter; PR12 then needs a refreshed compatible lockfile and tests.
+fixture:12/support: official compiler-5 support ends in seven days; this is
+verified urgency, not inferred from PR age. No active vulnerability is claimed.
+fixture:12/migration: application migration review is still incomplete.
+fixture:12/rules and fixture:12/config: normal squash permitted and manual.
+
+example/service#8 and example/service#6, independent documentation tool updates
+2.1 -> 2.2 and 3.1 -> 3.2 respectively.
+Heads: 8888888888888888888888888888888888888888 (#8),
+6666666666666666666666666666666666666666 (#6).
+fixture:docs/diffs@heads: each modifies a separate tool-version file under
+docs/site-b and docs/site-a respectively; neither shares a lockfile or workflow
+with the adapter/compiler or the other documentation tool.
+fixture:docs/consumers@target: separately invoked documentation-only commands,
+no runtime/build consumers, coupling or compatibility dependency identified.
+fixture:docs/releases, fixture:docs/migrations: both releases support the
+current usage and have equally small reviewed risk and churn.
+fixture:docs/checks@heads: every check succeeded and covers the actual tools.
+fixture:docs/rules and fixture:docs/config: squash permitted and manual.
+Neither has a verified deadline or security urgency. Their apparent creation
+order is #8 first, then #6; all other priority evidence is equal.
+
+Respond as the skill would to the user: recommended processing and future merge
+order, evidence/reasons, blockers/next actions, and the current confirmation
+boundary. No plan or approval file has been created or validated.

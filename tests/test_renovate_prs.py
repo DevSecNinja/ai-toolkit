@@ -994,25 +994,36 @@ class OfflineCliTests(unittest.TestCase):
         state["pullRequest"]["isMergeQueueEnabled"] = action == "queue"
         item["action"] = action
         args = self.merge_files(item)
-        variables = {"owner": "example", "name": "service", "number": 1, "cursor": None}
+        return args, self.merge_steps(state, action)
+
+    def inspection_steps(self, state):
+        owner, name = state["nameWithOwner"].split("/")
+        pr = state["pullRequest"]
+        variables = {"owner": owner, "name": name, "number": pr["number"], "cursor": None}
         read = self.gql_step(helper.SNAPSHOT, variables, {"repository": state})
         rules = {"args": ["api", "--hostname", "github.com", "--method", "GET",
-                         f"repos/{REPO}/rules/branches/main?per_page=100&page=1"], "response": []}
-        payload = {"pullRequestId": "PR_1", "expectedHeadOid": HEAD}
+                         f"repos/{state['nameWithOwner']}/rules/branches/{pr['baseRefName']}?per_page=100&page=1"],
+                 "response": []}
+        return [read, rules, read]
+
+    def merge_steps(self, state, action):
+        steps = self.inspection_steps(state)
+        pr = state["pullRequest"]
+        payload = {"pullRequestId": pr["id"], "expectedHeadOid": pr["headRefOid"]}
         after = copy.deepcopy(state)
         if action == "queue":
             payload["jump"] = False
             query = helper.ENQUEUE
-            data = {"enqueuePullRequest": {"mergeQueueEntry": {"id": "MQ_1"}}}
+            data = {"enqueuePullRequest": {"mergeQueueEntry": {"id": f"MQ_{pr['number']}"}}}
             after["pullRequest"]["isInMergeQueue"] = True
         else:
             payload["mergeMethod"] = "SQUASH"
             query = helper.MERGE
-            data = {"mergePullRequest": {"pullRequest": {"id": "PR_1", "state": "MERGED", "merged": True}}}
+            data = {"mergePullRequest": {"pullRequest": {"id": pr["id"], "state": "MERGED", "merged": True}}}
             after["pullRequest"].update(state="MERGED", merged=True)
-        return args, [
-            read, rules, read, self.gql_step(query, {"input": payload}, data),
-            self.gql_step(helper.SNAPSHOT, variables, {"repository": after}),
+        return steps + [
+            self.gql_step(query, {"input": payload}, data),
+            self.gql_step(helper.SNAPSHOT, steps[0]["payload"]["variables"], {"repository": after}),
         ]
 
     def test_fake_gh_rejected_requests_do_not_consume_scenario(self):
@@ -1242,6 +1253,95 @@ class OfflineCliTests(unittest.TestCase):
                 self.assertIn("current base advanced", row["reason"])
                 self.assertEqual(state["pullRequest"]["baseRefOid"], item["base_sha"])
                 self.assertNotIn("mutation", self.log.read_text())
+                self.log.unlink()
+
+    def test_real_cli_ready_selection_does_not_authorize_urgent_future_hold(self):
+        args, scenario = self.merge_scenario("squash")
+        ready, held = candidate(1), candidate(2)
+        held.update(recommendation="hold", reasons=[
+            "Verified support deadline is urgent, but compiler exceeds adapter peer range; repair and review first",
+        ])
+        raw = json.dumps(plan(held, ready)).encode()
+        (self.path / "plan.json").write_bytes(raw)
+        approved = self.path / "approval.json"
+        approved.write_text(json.dumps(approval(raw, [ready])))
+        result = self.invoke(["validate-plan", "--plan", str(self.path / "plan.json")], [])
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertFalse(json.loads(result.stdout)["authorized"])
+        self.assertFalse(self.log.exists())
+        result = self.invoke(args, scenario)
+        self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+        rows = json.loads(result.stdout)["results"]
+        self.assertEqual([(row["number"], row["status"]) for row in rows], [(1, "merged")])
+        self.assertNotIn("warning", rows[0])
+        calls = [json.loads(line) for line in self.log.read_text().splitlines()]
+        self.assertEqual(calls, [{"args": step["args"], "payload": step.get("payload")} for step in scenario])
+        self.log.unlink()
+
+        approved.write_text(json.dumps(approval(raw, [held])))
+        result = self.invoke(args[:-1] + [f"{REPO}#2"], [])
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("only high-confidence merge", result.stderr)
+        self.assertFalse(self.log.exists())
+
+    def test_real_cli_clean_with_optional_skips_still_blocks_merge_and_queue(self):
+        for action in ("squash", "queue"):
+            with self.subTest(action=action):
+                state, item = snapshot(), candidate()
+                state["pullRequest"]["isMergeQueueEnabled"] = action == "queue"
+                item["action"] = action
+                checks = rollup(state)["contexts"]["nodes"]
+                for number in range(20):
+                    checks.append(dict(checks[0], name=f"required-{number}"))
+                for number in range(6):
+                    checks.append(dict(checks[0], name=f"optional-lint-{number}", conclusion="SKIPPED"))
+                args = self.merge_files(item)
+                scenario = self.inspection_steps(state)
+                result = self.invoke(args, scenario)
+                self.assertEqual(result.returncode, 1, result.stderr + result.stdout)
+                row = json.loads(result.stdout)["results"][0]
+                self.assertEqual(row["status"], "blocked")
+                self.assertIn("a check is not successful", row["reason"])
+                self.assertEqual(state["pullRequest"]["mergeStateStatus"], "CLEAN")
+                self.assertEqual(rollup(state)["state"], "SUCCESS")
+                calls = [json.loads(line) for line in self.log.read_text().splitlines()]
+                self.assertEqual(calls, [{"args": step["args"], "payload": step.get("payload")} for step in scenario])
+                self.assertNotIn("mutation", self.log.read_text())
+                self.log.unlink()
+
+    def test_real_cli_merge_stales_same_target_but_not_independent_repository(self):
+        for next_action in ("squash", "queue"):
+            with self.subTest(next_action=next_action):
+                args, first_merge = self.merge_scenario("squash")
+                second = candidate(2)
+                second["action"] = next_action
+                independent = candidate(3, "example/infra")
+                selected = [candidate(1), second, independent]
+                raw = json.dumps(plan(*selected)).encode()
+                (self.path / "plan.json").write_bytes(raw)
+                (self.path / "approval.json").write_text(json.dumps(approval(raw, selected)))
+                args += ["--select", f"{REPO}#2", "--select", "example/infra#3"]
+                stale = snapshot(2)
+                stale["pullRequest"]["baseRef"]["target"]["oid"] = "c" * 40
+                stale["pullRequest"]["isMergeQueueEnabled"] = next_action == "queue"
+                scenario = (first_merge + self.inspection_steps(stale)
+                            + self.merge_steps(snapshot(3, "example/infra"), "squash"))
+                result = self.invoke(args, scenario)
+                self.assertEqual(result.returncode, 1, result.stderr + result.stdout)
+                rows = json.loads(result.stdout)["results"]
+                self.assertEqual([row["status"] for row in rows], ["merged", "blocked", "merged"])
+                self.assertIn("current base advanced; retriage and reconfirm", rows[1]["reason"])
+                self.assertEqual(stale["pullRequest"]["baseRefOid"], second["base_sha"])
+                self.assertTrue(all("warning" not in row for row in rows))
+                calls = [json.loads(line) for line in self.log.read_text().splitlines()]
+                self.assertEqual(calls, [{"args": step["args"], "payload": step.get("payload")} for step in scenario])
+                writes = [call["payload"]["variables"]["input"] for call in calls
+                          if call["payload"] and "mutation" in call["payload"]["query"]]
+                self.assertEqual(writes, [
+                    {"pullRequestId": "PR_1", "expectedHeadOid": HEAD, "mergeMethod": "SQUASH"},
+                    {"pullRequestId": "PR_3", "expectedHeadOid": HEAD, "mergeMethod": "SQUASH"},
+                ])
+                self.assertEqual((self.path / "plan.json").read_bytes(), raw)
                 self.log.unlink()
 
     def test_real_cli_merge_and_queue_roundtrips(self):
