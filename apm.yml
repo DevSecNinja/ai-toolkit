@@ -18,7 +18,7 @@ dependencies:
   - github/awesome-copilot/agents/accessibility.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
   - github/awesome-copilot/agents/se-ux-ui-designer.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
   - github/awesome-copilot/agents/linkedin-post-writer.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
-  - DevSecNinja/ai-toolkit#v0.8.0
+  - DevSecNinja/ai-toolkit#2491cedec727e722a7751ff516ae7b7c95de922b # v0.8.0
   mcp:
   - io.github.github/github-mcp-server
   - name: microsoft-learn
