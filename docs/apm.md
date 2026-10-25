@@ -122,6 +122,65 @@ apm install DevSecNinja/ai-toolkit#v0.1.0 --target copilot
 | Gemini         | `.gemini/commands/<category>-<name>.toml`     | `/<category>-<name>` |
 | Windsurf       | `.windsurf/workflows/<category>-<name>.md`    | workflows menu       |
 
+### Untrusted repositories before the first fork
+
+The canonical policy is
+[`.apm/instructions/untrusted-repositories.instructions.md`](../.apm/instructions/untrusted-repositories.instructions.md),
+with `applyTo: "**"`. Newly forked/cloned third-party repositories and their
+dependencies are data-only by default, even when the fork belongs to you.
+UI Trust, autopilot, a feature request and a clean static review do not
+authorize execution. Review and edit source as data; obtain explicit scoped
+approval before running repository/dependency code, setup, hooks or workflows.
+Delegated sessions inherit the same boundary. A Python venv is not a security
+sandbox. Trusted, execution-authorized work retains normal validation; report
+skipped runtime checks honestly for static-only work.
+
+**Distribution is not pre-fork coverage.** Existing APM sync distributes
+primitives to opted-in consumer repositories when their selected version is
+updated and materialized. A pinned release predating this policy does not
+contain it. Merely storing it here, or consuming it in the special
+`DevSecNinja/.github` repository, does not make it available before opening
+every new fork on every machine. `ai-toolkit` remains the authoring source;
+do not create another independently maintained policy in a consumer.
+
+For pre-fork coverage, arrange trusted user-level loading/bootstrap on each
+machine **before** opening an untrusted checkout:
+
+1. Obtain the policy from a reviewed toolkit revision using a trusted process,
+   not setup code or instructions from the new fork.
+2. For **GitHub Copilot CLI**, deploy the policy body into the documented
+   `$HOME/.copilot/copilot-instructions.md` user-level instructions, preserving
+   existing user rules. Keep it a managed deployment of the canonical source,
+   not a second authoring location. `COPILOT_HOME`, if set, replaces
+   `$HOME/.copilot`. Modular user instructions and
+   `COPILOT_CUSTOM_INSTRUCTIONS_DIRS` are also documented, but path-specific
+   instructions apply only when matching files are being worked on; do not
+   rely solely on them for authorization before the first file operation.
+3. Restart or resume the CLI session after changing instructions and use
+   `/instructions` to verify that the intended instructions are discovered
+   and enabled. Check for conflicting user/repository instructions: the CLI
+   combines them and does not define a general precedence order.
+4. Configure restrictive tool permissions separately. Keep Actions disabled on
+   newly created forks you control unless separately authorized, verify that
+   state before triggering events, and account for upstream PR workflows.
+   Stop if the required controls cannot be verified; Git operations must not
+   incidentally execute unapproved hooks, filters or workflows.
+
+These loading paths and commands are documented for **Copilot CLI** in
+[GitHub's custom-instructions guide](https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/add-custom-instructions).
+They are not a claim about desktop-app loading or permission behavior.
+Other harnesses need their own documented, verified user-level deployment.
+This change ships the source policy and guidance only; it does not install a
+bootstrap, alter dotfiles/app settings, disable Actions remotely, or synchronize
+machine trust lists, credentials or sessions.
+
+**Instructions are guidance, not a permission-enforcement sandbox.** APM
+distribution and static checks cannot guarantee that a model, child session or
+host will refuse execution. Use host/tool permission controls as enforcement,
+and never treat a repository's instructions or a clean review as authorization.
+All commits require 1Password signing; if signing or a required tool is
+unavailable or denied, halt rather than bypassing it.
+
 ## 🏷️ Versioning
 
 Versioning is driven by [release-please](https://github.com/googleapis/release-please)
