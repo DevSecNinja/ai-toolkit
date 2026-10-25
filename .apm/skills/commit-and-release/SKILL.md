@@ -126,13 +126,25 @@ Plus the repo's own test command, if any. If anything fails, **stop and report**
 
 ### 5. Commit and push
 
+Confirm Git's effective configuration selects the trusted 1Password signer and
+the intended signing key before committing. Halt if 1Password is unavailable
+or the signer cannot be confirmed. `-S` requests signing but does not itself
+select 1Password.
+
 ```sh
-git commit -S -m "<message>"
-git push
+git commit -S -m "<message>" &&
+    git verify-commit HEAD
 ```
 
-Use the configured 1Password signer and verify the resulting signature before
-pushing. `-S` requests signing but does not itself select 1Password.
+Before pushing, confirm verification succeeded for the intended signing key
+and that the commit was created through the confirmed 1Password signer.
+Signature verification authenticates a key, not the signing application.
+If either check fails or cannot be confirmed, halt without pushing or
+proceeding with a release. Only after both checks succeed:
+
+```sh
+git push
+```
 
 The `commit-msg` hook re-runs `cog verify` automatically; both hooks must pass.
 Because hooks execute validation, have a fresh non-implementation context

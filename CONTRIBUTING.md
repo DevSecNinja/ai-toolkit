@@ -127,9 +127,18 @@ stop before committing and request scoped approval. All commits must use
 1. **Fork** this repository
 2. **Create** a new branch (`git checkout -b add-my-prompt`)
 3. **Add** your prompt file in the correct category
-4. **Commit** your changes (`git commit -m 'Add: [prompt name]'`)
-5. **Push** to your branch (`git push origin add-my-prompt`)
-6. **Open** a Pull Request
+4. **Commit** your changes with the configured 1Password signer
+   (`git commit -S -m 'Add: [prompt name]'`). Confirm Git's effective signer
+   configuration and intended signing key first; halt if 1Password is
+   unavailable or the signer cannot be confirmed.
+5. **Verify** the commit (`git verify-commit HEAD`) before pushing. Confirm the
+   signature matches the intended key and the commit was created through the
+   confirmed 1Password signer; a valid signature alone does not identify the
+   signing application. Halt if verification fails or either check cannot be
+   confirmed.
+6. **Push** to your branch (`git push origin add-my-prompt`) only after the
+   signing and verification checks succeed.
+7. **Open** a Pull Request
 
 ## 📝 Pull Request Guidelines
 
