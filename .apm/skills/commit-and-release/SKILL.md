@@ -15,6 +15,23 @@ DevSecNinja repositories use [Conventional Commits](https://www.conventionalcomm
 step-by-step procedure; the always-on rules live in the org instruction
 (`devsecninja-conventions`).
 
+## Trust gate
+
+Apply the `untrusted-repositories` instruction before every command below,
+including message validation, staging, hooks and pushes. A commit/PR request,
+UI Trust or autopilot does not authorize execution of third-party repository
+or dependency code. Inspect as data first; ask for explicit scoped approval
+where hooks, filters, tools or workflows would execute untrusted code. Carry
+the same restriction into testing and child sessions. Keep Actions disabled
+on new forks we control unless separately authorized, and account for
+upstream PR triggers before opening a PR.
+
+For static-only work, report skipped runtime checks honestly. Do not bypass
+required hooks or protections to commit; stop if they require unauthorized
+execution. Normal checks still apply to trusted, execution-authorized work.
+All commits must use 1Password signing; halt if unavailable or denied, without
+substituting a signer or creating an unsigned commit.
+
 ## Conventional Commit format
 
 ```
@@ -91,6 +108,8 @@ correct message cannot be determined from the diff or task context.
 
 ### 4. Run lint/tests before committing
 
+Proceed only within the authorized execution scope established above.
+
 Run all tests/validation in a **fresh testing context/subsession separate from
 implementation**, including initial runs and reruns after fixes. Pause edits
 and provide the exact isolated worktree/revision, acceptance criteria and
@@ -108,9 +127,12 @@ Plus the repo's own test command, if any. If anything fails, **stop and report**
 ### 5. Commit and push
 
 ```sh
-git commit -m "<message>"
+git commit -S -m "<message>"
 git push
 ```
+
+Use the configured 1Password signer and verify the resulting signature before
+pushing. `-S` requests signing but does not itself select 1Password.
 
 The `commit-msg` hook re-runs `cog verify` automatically; both hooks must pass.
 Because hooks execute validation, have a fresh non-implementation context
@@ -123,7 +145,9 @@ Do not bypass hooks to avoid separate-context testing.
   is the release-critical field.
 - Update documentation in the **same PR** as the code it describes.
 - Keep the PR focused on one logical change.
-- Ensure lint/tests pass before marking it ready.
+- For execution-authorized work, ensure lint/tests pass before marking it ready.
+  Label static-only work with the runtime checks not run; do not present it as
+  runtime-validated or trigger unauthorized CI.
 - Never force-push to `main` or any shared/protected branch.
 
 ## Cutting a release (release-please)

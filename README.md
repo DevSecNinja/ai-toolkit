@@ -36,6 +36,7 @@ That committed snapshot is a **review gate**: bumping a dependency (`apm update`
 > Long-lived behavior rules deployed to each harness's instruction directory
 
 - **[Devsecninja Conventions](/.apm/instructions/devsecninja-conventions.instructions.md)** (`**`) - DevSecNinja org-wide engineering conventions for AI agents: Conventional-Commit PR titles, pre-PR checks, docs, and no force-push.
+- **[Untrusted Repositories](/.apm/instructions/untrusted-repositories.instructions.md)** (`**`) - Treat newly forked or cloned third-party repositories as untrusted data; require explicit scoped authorization before executing repository or dependency code.
 - **[Writing Style](/.apm/instructions/writing-style.instructions.md)** (`**`) - Human-facing writing style for AI agents: avoid AI tells like 'So' sentence openers and em-dash/spaced-hyphen pauses, and default to a restrained, low-emoji tone.
 
 ## 🧠 Skills
@@ -115,6 +116,13 @@ Run `apm targets` to list the supported harnesses you can pass to `--target`
 
 See the [APM Producer Guide](/docs/apm.md) for how these primitives are authored,
 produced and consumed.
+
+The [untrusted-repositories policy](.apm/instructions/untrusted-repositories.instructions.md)
+requires explicit scoped approval before executing code from newly forked or
+cloned third-party repositories. APM sync distributes it to opted-in consumers,
+but does not protect every new fork before opening it. See
+[pre-fork deployment and enforcement](docs/apm.md#untrusted-repositories-before-the-first-fork)
+for trusted user-level loading and its limits.
 
 ## 🤝 Contributing
 
