@@ -3,7 +3,7 @@ min_version = "2026.10.7"
 
 [tools]
 actionlint = "1.7.12"
-dprint = "0.61.1"
+dprint = "0.62.0"
 gitleaks = "8.30.1"
 lefthook = "2.2.1"
 "pipx:checkov" = "3.3.26"
