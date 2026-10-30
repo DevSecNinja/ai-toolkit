@@ -1,0 +1,72 @@
+---
+name: SkillSpector
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: skillspector-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  scan:
+    name: Scan AI primitives
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - name: Checkout toolkit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Test scan runner
+        run: python3 -m unittest discover -s tests -p 'test_skillspector.py'
+
+      - name: Checkout pinned SkillSpector
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: NVIDIA/SkillSpector
+          ref: 69dcdfb74487d361ba4c811d088cfdea2ff3a9dc # v2.11.2
+          path: .skillspector-source
+          persist-credentials: false
+
+      - name: Build scanner
+        run: docker build --tag skillspector-ci .skillspector-source
+
+      - name: Exercise the real scanner container
+        env:
+          REPORT_DIR: ${{ runner.temp }}/skillspector-reports/smoke
+        run: env -u GITHUB_STEP_SUMMARY python3 tests/smoke-skillspector.py --output-dir "$REPORT_DIR"
+
+      - name: Scan and enforce severity gate
+        id: scan
+        env:
+          REPORT_DIR: ${{ runner.temp }}/skillspector-reports/repository
+        run: python3 scripts/scan-skills.py --output-dir "$REPORT_DIR" --sarif
+
+      - name: Publish findings to Code Scanning
+        if: ${{ !cancelled() && steps.scan.outputs.sarif_created == 'true' }}
+        uses: github/codeql-action/upload-sarif@b96794f015dfd88f77b49b1c93e0fa7110f94c63 # v4.38.0
+        with:
+          sarif_file: ${{ runner.temp }}/skillspector-reports/repository/findings.sarif
+          category: skillspector/static
+          wait-for-processing: true
+
+      - name: Upload reports
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: skillspector-reports
+          path: ${{ runner.temp }}/skillspector-reports
+          if-no-files-found: warn
+          retention-days: 14
