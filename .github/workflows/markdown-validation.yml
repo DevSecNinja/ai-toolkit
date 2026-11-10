@@ -11,6 +11,9 @@ on:
       - '.github/prompts/**/*.md'
       - 'tests/**'
       - 'scripts/generate-index.sh'
+      - 'apm.yml'
+      - 'release-please-config.json'
+      - '.release-please-manifest.json'
       - '.github/workflows/markdown-validation.yml'
   pull_request:
     paths:
@@ -19,6 +22,9 @@ on:
       - '.github/prompts/**/*.md'
       - 'tests/**'
       - 'scripts/generate-index.sh'
+      - 'apm.yml'
+      - 'release-please-config.json'
+      - '.release-please-manifest.json'
       - '.github/workflows/markdown-validation.yml'
 
 permissions:
@@ -55,3 +61,6 @@ jobs:
 
       - name: Test Renovate helper with offline fixtures
         run: PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -p 'test_renovate_prs.py' -v
+
+      - name: Check release-please can bump apm.yml
+        run: PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -p 'test_release_please_config.py' -v

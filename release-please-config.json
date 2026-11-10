@@ -16,8 +16,9 @@
       "changelog-path": "CHANGELOG.md",
       "extra-files": [
         {
-          "type": "generic",
-          "path": "apm.yml"
+          "type": "yaml",
+          "path": "apm.yml",
+          "jsonpath": "$.version"
         },
         {
           "type": "generic",
