@@ -1,5 +1,5 @@
 ---
-description: "DevSecNinja org-wide engineering conventions for AI agents: Conventional-Commit PR titles, pre-PR checks, docs, and no force-push."
+description: "DevSecNinja org-wide engineering conventions for AI agents: Conventional-Commit PR titles, an issue per PR, reviewable PR size, pre-PR checks, docs, and no force-push."
 applyTo: "**"
 ---
 
@@ -35,7 +35,15 @@ All commits require 1Password signing; halt if unavailable or denied.
   would trigger unauthorized workflows.
 - Update documentation in the same PR as the code it describes — READMEs, inline
   docs, and generated indexes. Don't defer docs to a follow-up.
-- Keep PRs focused: one logical change per PR.
+- Every PR has an issue: find or create one before opening the PR and link it
+  with a closing keyword (`Closes #n`). Turn split-off or leftover work into its
+  own issue rather than leaving it in PR comments.
+- Keep PRs reviewable: one logical change, roughly 200–400 lines of hand-written
+  change (generated files, lockfiles, snapshots and reports don't count), and
+  avoid going much past ~800. Split larger work into a sequence of PRs that each
+  build, test and make sense on their own, but don't split so finely that a PR
+  can't be understood or tested alone. See Google's
+  [small CL guidance](https://google.github.io/eng-practices/review/developer/small-cls.html).
 - Never force-push to `main` or any shared/protected branch. All changes land via
   PR through normal CI; branch protection is always respected.
 
