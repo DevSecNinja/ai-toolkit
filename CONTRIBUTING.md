@@ -113,6 +113,8 @@ What runs on **pre-commit**:
 - `bash tests/validate-prompts.sh` — validates every primitive's frontmatter.
 - `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -p 'test_renovate_prs.py'`
   — exercises the Renovate helper with offline GitHub fixtures.
+- `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -p 'test_release_please_config.py'`
+  — checks release-please can still find and bump the version in `apm.yml`.
 - `bash scripts/generate-index.sh` — regenerates `INDEX.md` / `README.md` from
   `.apm/` and re-stages them, so the index never drifts from the primitives.
 

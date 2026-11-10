@@ -202,8 +202,13 @@ carries the matching version — so **pinned installs (`@1.2.3`) resolve to a tr
 whose `apm.yml` says `1.2.3`**. (This replaces the earlier post-release sync
 workflow, which bumped `apm.yml` _after_ tagging and left the tag tree stale.)
 
-> The `# x-release-please-version` annotation on the `version:` line in `apm.yml`
-> is what the generic updater keys off — keep it intact.
+> `apm.yml` uses release-please's `yaml` updater (`"jsonpath": "$.version"`), not
+> the comment-driven `generic` updater: the APM CLI re-serializes `apm.yml` and
+> drops YAML comments, which silently broke the old `# x-release-please-version`
+> annotation. The `yaml` updater re-serializes the file too (comments and
+> line-folding change), which is fine because `apm.yml` is tool-formatted and
+> excluded from yamlfmt/yamllint. `tests/test_release_please_config.py` fails if
+> release-please can no longer find the version or it drifts from the manifest.
 
 To force a specific version, add a `Release-As: X.Y.Z` footer to any commit on
 `main`. See the org
