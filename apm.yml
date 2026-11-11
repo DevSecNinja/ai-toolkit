@@ -1,31 +1,45 @@
 name: ai-toolkit
-version: 0.8.0
-description: A curated, multi-harness toolkit of AI primitives (prompts, instructions,
+version: 0.9.0
+description: >-
+  A curated, multi-harness toolkit of AI primitives (prompts, instructions,
   agents and hooks) installable via APM.
 author: DevSecNinja
 dependencies:
   apm:
-  - github/awesome-copilot/agents/devops-expert.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
-  - github/awesome-copilot/agents/github-actions-expert.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
-  - github/awesome-copilot/agents/sast-sca-security-analyzer.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
-  - github/awesome-copilot/agents/se-security-reviewer.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
-  - github/awesome-copilot/agents/project-architecture-planner.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
-  - github/awesome-copilot/agents/adr-generator.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
-  - github/awesome-copilot/agents/software-engineer-agent-v1.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
-  - github/awesome-copilot/agents/task-planner.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
-  - github/awesome-copilot/agents/prompt-builder.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
-  - github/awesome-copilot/agents/se-technical-writer.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
-  - github/awesome-copilot/agents/accessibility.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
-  - github/awesome-copilot/agents/se-ux-ui-designer.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
-  - github/awesome-copilot/agents/linkedin-post-writer.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
-  - DevSecNinja/ai-toolkit#v0.8.0
+    - >-
+      github/awesome-copilot/agents/devops-expert.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
+    - >-
+      github/awesome-copilot/agents/github-actions-expert.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
+    - >-
+      github/awesome-copilot/agents/sast-sca-security-analyzer.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
+    - >-
+      github/awesome-copilot/agents/se-security-reviewer.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
+    - >-
+      github/awesome-copilot/agents/project-architecture-planner.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
+    - >-
+      github/awesome-copilot/agents/adr-generator.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
+    - >-
+      github/awesome-copilot/agents/software-engineer-agent-v1.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
+    - >-
+      github/awesome-copilot/agents/task-planner.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
+    - >-
+      github/awesome-copilot/agents/prompt-builder.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
+    - >-
+      github/awesome-copilot/agents/se-technical-writer.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
+    - >-
+      github/awesome-copilot/agents/accessibility.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
+    - >-
+      github/awesome-copilot/agents/se-ux-ui-designer.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
+    - >-
+      github/awesome-copilot/agents/linkedin-post-writer.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
+    - DevSecNinja/ai-toolkit#v0.8.0
   mcp:
-  - io.github.github/github-mcp-server
-  - name: microsoft-learn
-    registry: false
-    transport: http
-    url: https://learn.microsoft.com/api/mcp
+    - io.github.github/github-mcp-server
+    - name: microsoft-learn
+      registry: false
+      transport: http
+      url: https://learn.microsoft.com/api/mcp
 targets:
-- copilot
+  - copilot
 includes: auto
 scripts: {}
