@@ -1,0 +1,50 @@
+---
+name: Hook Scripts
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.apm/hooks/**'
+      - 'scripts/git-push-approval/**'
+      - 'scripts/tool-guardian/**'
+      - 'tests/test_hook_scripts.py'
+      - 'tests/build-bash32.sh'
+      - '.github/workflows/hook-scripts.yml'
+  pull_request:
+    paths:
+      - '.apm/hooks/**'
+      - 'scripts/git-push-approval/**'
+      - 'scripts/tool-guardian/**'
+      - 'tests/test_hook_scripts.py'
+      - 'tests/build-bash32.sh'
+      - '.github/workflows/hook-scripts.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Test Hook Scripts
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Test hooks with the runner's Bash
+        run: PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -p 'test_hook_scripts.py' -v
+
+      # Stock macOS runs `#!/bin/bash` hooks under Bash 3.2 (#217).
+      - name: Build Bash 3.2
+        run: |
+          hook_bash="$(bash tests/build-bash32.sh "${RUNNER_TEMP}/bash32")"
+          echo "HOOK_BASH=${hook_bash}" >> "${GITHUB_ENV}"
+
+      - name: Test hooks with Bash 3.2
+        env:
+          EXPECT_BASH_VERSION: "3.2"
+        run: PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -p 'test_hook_scripts.py' -v
