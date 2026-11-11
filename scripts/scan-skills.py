@@ -182,6 +182,7 @@ def analyzer_gaps(statuses: object) -> tuple[list[str], list[str]]:
     if not isinstance(statuses, list):
         return [], ["SkillSpector did not report analyzer statuses."]
     gaps, errors = [], []
+    ran = False
     for status in statuses:
         if not isinstance(status, dict) or not isinstance(status.get("analyzer_id"), str):
             errors.append("Invalid analyzer status entry.")
@@ -190,10 +191,13 @@ def analyzer_gaps(statuses: object) -> tuple[list[str], list[str]]:
         lost = [key for key in ("failed", "skipped", "unaccounted") if status.get(key, 0) != 0]
         # --no-llm disables only the semantic and meta analyzers.
         llm = name.startswith("semantic_") or name == "meta_analyzer"
+        ran = ran or (not llm and state in ("completed", "degraded"))
         if lost or not (state in ("completed", "not_applicable", "degraded") or (state == "disabled" and llm)):
             errors.append(f"Analyzer {name} did not run to completion ({state}); inspect the JSON report.")
         elif state == "degraded":
             gaps.append(name)
+    if not ran:
+        errors.append("No static analyzer reported running; inspect the JSON report.")
     return gaps, errors
 
 
