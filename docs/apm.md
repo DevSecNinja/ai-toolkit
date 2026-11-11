@@ -210,6 +210,14 @@ workflow, which bumped `apm.yml` _after_ tagging and left the tag tree stale.)
 > excluded from yamlfmt/yamllint. `tests/test_release_please_config.py` fails if
 > release-please can no longer find the version or it drifts from the manifest.
 
+> **Never add `DevSecNinja/ai-toolkit` to its own `apm.yml`** (for example by
+> running the consumer `apm install DevSecNinja/ai-toolkit#vX.Y.Z` here). A
+> consumer pinning a newer tag would then also need the older ref of the same
+> package, and APM fails with "incompatible immutable requirements" (#207). This
+> repo already dogfoods its own primitives through `includes: auto`.
+> `tests/test_apm_manifest.py` fails on a self-entry, and the **Check Consumer
+> Install** CI job installs each commit into a throwaway consumer project.
+
 To force a specific version, add a `Release-As: X.Y.Z` footer to any commit on
 `main`. See the org
 [release-please onboarding guide](https://github.com/DevSecNinja/.github/blob/main/docs/release-please-onboarding.md)
