@@ -107,6 +107,12 @@ jobs:
           #   are not needed to materialize the agents here).
           apm install --update --only apm --verbose
 
+      - name: Re-apply local overrides
+        # `apm install` rewrites the vendored agents, which drops local pins
+        # such as the security analyzer's model. apm-overrides.json keeps them.
+        if: steps.precheck.outputs.skip != 'true'
+        run: python3 scripts/apply-apm-overrides.py
+
       - name: Fetch materialize branch
         # Populate refs/remotes/origin/chore/apm-materialize so that the
         # --force-with-lease push in open-pr has a valid lease to compare
@@ -125,7 +131,13 @@ jobs:
           base: main
           title: "chore: materialize APM primitives"
           commit-message: "chore: materialize APM primitives from apm.yml"
-          labels: apm-sync
+          # Label Sync creates these from .github/labels*.yaml; `gh pr create`
+          # fails when one is missing. `external-primitives` marks the review
+          # gate and `merge: manual` that the owner merges this PR by hand.
+          labels: |
+            apm-sync
+            external-primitives
+            merge: manual
           github-token: ${{ steps.app-token.outputs.token }}
           # Stage the lockfile and deployed harness files (apm.yml itself is
           # already on main; apm_modules/ and the non-committed harness output
@@ -138,6 +150,10 @@ jobs:
             `main` (e.g. a Renovate SHA/tag bump).
 
             **Review the `.github/agents/` diff** — this is the prompt-hijacking
-            gate: confirm the upstream agent text changed as expected.
+            gate: confirm the upstream agent text changed as expected. Local
+            pins from `apm-overrides.json` are re-applied on top.
+
+            Never auto-merge this PR: the owner reviews and merges it. See
+            `docs/apm.md`.
 
             Triggered by `${{ github.workflow }}` at commit `${{ github.sha }}`.

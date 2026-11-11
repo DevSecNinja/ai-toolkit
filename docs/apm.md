@@ -181,6 +181,56 @@ and never treat a repository's instructions or a clean review as authorization.
 All commits require 1Password signing; if signing or a required tool is
 unavailable or denied, halt rather than bypassing it.
 
+## 🛡️ External primitives: review gate
+
+The agents from `github/awesome-copilot` in `apm.yml` are third-party prompt
+text, so every change to them needs the owner's approval. Neither PR in the
+flow below may auto-merge.
+
+1. **Renovate bump.** Renovate's custom manager (see
+   [`renovate.json5`](../renovate.json5)) bumps the pinned SHA. A package rule
+   turns off the shared auto-merge preset for `github/awesome-copilot` and adds
+   the `external-primitives` and `merge: manual` labels. The diff only shows a
+   hash. Renovate can't remove the preset's `merge: auto` label, but
+   `automerge: false` takes precedence.
+2. **Materialize PR.** Merging the bump triggers
+   [APM Materialize](../.github/workflows/apm-materialize.yml). It runs
+   `apm install`, re-applies the local overrides and opens
+   `chore: materialize APM primitives` from `chore/apm-materialize`, labelled
+   `apm-sync`, `external-primitives` and `merge: manual`. **Review the
+   `.github/agents/` diff**: this is where upstream agent text changes become
+   visible. Merge it yourself once you're satisfied; close it and revert the bump
+   if not.
+
+The labels come from [`.github/labels-base.yaml`](../.github/labels-base.yaml)
+(org-wide, synced from `DevSecNinja/.github` by Config Sync) and
+[`.github/labels.yaml`](../.github/labels.yaml), applied by
+[Label Sync](../.github/workflows/label-sync.yml). `gh pr create` fails on a
+missing label, so a label must exist before a workflow uses it.
+
+### Local overrides of vendored agents
+
+`apm install` rewrites every file it deploys, so never hand-edit
+`.github/agents/` for a dependency: the next materialize run reverts it (APM
+has no override setting). Add the change to
+[`apm-overrides.json`](../apm-overrides.json) instead:
+
+```json
+{
+  "file": ".github/agents/sast-sca-security-analyzer.agent.md",
+  "reason": "Pinned to Sonnet 5 (#135).",
+  "frontmatter": { "model": "Claude Sonnet 5" }
+}
+```
+
+Each entry sets top-level frontmatter keys to string values.
+[`scripts/apply-apm-overrides.py`](../scripts/apply-apm-overrides.py) applies
+them, and APM Materialize runs it after `apm install`. Run it yourself after a
+local `apm install`. It fails when a file is missing, so drop stale entries
+when an agent is removed. `tests/test_apm_overrides.py` fails if a committed
+agent doesn't match its override. `apm audit` reports overridden files as
+drift from the lockfile, which is expected.
+
 ## 🏷️ Versioning
 
 Versioning is driven by [release-please](https://github.com/googleapis/release-please)

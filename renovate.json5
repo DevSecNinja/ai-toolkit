@@ -32,4 +32,18 @@
       currentValueTemplate: "main",
     },
   ],
+  packageRules: [
+    {
+      // The shared autoMerge preset merges digest bumps unattended, but this
+      // bump PR only shows a SHA. The agent text it pulls in surfaces in the
+      // follow-up APM Materialize PR, so the owner reviews and merges both.
+      // Renovate adds labels from every matching rule and can't remove one,
+      // so the preset's `merge: auto` label stays; `automerge: false` wins.
+      description: "Never auto-merge github/awesome-copilot bumps: third-party agent text needs owner review",
+      matchDepNames: ["github/awesome-copilot"],
+      automerge: false,
+      commitMessageSuffix: "",
+      addLabels: ["external-primitives", "merge: manual"],
+    },
+  ],
 }
