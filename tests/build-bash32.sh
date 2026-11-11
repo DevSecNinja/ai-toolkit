@@ -10,6 +10,11 @@ set -euo pipefail
 VERSION="3.2.57"
 SHA256="3fa9daf85ebf35068f090ce51283ddeeb3c75eb5bc70b1a4a7cb05868bfe06a4"
 DEST="${1:-${HOME}/.cache/bash-${VERSION}}"
+# Anchor a relative DEST to the caller's directory; the build `cd`s away below.
+case "${DEST}" in
+/*) ;;
+*) DEST="${PWD}/${DEST}" ;;
+esac
 
 if [[ -x "${DEST}/bash" ]]; then
     printf '%s\n' "${DEST}/bash"
