@@ -10,6 +10,7 @@ import argparse
 import json
 import os
 from pathlib import Path
+import re
 import subprocess
 import sys
 from urllib.parse import quote, urlsplit
@@ -23,13 +24,16 @@ LEVELS = {"LOW": "note", "MEDIUM": "warning", "HIGH": "error", "CRITICAL": "erro
 VERDICTS = {0: "✅ Passed", 1: "❌ Blocked: HIGH/CRITICAL findings", 2: "⚠️ Failed: scan errors"}
 
 
-ESCAPES = {ord(character): f"&#{ord(character)};" for character in "\\`*_{}[]()!|@#<>&\"'"}
+ESCAPES = {ord(character): f"&#{ord(character)};" for character in "\\`*_{}[]()!|<>&\"'"}
+# GitHub links @mentions, #refs and bare URLs even after entity decoding; a zero-width space breaks them.
+AUTOLINKS = re.compile(r"[@#]|:(?=//)|(?i:www)(?=\.)")
 
 
 def cell(value: str, limit: int = 300) -> str:
     """Escape untrusted text for one Markdown table cell, in a single pass."""
     value = value if len(value) <= limit else value[:limit] + "..."
-    return value.replace("\r", " ").replace("\n", " ").translate(ESCAPES)
+    value = AUTOLINKS.sub(lambda match: match.group(0) + "\u200b", value.replace("\r", " ").replace("\n", " "))
+    return value.translate(ESCAPES)
 
 
 def github_url(*parts: str) -> str | None:
@@ -43,7 +47,7 @@ def github_url(*parts: str) -> str | None:
 
 def source_link(path: str, line: int | None = None) -> str:
     label = cell(path + (f":{line}" if line else ""), 200)
-    revision = os.environ.get("SKILLSPECTOR_REVISION") or os.environ.get("GITHUB_SHA")
+    revision = os.environ.get("GITHUB_SHA")
     url = github_url("blob", quote(revision or "", safe=""), quote(path, safe="/")) if revision else None
     if not url:
         return label
@@ -90,7 +94,7 @@ def finding_table(items: list[dict], limit: int) -> list[str]:
 def render(summary: dict, limit: int, pr: int | None = None) -> str:
     code = summary["exit_code"]
     version = summary.get("skillspector_version") or "unknown"
-    revision = (os.environ.get("SKILLSPECTOR_REVISION") or os.environ.get("GITHUB_SHA") or "")[:7]
+    revision = (os.environ.get("GITHUB_SHA") or "")[:7]
     lines = [
         MARKER,
         f"## SkillSpector report: {VERDICTS.get(code, VERDICTS[2])}",
@@ -143,16 +147,22 @@ def build_sarif(summary: dict) -> dict:
     rules = {}
     results = []
     for item in findings(summary):
-        # Upstream rules can emit different severities; keep GitHub severity bands stable.
-        rule_id = f"{item['rule']}/{item['severity'].lower()}"
+        # GitHub ignores SARIF suppressions, so accepted findings use a separate, non-security
+        # "note" rule; otherwise Code Scanning's severity threshold would re-block them.
+        accepted = bool(item["accepted"])
+        rule_id = f"{item['rule']}/{'accepted' if accepted else item['severity'].lower()}"
+        level = "note" if accepted else LEVELS[item["severity"]]
         rules[rule_id] = {
             "id": rule_id,
-            "shortDescription": {"text": f"{item['rule']}: {item['severity']} static finding"},
+            "shortDescription": {"text": f"{item['rule']}: {'accepted' if accepted else item['severity']} static finding"},
             "helpUri": "https://github.com/NVIDIA/SkillSpector#vulnerability-patterns",
-            "defaultConfiguration": {"level": LEVELS[item["severity"]]},
-            "properties": {"tags": ["security"], "security-severity": SECURITY_SCORES[item["severity"]]},
+            "defaultConfiguration": {"level": level},
+            "properties": {"tags": ["accepted"]} if accepted else {
+                "tags": ["security"], "security-severity": SECURITY_SCORES[item["severity"]],
+            },
         }
         message = "\n\n".join(text for text in (
+            f"Accepted {item['severity']} finding: {item['accepted']}" if accepted else "",
             item["title"], item["explanation"],
             f"Evidence: {item['evidence']}" if item["evidence"] else "",
             f"Remediation: {item['remediation']}" if item["remediation"] else "",
@@ -162,13 +172,13 @@ def build_sarif(summary: dict) -> dict:
             region["endLine"] = item["end_line"]
         result = {
             "ruleId": rule_id,
-            "level": LEVELS[item["severity"]],
+            "level": level,
             "message": {"text": message or item["rule"]},
             "locations": [{"physicalLocation": {
                 "artifactLocation": {"uri": quote(item["path"], safe="/")}, "region": region,
             }}],
         }
-        if item["accepted"]:
+        if accepted:
             result["suppressions"] = [{"kind": "external", "status": "accepted", "justification": item["accepted"]}]
         results.append(result)
     notifications = [

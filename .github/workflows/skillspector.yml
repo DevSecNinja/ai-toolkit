@@ -74,8 +74,6 @@ jobs:
       - name: Render summary and SARIF
         id: report
         if: ${{ !cancelled() && steps.scan.outcome != 'skipped' }}
-        env:
-          SKILLSPECTOR_REVISION: ${{ github.event.pull_request.head.sha || github.sha }}
         run: >-
           python3 scripts/skillspector-report.py "$RUNNER_TEMP/skillspector-reports/repository/summary.json"
           --markdown "$GITHUB_STEP_SUMMARY" --sarif "$RUNNER_TEMP/skillspector-reports/repository/findings.sarif"
@@ -131,7 +129,6 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
-          SKILLSPECTOR_REVISION: ${{ github.event.pull_request.head.sha }}
         run: >-
           python3 scripts/skillspector-report.py "$RUNNER_TEMP/skillspector-reports/repository/summary.json"
           --comment-pr "$PR_NUMBER"

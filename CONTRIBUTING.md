@@ -173,7 +173,9 @@ static scan is not a safety guarantee: OSV lookups use the offline fallback.
 - The **Actions run summary** lists up to 100 findings and every analysis
   limitation.
 - **Security > Code scanning** (tool: SkillSpector) holds every finding as
-  SARIF. Accepted findings carry a SARIF `suppressions` justification.
+  SARIF. GitHub ignores SARIF suppressions, so accepted findings are uploaded
+  as `<rule>/accepted` notes without a security severity. They stay visible but
+  can't trip Code Scanning's own severity threshold.
 - The `skillspector-reports` artifact keeps raw JSON, scanner logs, `summary.json`
   and `findings.sarif` for 14 days. Reports can quote source text.
 
@@ -191,7 +193,10 @@ them when the content changes. Never accept a finding just to get a green check.
 check rule for the default branch requiring **Scan AI primitives** (source:
 GitHub Actions). Because the job always reports, PRs that don't touch AI
 primitives aren't left waiting. Don't require **Post SkillSpector report**: it
-is skipped for fork PRs and unrelated changes.
+is skipped for fork PRs and unrelated changes. First, stop the
+[Generate Index workflow](.github/workflows/generate-index.yml) from pushing
+`[skip ci]` commits to PR branches with `GITHUB_TOKEN`. Those commits don't
+trigger CI, so a required check would stay pending on the new head.
 
 **Upgrading SkillSpector.** The workflow builds the upstream Dockerfile from a
 commit SHA with a `# renovate: datasource=github-tags depName=NVIDIA/SkillSpector`

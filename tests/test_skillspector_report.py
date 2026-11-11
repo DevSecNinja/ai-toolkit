@@ -17,7 +17,7 @@ SPEC.loader.exec_module(report)
 
 ENV = {
     "GITHUB_SERVER_URL": "https://github.com", "GITHUB_REPOSITORY": "owner/repo",
-    "SKILLSPECTOR_REVISION": "abc1234def", "GITHUB_SHA": "merge", "GITHUB_RUN_ID": "42",
+    "GITHUB_SHA": "abc1234def", "GITHUB_RUN_ID": "42",
 }
 
 
@@ -67,9 +67,9 @@ class RenderTests(unittest.TestCase):
         self.assertIn("https://github.com/owner/repo/actions/runs/42", body)
 
     def test_untrusted_text_cannot_inject_markup_mentions_or_links(self):
-        data = summary(finding("HIGH", title="<script>x</script> | ![t](u) @owner #99 it's\nnext"), exit_code=1)
-        body = report.render(data, limit=10)
-        for unsafe in ("<script>", "![t]", "@owner", "#99", "\nnext", "&&"):
+        title = "<script>x</script> | ![t](u) @owner #99 it's https://evil.example WWW.evil.example\nnext"
+        body = report.render(summary(finding("HIGH", title=title), exit_code=1), limit=10)
+        for unsafe in ("<script>", "![t]", "@owner", "#99", "https://evil", "WWW.evil", "\nnext", "&&"):
             self.assertNotIn(unsafe, body)
         self.assertIn("&#60;script&#62;", body)
         self.assertIn("it&#39;s", body)
@@ -98,15 +98,21 @@ class RenderTests(unittest.TestCase):
 
 
 class SarifTests(unittest.TestCase):
-    def test_sarif_has_stable_rules_encoded_uris_and_suppressions(self):
+    def test_sarif_has_stable_rules_encoded_uris_and_accepted_notes(self):
         data = summary(finding("HIGH", accepted="Reviewed."), finding("MEDIUM", path=".apm/a #b.md"),
                        exit_code=0)
         sarif = report.build_sarif(data)
         self.assertEqual(sarif, report.build_sarif(json.loads(json.dumps(data))))
         run = sarif["runs"][0]
         self.assertEqual(run["tool"]["driver"]["version"], "2.13.4")
-        self.assertEqual([rule["id"] for rule in run["tool"]["driver"]["rules"]], ["R1/high", "R1/medium"])
+        rules = {rule["id"]: rule for rule in run["tool"]["driver"]["rules"]}
+        self.assertEqual(sorted(rules), ["R1/accepted", "R1/medium"])
+        # Accepted findings must not trip Code Scanning's security-severity threshold.
+        self.assertNotIn("security-severity", rules["R1/accepted"]["properties"])
+        self.assertEqual(rules["R1/medium"]["properties"]["security-severity"], "5.0")
         high, medium = run["results"]
+        self.assertEqual((high["ruleId"], high["level"]), ("R1/accepted", "note"))
+        self.assertIn("Accepted HIGH finding: Reviewed.", high["message"]["text"])
         self.assertEqual(high["suppressions"][0]["justification"], "Reviewed.")
         self.assertNotIn("suppressions", medium)
         self.assertEqual(medium["locations"][0]["physicalLocation"]["artifactLocation"]["uri"], ".apm/a%20%23b.md")
