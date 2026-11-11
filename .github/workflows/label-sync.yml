@@ -1,0 +1,31 @@
+---
+name: Label Sync
+
+# Creates and updates this repo's labels from the org-wide base set
+# (.github/labels-base.yaml, delivered by config-sync from DevSecNinja/.github)
+# plus the repo-specific .github/labels.yaml. Automation depends on these
+# labels: `gh pr create --label` fails when a label is missing, which is what
+# kept APM Materialize from opening its review PR (#210).
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/labels.yaml
+      - .github/labels-base.yaml
+  # Weekly drift correction for labels edited in the UI; changes to the label
+  # files themselves are applied by the push trigger above.
+  schedule:
+    - cron: "0 0 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  label-sync:
+    uses: DevSecNinja/.github/.github/workflows/label-sync.yml@8ef60d65001c56a496d12f6ae0a7091c05db2e06 # v3.5.0
+    permissions:
+      contents: read
+      issues: write

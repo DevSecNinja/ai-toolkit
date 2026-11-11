@@ -154,6 +154,9 @@ helper, run `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -p
 3. **`description` and `category` are required** in every primitive's frontmatter.
 4. **Bash scripts are executable** — run as `bash script-name.sh`.
 5. **No background processes** — all commands complete immediately.
+6. **Never hand-edit vendored agents** in `.github/agents/` that come from
+   `apm.yml` dependencies; `apm install` reverts them. Put local pins in
+   `apm-overrides.json` (see the review gate section of `docs/apm.md`).
 
 ## Coding Style Preferences
 

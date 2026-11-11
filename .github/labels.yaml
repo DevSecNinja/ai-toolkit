@@ -1,0 +1,41 @@
+---
+# Labels specific to ai-toolkit. Label Sync merges this file with the org-wide
+# .github/labels-base.yaml (synced from DevSecNinja/.github by config-sync) and
+# deletes any label in neither file.
+
+# Review gate for third-party agent text (see docs/apm.md). Set on Renovate's
+# github/awesome-copilot bumps and on the APM Materialize PR; neither may
+# auto-merge.
+- name: external-primitives
+  color: "b60205"
+  description: Changes third-party AI primitives; owner review required
+
+# Renovate labels vulnerability-fix PRs `security` (shared base.json5).
+- name: security
+  color: "ee0701"
+  description: Security fix
+
+# GitHub's default labels, kept so the sync doesn't delete them.
+- name: dependencies
+  color: "ededed"
+- name: documentation
+  color: "0075ca"
+  description: Improvements or additions to documentation
+- name: duplicate
+  color: "cfd3d7"
+  description: This issue or pull request already exists
+- name: good first issue
+  color: "7057ff"
+  description: Good for newcomers
+- name: help wanted
+  color: "008672"
+  description: Extra attention is needed
+- name: invalid
+  color: "e4e669"
+  description: This doesn't seem right
+- name: question
+  color: "d876e3"
+  description: Further information is requested
+- name: wontfix
+  color: "ffffff"
+  description: This will not be worked on

@@ -1,0 +1,12 @@
+{
+  "$comment": "Local changes to vendored APM primitives. `apm install` rewrites files it deploys, so APM Materialize re-applies these afterwards with scripts/apply-apm-overrides.py. See docs/apm.md.",
+  "overrides": [
+    {
+      "file": ".github/agents/sast-sca-security-analyzer.agent.md",
+      "reason": "Pinned to Sonnet 5 (#135).",
+      "frontmatter": {
+        "model": "Claude Sonnet 5"
+      }
+    }
+  ]
+}

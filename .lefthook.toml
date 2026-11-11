@@ -21,6 +21,10 @@ run = "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -p 'test_
 [pre-commit.commands.apm-manifest]
 run = "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -p 'test_apm_manifest.py'"
 
+# Vendored agents must keep their apm-overrides.json pins (see #210).
+[pre-commit.commands.apm-overrides]
+run = "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -p 'test_apm_overrides.py'"
+
 # Regenerate INDEX.md / README index from .apm/ and re-stage the result, so the
 # generated index never drifts from the primitives (the common contributor miss).
 [pre-commit.commands.generate-index]

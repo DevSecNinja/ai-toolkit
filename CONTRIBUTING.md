@@ -117,6 +117,8 @@ What runs on **pre-commit**:
   — checks release-please can still find and bump the version in `apm.yml`.
 - `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -p 'test_apm_manifest.py'`
   — checks `apm.yml` doesn't list `ai-toolkit` as its own dependency.
+- `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -p 'test_apm_overrides.py'`
+  — checks vendored agents keep their `apm-overrides.json` pins.
 - `bash scripts/generate-index.sh` — regenerates `INDEX.md` / `README.md` from
   `.apm/` and re-stages them, so the index never drifts from the primitives.
 
@@ -125,6 +127,16 @@ Within the authorized execution scope, run the suite on demand with
 signing or tool denials. If hooks or filters would execute unauthorized code,
 stop before committing and request scoped approval. All commits must use
 1Password signing; halt if it is unavailable.
+
+## 🛡️ Changes to external agents
+
+The `github/awesome-copilot` agents in `apm.yml` are reviewed by the owner and
+never auto-merge. A Renovate SHA bump and the follow-up
+`chore: materialize APM primitives` PR both carry the `external-primitives`
+label; review the `.github/agents/` diff in the materialize PR before merging.
+Don't hand-edit a vendored agent: put local changes such as a model pin in
+`apm-overrides.json`. See "External primitives: review gate" in
+[the APM guide](docs/apm.md).
 
 ## 🚀 Submission Process
 
