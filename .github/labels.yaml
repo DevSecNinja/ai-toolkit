@@ -3,8 +3,8 @@
 # .github/labels-base.yaml (synced from DevSecNinja/.github by config-sync) and
 # deletes any label in neither file.
 
-# Review gate for third-party agent text (see docs/apm.md). Set on Renovate's
-# github/awesome-copilot bumps and on the APM Materialize PR; neither may
+# Review gate for third-party agent and skill text (see docs/apm.md). Set on
+# Renovate's apm.yml bumps and on the APM Materialize PR; neither may
 # auto-merge.
 - name: external-primitives
   color: "b60205"

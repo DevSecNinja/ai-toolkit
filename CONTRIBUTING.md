@@ -130,15 +130,16 @@ signing or tool denials. If hooks or filters would execute unauthorized code,
 stop before committing and request scoped approval. All commits must use
 1Password signing; halt if it is unavailable.
 
-## 🛡️ Changes to external agents
+## 🛡️ Changes to external primitives
 
-The `github/awesome-copilot` agents in `apm.yml` are reviewed by the owner and
-never auto-merge. A Renovate SHA bump and the follow-up
+The external agents and skills in `apm.yml` (`github/awesome-copilot`,
+`cloudflare/security-audit-skill`) are reviewed by the owner and never
+auto-merge. A Renovate SHA bump and the follow-up
 `chore: materialize APM primitives` PR both carry the `external-primitives`
-label; review the `.github/agents/` diff in the materialize PR before merging.
-Don't hand-edit a vendored agent: put local changes such as a model pin in
-`apm-overrides.json`. See "External primitives: review gate" in
-[the APM guide](docs/apm.md).
+label; review the `.github/agents/` and `.agents/skills/` diff in the
+materialize PR before merging. Don't hand-edit a vendored primitive: put local
+changes such as a model pin in `apm-overrides.json`. See "External primitives:
+review gate" in [the APM guide](docs/apm.md).
 
 ## 🛡️ SkillSpector security scans
 
