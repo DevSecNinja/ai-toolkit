@@ -137,6 +137,17 @@ class ScanTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             scanner.scan_command(target, self.output, "test-scanner")
 
+    def test_root_cannot_run_the_scanner_container(self):
+        with patch.object(os, "getuid", return_value=0, create=True), self.assertRaisesRegex(ValueError, "root"):
+            scanner.scan_command(self.skill, self.output, "test-scanner")
+
+    def test_stalled_docker_client_is_an_error(self):
+        stalled = subprocess.TimeoutExpired("docker", scanner.CLIENT_TIMEOUT)
+        with patch.object(scanner.subprocess, "run", side_effect=stalled) as run:
+            self.assertEqual(scanner.run_scans(self.root, self.output, "test-scanner"), 2)
+        self.assertEqual(run.call_args.kwargs["timeout"], scanner.CLIENT_TIMEOUT)
+        self.assertIn("did not finish", self.summary()["errors"][0]["error"])
+
     def test_symlinks_are_rejected_before_any_scan(self):
         self.write(".apm/skills/example/references/context.md")
         original = Path.is_symlink
@@ -202,6 +213,7 @@ class ScanTests(unittest.TestCase):
             {**report(), "components": []},
             {**report(), "components": [None]},
             {**report(), "components": [{"path": "../outside.md"}]},
+            {**report(), "components": [{"path": "never-inspected.md"}]},
             {**report(), "issues": None},
             {**report(), "issues": [{"severity": "UNKNOWN"}]},
             {**report(), "execution_successful": False},
@@ -290,20 +302,29 @@ class ScanTests(unittest.TestCase):
                 self.assertEqual(self.summary()["scans"][0]["status"], "BLOCK")
                 self.assertIn("Stale findings entry", self.summary()["errors"][0]["error"])
 
-    def test_rule_level_acceptance_without_evidence_covers_the_file(self):
-        self.accept([{"path": SKILL, "rule": "R1", "severity": "HIGH", "reason": "Deny-list."}])
+    def test_each_entry_accepts_exactly_one_occurrence(self):
+        entry = {"path": SKILL, "rule": "R1", "severity": "HIGH", "evidence": "Synthetic evidence",
+                 "reason": "Deny-list."}
+        self.accept([entry])
+        self.assertEqual(self.run_with(report("HIGH", "HIGH")), 1)
+        self.output = Path(self.temporary.name) / "two-entries"
+        self.accept([entry, entry])
         self.assertEqual(self.run_with(report("HIGH", "HIGH")), 0)
 
     def test_accepted_limitations_allow_incomplete_scans(self):
-        self.accept(limitations=[{"path": SKILL, "reason_code": "static_parse_limit", "reason": "Reviewed."}])
+        self.accept(limitations=[{"path": SKILL, "reason_code": "static_parse_limit",
+                                  "analyzers": ["tool_misuse"], "reason": "Reviewed."}])
         incomplete = {"complete": False, "degraded": ["tool_misuse"]}
         self.assertEqual(self.run_with(report(ledger=[PARSE_LIMIT], **incomplete), code=1), 0)
         other = {**PARSE_LIMIT, "reason_code": "reference_missing"}
+        widened = {**PARSE_LIMIT, "analyzers": ["tool_misuse", "taint"]}
         for name, payload in (
             ("other", report(ledger=[PARSE_LIMIT, other], **incomplete)),
             ("no-ledger", report(complete=False)),
             # The accepted limitation names tool_misuse, so it cannot waive an unrelated analyzer.
             ("unrelated", report(ledger=[PARSE_LIMIT], complete=False, degraded=["tool_misuse", "taint"])),
+            # A reviewed limitation that now degrades another analyzer needs a new review.
+            ("widened", report(ledger=[widened], complete=False, degraded=["tool_misuse", "taint"])),
         ):
             with self.subTest(name):
                 self.output = Path(self.temporary.name) / name
@@ -313,18 +334,21 @@ class ScanTests(unittest.TestCase):
         self.assertEqual(scanner.printable("x\n::warning::y\r\x1b"), "x\\n::warning::y\\r\\x1b")
 
     def test_stale_acceptance_is_an_error(self):
-        self.accept([{"path": SKILL, "rule": "R9", "severity": "HIGH", "reason": "Old."}])
+        self.accept([{"path": SKILL, "rule": "R9", "severity": "HIGH", "evidence": "x", "reason": "Old."}])
         self.assertEqual(self.run_with(report()), 2)
         self.assertEqual(self.summary()["errors"][0]["target"], scanner.ACCEPTED_FILE)
 
     def test_invalid_acceptance_files_are_rejected(self):
-        base = {"path": SKILL, "rule": "R1", "severity": "HIGH", "reason": "Reviewed."}
+        base = {"path": SKILL, "rule": "R1", "severity": "HIGH", "evidence": "e", "reason": "Reviewed."}
+        limitation = {"path": SKILL, "reason_code": "static_parse_limit", "reason": "Reviewed."}
         for index, content in enumerate((
             "[]", '{"other": []}', '{"findings": {}}',
             json.dumps({"findings": [{**base, "reason": " "}]}),
             json.dumps({"findings": [{**base, "severity": "MEDIUM"}]}),
             json.dumps({"findings": [{**base, "line": "1"}]}),
+            json.dumps({"findings": [{key: value for key, value in base.items() if key != "evidence"}]}),
             json.dumps({"limitations": [{"path": SKILL, "reason": "No code."}]}),
+            json.dumps({"limitations": [{**limitation, "analyzers": "tool_misuse"}]}),
         )):
             with self.subTest(content=content):
                 self.write(scanner.ACCEPTED_FILE, content)

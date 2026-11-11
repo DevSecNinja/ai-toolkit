@@ -18,6 +18,7 @@ import sys
 SEVERITIES = ("LOW", "MEDIUM", "HIGH", "CRITICAL")
 BLOCKING = ("HIGH", "CRITICAL")
 SCAN_TIMEOUT = "180s"
+CLIENT_TIMEOUT = 300
 ACCEPTED_FILE = ".github/skillspector-accepted.json"
 # Directories whose children are scanned one by one, then whole extra roots.
 CONTENT_ROOTS = (".apm", ".agents")
@@ -230,7 +231,7 @@ def read_report(path: Path, root: Path, target: Path) -> dict:
             try:
                 if not isinstance(component, dict):
                     raise ValueError("Expected a component object.")
-                repository_path(root, target, component.get("path"), require_file=False)
+                repository_path(root, target, component.get("path"))
             except ValueError as error:
                 errors.append(f"Invalid inspected component: {error}")
     completeness = report.get("analysis_completeness")
@@ -277,8 +278,8 @@ def load_accepted(path: Path) -> dict:
         return {"findings": [], "limitations": []}
     data = json.loads(path.read_text(encoding="utf-8"))
     schema = {
-        "findings": ({"path", "rule", "severity", "reason"}, {"evidence"}),
-        "limitations": ({"path", "reason_code", "reason"}, set()),
+        "findings": ({"path", "rule", "severity", "evidence", "reason"}, set()),
+        "limitations": ({"path", "reason_code", "reason"}, {"analyzers"}),
     }
     if not isinstance(data, dict) or not set(data) <= set(schema):
         raise ValueError(f"{path.name} must be an object with 'findings' and 'limitations' lists.")
@@ -289,9 +290,12 @@ def load_accepted(path: Path) -> dict:
             raise ValueError(f"{path.name}: '{kind}' must be a list.")
         for entry in entries:
             if not isinstance(entry, dict) or not required <= set(entry) <= required | optional or not all(
-                isinstance(value, str) and value.strip() for value in entry.values()
+                isinstance(entry[key], str) and entry[key].strip() for key in required
             ):
                 raise ValueError(f"{path.name}: each '{kind}' entry needs non-empty {sorted(required)}.")
+            analyzers = entry.get("analyzers", [])
+            if not isinstance(analyzers, list) or not all(isinstance(item, str) and item for item in analyzers):
+                raise ValueError(f"{path.name}: 'analyzers' must be a list of analyzer IDs.")
             if kind == "findings" and entry["severity"] not in BLOCKING:
                 raise ValueError(f"{path.name}: only HIGH or CRITICAL findings need acceptance.")
         accepted[kind] = entries
@@ -299,32 +303,38 @@ def load_accepted(path: Path) -> dict:
 
 
 def finding_matches(entry: dict, finding: dict) -> bool:
-    keys = ("path", "rule", "severity")
-    return all(entry[key] == finding[key] for key in keys) and (
-        "evidence" not in entry or entry["evidence"] == finding["evidence"]
-    )
+    return all(entry[key] == finding[key] for key in ("path", "rule", "severity", "evidence"))
+
+
+def limitation_matches(entry: dict, diagnostic: dict) -> bool:
+    # The analyzer set is part of the reviewed limitation: a newly degraded analyzer needs review.
+    return diagnostic["kind"] == "ledger_exceptions" and (
+        entry["path"], entry["reason_code"], sorted(entry.get("analyzers", []))
+    ) == (diagnostic["path"], diagnostic["reason_code"], sorted(diagnostic["analyzers"]))
 
 
 def apply_acceptances(rows: list[dict], accepted: dict) -> list[str]:
-    """Mark reviewed findings and limitations; return entries that matched nothing."""
+    """Mark reviewed findings and limitations; return entries that matched nothing.
+
+    Each entry accepts exactly one occurrence, so a repeated finding needs a repeated entry.
+    """
     used = set()
+
+    def consume(kind: str, item: dict, matches) -> None:
+        for index, entry in enumerate(accepted[kind]):
+            if (kind, index) not in used and matches(entry, item):
+                item["accepted"] = entry["reason"]
+                used.add((kind, index))
+                return
+
     for row in rows:
         for finding in row["findings"]:
-            for index, entry in enumerate(accepted["findings"]):
-                if finding["severity"] in BLOCKING and finding_matches(entry, finding):
-                    finding["accepted"] = entry["reason"]
-                    used.add(("findings", index))
-                    break
+            if finding["severity"] in BLOCKING:
+                consume("findings", finding, finding_matches)
         if row["complete"] and not row["analyzer_gaps"]:
             continue
         for diagnostic in row["diagnostics"]:
-            for index, entry in enumerate(accepted["limitations"]):
-                if diagnostic["kind"] == "ledger_exceptions" and (
-                    entry["path"], entry["reason_code"]
-                ) == (diagnostic["path"], diagnostic["reason_code"]):
-                    diagnostic["accepted"] = entry["reason"]
-                    used.add(("limitations", index))
-                    break
+            consume("limitations", diagnostic, limitation_matches)
     return [
         f"Stale {kind} entry for {entry['path']} ({entry.get('rule') or entry.get('reason_code')}); "
         "remove it or update it to the current report."
@@ -355,6 +365,8 @@ def row_status(row: dict) -> str:
 def scan_command(target: Path, output: Path, image: str) -> list[str]:
     if any(character in str(path) for path in (target, output) for character in ",\r\n"):
         raise ValueError("Docker mount paths must not contain commas or line breaks.")
+    if os.getuid() == 0:
+        raise ValueError("Refusing to run the scanner container as root; run as an unprivileged user.")
     destination = "/scan" if target.is_dir() else f"/scan/{target.name}"
     return [
         "docker", "run", "--rm", "--init",
@@ -392,7 +404,9 @@ def scan_target(root: Path, target: Path, output: Path, image: str) -> dict:
         command = scan_command(target, output, image)
         # Keep scanner-controlled text out of the Actions command channel.
         with (output / "scanner.log").open("w", encoding="utf-8") as log:
-            result = subprocess.run(command, stdout=log, stderr=subprocess.STDOUT, check=False)
+            # The in-container timeout can't stop a stalled Docker client.
+            result = subprocess.run(command, stdout=log, stderr=subprocess.STDOUT, check=False,
+                                    timeout=CLIENT_TIMEOUT)
         if result.returncode not in (0, 1):
             row["errors"].append(f"Scanner exited {result.returncode}; inspect scanner.log.")
         # Exit 1 also covers upstream's aggregate risk score, not this severity policy.
@@ -401,6 +415,8 @@ def scan_target(root: Path, target: Path, output: Path, image: str) -> dict:
             parsed = read_report(report_path, root, target)
             row["errors"].extend(parsed.pop("errors"))
             row.update(parsed)
+    except subprocess.TimeoutExpired:
+        row["errors"].append(f"The Docker client did not finish within {CLIENT_TIMEOUT} seconds.")
     except (OSError, ValueError) as error:
         row["errors"].append(str(error))
     return row
