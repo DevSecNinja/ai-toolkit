@@ -10,6 +10,7 @@ import argparse
 import json
 import os
 from pathlib import Path, PurePosixPath
+import re
 import stat
 import subprocess
 import sys
@@ -33,8 +34,9 @@ EXTRA_ROOTS = (
 
 
 def printable(text: str) -> str:
-    """Escape control characters so repository paths cannot start Actions workflow commands."""
-    return "".join(character if character.isprintable() else repr(character)[1:-1] for character in text)
+    """Escape control characters and '##[' so repository paths cannot start Actions workflow commands."""
+    escaped = "".join(character if character.isprintable() else repr(character)[1:-1] for character in text)
+    return escaped.replace("##[", "#\\x23[")
 
 
 def contains_regular_files(target: Path) -> bool:
@@ -156,6 +158,9 @@ def normalize_finding(issue: dict, root: Path, target: Path) -> dict:
     end_line = source_line(location.get("end_line"), optional=True)
     if end_line is not None and end_line < line:
         raise ValueError("A finding has an invalid source range.")
+    fingerprint = issue.get("match_fingerprint")
+    if fingerprint is not None and not is_fingerprint(fingerprint):
+        raise ValueError("A finding has an invalid match fingerprint.")
     return {
         "rule": rule,
         "severity": issue["severity"],
@@ -164,6 +169,7 @@ def normalize_finding(issue: dict, root: Path, target: Path) -> dict:
         "end_line": end_line,
         "title": text_field(issue, "pattern", rule),
         "evidence": text_field(issue, "finding"),
+        "fingerprint": fingerprint,
         "explanation": text_field(issue, "explanation"),
         "remediation": text_field(issue, "remediation"),
         "accepted": None,
@@ -293,7 +299,7 @@ def load_accepted(path: Path) -> dict:
         return {"findings": [], "limitations": []}
     data = json.loads(path.read_text(encoding="utf-8"))
     schema = {
-        "findings": ({"path", "rule", "severity", "evidence", "reason"}, set()),
+        "findings": ({"path", "rule", "severity", "evidence", "reason"}, {"fingerprint"}),
         "limitations": ({"path", "reason_code", "reason"}, {"analyzers"}),
     }
     if not isinstance(data, dict) or not set(data) <= set(schema):
@@ -313,12 +319,21 @@ def load_accepted(path: Path) -> dict:
                 raise ValueError(f"{path.name}: 'analyzers' must be a list of analyzer IDs.")
             if kind == "findings" and entry["severity"] not in BLOCKING:
                 raise ValueError(f"{path.name}: only HIGH or CRITICAL findings need acceptance.")
+            if "fingerprint" in entry and not is_fingerprint(entry["fingerprint"]):
+                raise ValueError(f"{path.name}: 'fingerprint' must be a SkillSpector match_fingerprint.")
         accepted[kind] = entries
     return accepted
 
 
+def is_fingerprint(value: object) -> bool:
+    return isinstance(value, str) and re.fullmatch(r"[0-9a-f]{64}", value) is not None
+
+
 def finding_matches(entry: dict, finding: dict) -> bool:
-    return all(entry[key] == finding[key] for key in ("path", "rule", "severity", "evidence"))
+    # 'evidence' can be a 200-character preview; the fingerprint covers the full match when present.
+    return entry.get("fingerprint") == finding["fingerprint"] and all(
+        entry[key] == finding[key] for key in ("path", "rule", "severity", "evidence")
+    )
 
 
 def limitation_matches(entry: dict, diagnostic: dict) -> bool:

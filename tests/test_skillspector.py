@@ -351,8 +351,31 @@ class ScanTests(unittest.TestCase):
                 self.output = Path(self.temporary.name) / name
                 self.assertEqual(self.run_with(payload, code=1), 2)
 
+    def test_fingerprint_binds_acceptance_to_the_full_match(self):
+        preview, original, changed = "x" * 200, "a" * 64, "b" * 64
+        entry = {"path": SKILL, "rule": "R1", "severity": "HIGH", "evidence": preview,
+                 "fingerprint": original, "reason": "Reviewed long match."}
+        def payload(fingerprint):
+            data = report("HIGH")
+            data["issues"][0].update(finding=preview, match_fingerprint=fingerprint)
+            return data
+        self.accept([entry])
+        self.assertEqual(self.run_with(payload(original)), 0)
+        unbound = {key: value for key, value in entry.items() if key != "fingerprint"}
+        # Same 200-character preview, different suffix: the old approval must not apply.
+        for name, data, accepted in (("changed-suffix", payload(changed), entry),
+                                     ("unbound-entry", payload(original), unbound),
+                                     ("invalid-report", payload("not-a-hash"), entry)):
+            with self.subTest(name):
+                self.output = Path(self.temporary.name) / name
+                self.accept([accepted])
+                self.assertEqual(self.run_with(data), 2)
+                if name != "invalid-report":
+                    self.assertEqual(self.summary()["scans"][0]["status"], "BLOCK")
+
     def test_printed_paths_cannot_start_workflow_commands(self):
         self.assertEqual(scanner.printable("x\n::warning::y\r\x1b"), "x\\n::warning::y\\r\\x1b")
+        self.assertNotIn("##[", scanner.printable(".apm/skills/##[warning]injected"))
 
     def test_stale_acceptance_is_an_error(self):
         self.accept([{"path": SKILL, "rule": "R9", "severity": "HIGH", "evidence": "x", "reason": "Old."}])
@@ -367,6 +390,7 @@ class ScanTests(unittest.TestCase):
             json.dumps({"findings": [{**base, "reason": " "}]}),
             json.dumps({"findings": [{**base, "severity": "MEDIUM"}]}),
             json.dumps({"findings": [{**base, "line": "1"}]}),
+            json.dumps({"findings": [{**base, "fingerprint": "ABC"}]}),
             json.dumps({"findings": [{key: value for key, value in base.items() if key != "evidence"}]}),
             json.dumps({"limitations": [{"path": SKILL, "reason": "No code."}]}),
             json.dumps({"limitations": [{**limitation, "analyzers": "tool_misuse"}]}),
