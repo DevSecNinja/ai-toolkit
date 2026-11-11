@@ -24,7 +24,10 @@ jobs:
   scan:
     name: Scan AI primitives
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    # Targets scan sequentially with a 300 s worst case each (CLIENT_TIMEOUT); keep room for
+    # every target to time out (about 20 today) plus build, smoke tests and publishing.
+    # A normal run takes about 3 minutes.
+    timeout-minutes: 150
     permissions:
       contents: read
       security-events: write
