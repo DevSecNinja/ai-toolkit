@@ -29,9 +29,10 @@ run = "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -p 'test_
 [pre-commit.commands.skillspector-gate]
 run = "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -p 'test_skillspector*.py'"
 
-# Regenerate INDEX.md / README index from .apm/ and re-stage the result, so the
+# Regenerate INDEX.md / README index from .apm/ and stage the result, so the
 # generated index never drifts from the primitives (the common contributor miss).
+# CI fails a PR with a stale index instead of pushing a fix-up commit (#219).
+# stage_fixed would only re-add the matched primitives, so stage the index here.
 [pre-commit.commands.generate-index]
-run = "bash scripts/generate-index.sh"
-glob = [".apm/prompts/*.prompt.md", ".apm/instructions/*.instructions.md", ".apm/skills/**", ".apm/agents/*.agent.md"]
-stage_fixed = true
+run = "bash scripts/generate-index.sh && git add INDEX.md README.md"
+glob = [".apm/prompts/*.prompt.md", ".apm/instructions/*.instructions.md", ".apm/skills/**", ".apm/agents/*.agent.md", ".github/prompts/*.md", ".github/agents/*.agent.md"]

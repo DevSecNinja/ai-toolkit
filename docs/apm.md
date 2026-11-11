@@ -93,8 +93,11 @@ bash tests/validate-prompts.sh   # validate the .apm primitives
 bash scripts/generate-index.sh   # regenerate INDEX.md + README index
 ```
 
-The [Generate Index](../.github/workflows/generate-index.yml) workflow runs this
-automatically whenever a primitive changes and commits the refreshed index.
+The [Generate Index](../.github/workflows/generate-index.yml) workflow fails a
+pull request whose index is stale (`bash scripts/check-index.sh` runs the same
+check locally); it doesn't push fix-up commits to PR branches, because those
+would leave required checks pending. On `main` it regenerates and commits the
+index as a fallback.
 
 ## 📥 How to consume these primitives
 

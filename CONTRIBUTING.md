@@ -94,7 +94,7 @@ for commands and clean-context behavior scenarios.
 > **Tip:** Primitives are authored directly under `.apm/`. After adding or
 > editing one, regenerate the [index](/docs/apm.md) with
 > `bash scripts/generate-index.sh` and commit the updated `INDEX.md` / `README.md`
-> alongside your primitive.
+> alongside your primitive. CI fails the pull request if the index is stale.
 
 ## 🪝 Git hooks (lefthook)
 
@@ -122,7 +122,7 @@ What runs on **pre-commit**:
 - `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -p 'test_skillspector*.py'`
   — checks the SkillSpector severity gate, reviewed acceptances and report rendering.
 - `bash scripts/generate-index.sh` — regenerates `INDEX.md` / `README.md` from
-  `.apm/` and re-stages them, so the index never drifts from the primitives.
+  `.apm/` and stages them, so the index never drifts from the primitives.
 
 Within the authorized execution scope, run the suite on demand with
 `mise exec -- lefthook run pre-commit --all-files`. Do not bypass required hooks,

@@ -1,6 +1,14 @@
 ---
 name: Generate Index
 
+# INDEX.md and the README index block are generated from .apm/ by
+# scripts/generate-index.sh (lefthook regenerates them on pre-commit).
+#
+# - Pull requests: read-only check that fails when the index is stale. It never
+#   pushes to the PR branch: a `[skip ci]` / GITHUB_TOKEN commit would leave the
+#   new head without check runs, so required checks would stay pending (#219).
+# - main / manual runs: regenerate and push the refreshed index as a fallback.
+
 on:
   push:
     branches:
@@ -20,15 +28,38 @@ on:
       - '.apm/agents/**'
       - '.github/prompts/**/*.md'
       - '.github/agents/**/*.md'
+      - 'INDEX.md'
+      - 'README.md'
+      - 'scripts/generate-index.sh'
+      - 'scripts/check-index.sh'
+      - '.github/workflows/generate-index.yml'
   workflow_dispatch:
 
-permissions:
-  contents: write
+permissions: {}
 
 jobs:
+  check-index:
+    name: Check index
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Check index is up to date
+        run: bash scripts/check-index.sh
+
   generate-index:
     name: Generate Index
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout code
@@ -47,18 +78,11 @@ jobs:
 
       - name: Commit and push if changed
         if: steps.git-check.outputs.changed == 'true'
-        env:
-          EVENT_NAME: ${{ github.event_name }}
-          HEAD_REF: ${{ github.head_ref }}
         run: |-
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git add INDEX.md README.md
           git commit -m "docs: Update index [skip ci]"
-          if [ "${EVENT_NAME}" = "pull_request" ]; then
-            branch="${HEAD_REF}"
-          else
-            branch="${GITHUB_REF_NAME:-main}"
-          fi
+          branch="${GITHUB_REF_NAME:-main}"
           git pull --rebase origin "$branch"
           git push origin HEAD:"$branch"

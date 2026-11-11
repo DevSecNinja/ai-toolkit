@@ -1392,7 +1392,7 @@ class RepositoryScriptTests(unittest.TestCase):
         for directory in (".apm/prompts/nested", ".apm/instructions", ".apm/skills/example",
                           ".apm/agents", ".github/prompts", "scripts", "tests", "tmp"):
             (self.path / directory).mkdir(parents=True, exist_ok=True)
-        for file in ("scripts/generate-index.sh", "tests/validate-prompts.sh"):
+        for file in ("scripts/generate-index.sh", "scripts/check-index.sh", "tests/validate-prompts.sh"):
             shutil.copyfile(ROOT / file, self.path / file)
         (self.path / ".apm/skills/example/SKILL.md").write_text(
             "---\nname: example\ndescription: Example skill\n---\nSkill body.\n"
@@ -1459,6 +1459,44 @@ class RepositoryScriptTests(unittest.TestCase):
         result = self.run_script("scripts/generate-index.sh")
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn(b"Literal \\\\path and \\\\n text", (self.path / "README.md").read_bytes())
+
+    def index_files(self):
+        return {name: (self.path / name).read_bytes() for name in ("INDEX.md", "README.md")
+                if (self.path / name).exists()}
+
+    def test_index_check_passes_when_fresh_and_fails_without_rewriting_when_stale(self):
+        result = self.run_script("scripts/generate-index.sh")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        fresh = self.index_files()
+        result = self.run_script("scripts/check-index.sh")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(fresh, self.index_files())
+        (self.path / ".apm/skills/example/SKILL.md").write_text(
+            "---\nname: example\ndescription: Changed skill\n---\nBody.\n"
+        )
+        result = self.run_script("scripts/check-index.sh")
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("bash scripts/generate-index.sh", result.stderr)
+        self.assertIn("Changed skill", result.stdout)
+        self.assertEqual(fresh, self.index_files())
+        self.assertEqual(list((self.path / "tmp").iterdir()), [])
+
+    def test_index_check_fails_when_index_missing_and_leaves_tree_untouched(self):
+        original = self.index_files()
+        result = self.run_script("scripts/check-index.sh")
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("INDEX.md", result.stderr)
+        self.assertEqual(original, self.index_files())
+        self.assertEqual(list((self.path / "tmp").iterdir()), [])
+
+    def test_index_check_surfaces_generator_failure_and_restores_files(self):
+        (self.path / "README.md").write_text("# Missing markers\n")
+        result = self.run_script("scripts/check-index.sh")
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("index marker pair", result.stderr)
+        self.assertEqual((self.path / "README.md").read_text(), "# Missing markers\n")
+        self.assertFalse((self.path / "INDEX.md").exists())
+        self.assertEqual(list((self.path / "tmp").iterdir()), [])
 
 
 if __name__ == "__main__":
