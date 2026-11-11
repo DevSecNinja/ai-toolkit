@@ -39,8 +39,15 @@
       // follow-up APM Materialize PR, so the owner reviews and merges both.
       // Renovate adds labels from every matching rule and can't remove one,
       // so the preset's `merge: auto` label stays; `automerge: false` wins.
+      // The shared presets also disable digest updates and batch non-major
+      // updates into one weekly PR: re-enable them here and keep this bump in
+      // its own PR. git-refs has no release timestamps, so the 14-day soak
+      // can't apply; without timestamp-optional the update stays pending.
       description: "Never auto-merge github/awesome-copilot bumps: third-party agent text needs owner review",
       matchDepNames: ["github/awesome-copilot"],
+      enabled: true,
+      groupName: null,
+      minimumReleaseAgeBehaviour: "timestamp-optional",
       automerge: false,
       commitMessageSuffix: "",
       addLabels: ["external-primitives", "merge: manual"],

@@ -189,8 +189,9 @@ flow below may auto-merge.
 
 1. **Renovate bump.** Renovate's custom manager (see
    [`renovate.json5`](../renovate.json5)) bumps the pinned SHA. A package rule
-   turns off the shared auto-merge preset for `github/awesome-copilot` and adds
-   the `external-primitives` and `merge: manual` labels. The diff only shows a
+   re-enables these digest updates (off org-wide) in their own PR rather than
+   the weekly batch, turns off the shared auto-merge preset and adds the
+   `external-primitives` and `merge: manual` labels. The diff only shows a
    hash. Renovate can't remove the preset's `merge: auto` label, but
    `automerge: false` takes precedence.
 2. **Materialize PR.** Merging the bump triggers

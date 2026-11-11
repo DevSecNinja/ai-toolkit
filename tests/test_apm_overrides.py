@@ -42,6 +42,11 @@ class SetFrontmatterTests(unittest.TestCase):
         result = overrides.set_frontmatter(text, {"model": "m", "tools": "t"})
         self.assertEqual(result, '---\nmodel: "m"\ntools: "t"\nname: n\n---\n')
 
+    def test_multi_line_values_may_contain_blank_and_comment_lines(self):
+        text = "---\nmodel:\n- a\n\n# note\n- b\n\n# keep\nname: n\n---\n"
+        result = overrides.set_frontmatter(text, {"model": "m"})
+        self.assertEqual(result, '---\nmodel: "m"\n\n# keep\nname: n\n---\n')
+
     def test_keeps_crlf_line_endings(self):
         result = overrides.set_frontmatter(AGENT.replace("\n", "\r\n"), {"model": "M", "extra": "E"})
         expected = AGENT.replace('"Claude Sonnet 4.6"', '"M"').replace('---\n\n', 'extra: "E"\n---\n\n')

@@ -73,9 +73,13 @@ def set_frontmatter(text, values):
             end += 1
             continue
         start = stop = matches[0]
-        # Swallow a multi-line value: indented lines or a column-0 `- ` list.
-        while stop + 1 < end and re.match(r"[ \t]|-([ \t]|$)", lines[stop + 1]):
-            stop += 1
+        # Swallow a multi-line value: indented lines or a column-0 `- ` list,
+        # including blank and comment lines between its items.
+        for i in range(start + 1, end):
+            if lines[i].strip() and re.match(r"[ \t]|-([ \t]|$)", lines[i]):
+                stop = i
+            elif lines[i].strip() and not lines[i].startswith("#"):
+                break
         lines[start:stop + 1] = [line]
         end -= stop - start
     return "".join(lines)

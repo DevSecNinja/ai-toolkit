@@ -10,6 +10,11 @@
   color: "b60205"
   description: Changes third-party AI primitives; owner review required
 
+# Renovate labels vulnerability-fix PRs `security` (shared base.json5).
+- name: security
+  color: "ee0701"
+  description: Security fix
+
 # GitHub's default labels, kept so the sync doesn't delete them.
 - name: dependencies
   color: "ededed"
