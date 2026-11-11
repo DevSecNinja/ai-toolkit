@@ -1,5 +1,5 @@
 name: ai-toolkit
-version: 0.9.0
+version: 0.9.1
 description: >-
   A curated, multi-harness toolkit of AI primitives (prompts, instructions,
   agents and hooks) installable via APM.

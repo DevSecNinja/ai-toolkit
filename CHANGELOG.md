@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.1](https://github.com/DevSecNinja/ai-toolkit/compare/v0.9.0...v0.9.1) (2026-11-11)
+
+
+### Bug Fixes
+
+* remove ai-toolkit self-dependency that breaks installs ([#208](https://github.com/DevSecNinja/ai-toolkit/issues/208)) ([6339fc1](https://github.com/DevSecNinja/ai-toolkit/commit/6339fc18e02846c1850a6dae3f8a4c5967e08e37))
+
 ## [0.9.0](https://github.com/DevSecNinja/ai-toolkit/compare/v0.8.0...v0.9.0) (2026-11-10)
 
 
