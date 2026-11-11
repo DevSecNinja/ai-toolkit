@@ -121,8 +121,9 @@ What runs on **pre-commit**:
   — checks vendored agents keep their `apm-overrides.json` pins.
 - `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -p 'test_skillspector*.py'`
   — checks the SkillSpector severity gate, reviewed acceptances and report rendering.
-- `bash scripts/generate-index.sh` — regenerates `INDEX.md` / `README.md` from
-  `.apm/` and stages them, so the index never drifts from the primitives.
+- `bash scripts/stage-index.sh` — regenerates `INDEX.md` / `README.md` from the
+  **staged** primitives and stages only that result (unstaged README edits and
+  untracked primitives stay out of the commit), so the index never drifts.
 
 Within the authorized execution scope, run the suite on demand with
 `mise exec -- lefthook run pre-commit --all-files`. Do not bypass required hooks,
