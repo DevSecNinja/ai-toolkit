@@ -17,12 +17,16 @@ scanner = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(scanner)
 
 
-def report(*severities, complete=True, ledger=()):
+def report(*severities, complete=True, ledger=(), degraded=()):
+    statuses = [{"analyzer_id": "static_patterns", "status": "completed"},
+                {"analyzer_id": "semantic_security_discovery", "status": "disabled"}]
+    statuses += [{"analyzer_id": name, "status": "degraded", "partial": 1} for name in degraded]
     return {
         "execution_successful": True,
         "components": [{"path": "SKILL.md", "type": "markdown"}],
         "analysis_completeness": {
             "is_complete": complete, "scope_exclusions": [], "ledger_exceptions": list(ledger),
+            "analyzer_statuses": statuses,
         },
         "metadata": {"llm_requested": False, "skillspector_version": "2.13.4"},
         "suppressed_count": 0,
@@ -41,7 +45,7 @@ def report(*severities, complete=True, ledger=()):
 
 PARSE_LIMIT = {
     "reason_code": "static_parse_limit", "message": "Bounded parser limit.", "path": "SKILL.md",
-    "start_line": None, "parser_diagnostic": {"start_line": 1},
+    "start_line": None, "parser_diagnostic": {"start_line": 1}, "analyzers": ["tool_misuse"],
 }
 SKILL = ".apm/skills/example/SKILL.md"
 
@@ -191,17 +195,25 @@ class ScanTests(unittest.TestCase):
             self.assertEqual(scanner.run_scans(self.root, self.output, "test-scanner"), 2)
 
     def test_report_contract_fails_closed(self):
+        def completeness(**changes):
+            return {**report(), "analysis_completeness": {**report()["analysis_completeness"], **changes}}
         invalid = [
             [], {},
             {**report(), "components": []},
+            {**report(), "components": [None]},
+            {**report(), "components": [{"path": "../outside.md"}]},
             {**report(), "issues": None},
             {**report(), "issues": [{"severity": "UNKNOWN"}]},
             {**report(), "execution_successful": False},
             {**report(), "analysis_completeness": None},
             {**report(), "analysis_completeness": {"is_complete": True}},
-            {**report(), "analysis_completeness": {
-                "is_complete": True, "scope_exclusions": [{"path": "references/", "reason_code": "excluded"}],
-            }},
+            completeness(is_complete=None),
+            completeness(is_complete="true"),
+            completeness(scope_exclusions=[{"path": "references/", "reason_code": "excluded"}]),
+            completeness(analyzer_statuses=None),
+            completeness(analyzer_statuses=[{"analyzer_id": "static_patterns", "status": "failed"}]),
+            completeness(analyzer_statuses=[{"analyzer_id": "static_patterns", "status": "disabled"}]),
+            completeness(analyzer_statuses=[{"analyzer_id": "x", "status": "completed", "unaccounted": 1}]),
             {**report(), "metadata": {"llm_requested": True}},
             {**report(), "suppressed_count": 1},
         ]
@@ -281,12 +293,21 @@ class ScanTests(unittest.TestCase):
 
     def test_accepted_limitations_allow_incomplete_scans(self):
         self.accept(limitations=[{"path": SKILL, "reason_code": "static_parse_limit", "reason": "Reviewed."}])
-        self.assertEqual(self.run_with(report(complete=False, ledger=[PARSE_LIMIT]), code=1), 0)
-        self.output = Path(self.temporary.name) / "other"
+        incomplete = {"complete": False, "degraded": ["tool_misuse"]}
+        self.assertEqual(self.run_with(report(ledger=[PARSE_LIMIT], **incomplete), code=1), 0)
         other = {**PARSE_LIMIT, "reason_code": "reference_missing"}
-        self.assertEqual(self.run_with(report(complete=False, ledger=[PARSE_LIMIT, other]), code=1), 2)
-        self.output = Path(self.temporary.name) / "no-ledger"
-        self.assertEqual(self.run_with(report(complete=False), code=1), 2)
+        for name, payload in (
+            ("other", report(ledger=[PARSE_LIMIT, other], **incomplete)),
+            ("no-ledger", report(complete=False)),
+            # The accepted limitation names tool_misuse, so it cannot waive an unrelated analyzer.
+            ("unrelated", report(ledger=[PARSE_LIMIT], complete=False, degraded=["tool_misuse", "taint"])),
+        ):
+            with self.subTest(name):
+                self.output = Path(self.temporary.name) / name
+                self.assertEqual(self.run_with(payload, code=1), 2)
+
+    def test_printed_paths_cannot_start_workflow_commands(self):
+        self.assertEqual(scanner.printable("x\n::warning::y\r\x1b"), "x\\n::warning::y\\r\\x1b")
 
     def test_stale_acceptance_is_an_error(self):
         self.accept([{"path": SKILL, "rule": "R9", "severity": "HIGH", "reason": "Old."}])

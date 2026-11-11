@@ -31,6 +31,11 @@ EXTRA_ROOTS = (
 )
 
 
+def printable(text: str) -> str:
+    """Escape control characters so repository paths cannot start Actions workflow commands."""
+    return "".join(character if character.isprintable() else repr(character)[1:-1] for character in text)
+
+
 def contains_regular_files(target: Path) -> bool:
     pending = [target]
     found = False
@@ -158,14 +163,38 @@ def normalize_diagnostic(entry: object, field: str, root: Path, target: Path) ->
     # Parser limits report their span only inside parser_diagnostic.
     if line is None and isinstance(parser, dict):
         line = parser.get("start_line")
+    analyzers = entry.get("analyzers", [])
+    if not isinstance(analyzers, list) or not all(isinstance(item, str) for item in analyzers):
+        raise ValueError("Expected a list of analyzer IDs.")
     return {
         "kind": field,
         "reason_code": text_field(entry, "reason_code", field),
         "message": text_field(entry, "message"),
         "path": repository_path(root, target, filename, require_file=False) if filename else None,
         "line": source_line(line, optional=True),
+        "analyzers": analyzers,
         "accepted": None,
     }
+
+
+def analyzer_gaps(statuses: object) -> tuple[list[str], list[str]]:
+    """Return (degraded analyzers that need an accepted limitation, contract errors)."""
+    if not isinstance(statuses, list):
+        return [], ["SkillSpector did not report analyzer statuses."]
+    gaps, errors = [], []
+    for status in statuses:
+        if not isinstance(status, dict) or not isinstance(status.get("analyzer_id"), str):
+            errors.append("Invalid analyzer status entry.")
+            continue
+        name, state = status["analyzer_id"], status.get("status")
+        lost = [key for key in ("failed", "skipped", "unaccounted") if status.get(key, 0) != 0]
+        # --no-llm disables only the semantic and meta analyzers.
+        llm = name.startswith("semantic_") or name == "meta_analyzer"
+        if lost or not (state in ("completed", "not_applicable", "degraded") or (state == "disabled" and llm)):
+            errors.append(f"Analyzer {name} did not run to completion ({state}); inspect the JSON report.")
+        elif state == "degraded":
+            gaps.append(name)
+    return gaps, errors
 
 
 def read_report(path: Path, root: Path, target: Path) -> dict:
@@ -192,10 +221,22 @@ def read_report(path: Path, root: Path, target: Path) -> dict:
     components = report.get("components")
     if not isinstance(components, list) or not components:
         errors.append("SkillSpector did not report any inspected components.")
+    else:
+        for component in components:
+            try:
+                if not isinstance(component, dict):
+                    raise ValueError("Expected a component object.")
+                repository_path(root, target, component.get("path"), require_file=False)
+            except ValueError as error:
+                errors.append(f"Invalid inspected component: {error}")
     completeness = report.get("analysis_completeness")
     if not isinstance(completeness, dict):
         completeness = {}
         errors.append("SkillSpector did not report analysis completeness.")
+    if not isinstance(completeness.get("is_complete"), bool):
+        errors.append("SkillSpector did not report whether inspection was complete.")
+    gaps, gap_errors = analyzer_gaps(completeness.get("analyzer_statuses"))
+    errors.extend(gap_errors)
     # Upstream completeness excludes out-of-scope files from its denominator.
     if completeness.get("scope_exclusions") != []:
         errors.append("Inspection has missing or nonempty scope exclusions; inspect the JSON report.")
@@ -220,6 +261,7 @@ def read_report(path: Path, root: Path, target: Path) -> dict:
         "findings": findings,
         "diagnostics": diagnostics,
         "complete": completeness.get("is_complete") is True,
+        "analyzer_gaps": gaps,
         "errors": errors,
         "version": version if isinstance(version, str) else None,
     }
@@ -269,7 +311,7 @@ def apply_acceptances(rows: list[dict], accepted: dict) -> list[str]:
                     finding["accepted"] = entry["reason"]
                     used.add(("findings", index))
                     break
-        if row["complete"]:
+        if row["complete"] and not row["analyzer_gaps"]:
             continue
         for diagnostic in row["diagnostics"]:
             for index, entry in enumerate(accepted["limitations"]):
@@ -291,10 +333,16 @@ def apply_acceptances(rows: list[dict], accepted: dict) -> list[str]:
 def row_status(row: dict) -> str:
     if row["counts"] is None or row["errors"]:
         return "ERROR"
-    if not row["complete"]:
+    if not row["complete"] or row["analyzer_gaps"]:
         diagnostics = [item for item in row["diagnostics"] if item["kind"] == "ledger_exceptions"]
+        covered = {name for item in diagnostics if item["accepted"] for name in item["analyzers"]}
         if not diagnostics or any(item["accepted"] is None for item in diagnostics):
             row["errors"].append("Static inspection was incomplete; accept or resolve each limitation.")
+            return "ERROR"
+        # An accepted limitation only waives the analyzers it names.
+        if not set(row["analyzer_gaps"]) <= covered:
+            missing = ", ".join(sorted(set(row["analyzer_gaps"]) - covered))
+            row["errors"].append(f"Degraded analyzers have no accepted limitation: {missing}.")
             return "ERROR"
     blocking = [item for item in row["findings"] if item["severity"] in BLOCKING and not item["accepted"]]
     return "BLOCK" if blocking else "PASS"
@@ -333,7 +381,7 @@ def scan_command(target: Path, output: Path, image: str) -> list[str]:
 def scan_target(root: Path, target: Path, output: Path, image: str) -> dict:
     row = {
         "target": target.relative_to(root).as_posix(), "report_directory": output.name,
-        "counts": None, "findings": [], "diagnostics": [], "complete": False,
+        "counts": None, "findings": [], "diagnostics": [], "complete": False, "analyzer_gaps": [],
         "errors": [], "version": None,
     }
     try:
@@ -393,7 +441,7 @@ def run_scans(root: Path, output: Path, image: str, accepted_path: Path | None =
     (output / "summary.json").write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
     for row in rows:
         counts = row["counts"] or {}
-        print(f"{row['status']:5} {row['target']} " + " ".join(
+        print(f"{row['status']:5} {printable(row['target'])} " + " ".join(
             f"{severity}={counts.get(severity, '-')}" for severity in SEVERITIES
         ))
     print(f"Scanned {len(rows)} targets: {sum(row['status'] == 'BLOCK' for row in rows)} blocked, "
@@ -414,7 +462,7 @@ def main() -> int:
         accepted = args.accepted.resolve() if args.accepted else None
         return run_scans(args.root.resolve(), args.output_dir.resolve(), args.image, accepted)
     except (OSError, ValueError) as error:
-        print(f"SkillSpector runner failed: {error}", file=sys.stderr)
+        print(f"SkillSpector runner failed: {printable(str(error))}", file=sys.stderr)
         return 2
 
 
