@@ -85,19 +85,34 @@ def discover_targets(root: Path) -> list[Path]:
     return targets
 
 
+def relative_parts(path: str) -> tuple[str, ...]:
+    relative = PurePosixPath(path)
+    if not path or relative.is_absolute() or ".." in relative.parts or ":" in path or any(
+        ord(character) < 32 for character in path
+    ):
+        raise ValueError("A reported path is outside the selected scan target.")
+    return relative.parts
+
+
 def repository_path(root: Path, target: Path, filename: str, require_file: bool = True) -> str:
+    """Map a reported path to a repository path, keeping archive members as 'outer!/member'."""
     if not isinstance(filename, str) or not filename.strip():
         raise ValueError("A finding or diagnostic is missing its file path.")
     filename = filename.replace("\\", "/")
     if filename.startswith("/scan/"):
         filename = filename[len("/scan/"):]
-    relative = PurePosixPath(filename)
-    if relative.is_absolute() or ".." in relative.parts or ":" in filename or any(
-        ord(character) < 32 for character in filename
-    ):
-        raise ValueError("A reported path is outside the selected scan target.")
+    # SkillSpector names inspected archive members '<archive>!/<member>', possibly nested.
+    filename, *members = filename.split("!/")
+    for member in members:
+        relative_parts(member)
+    outer = repository_file(root, target, filename, require_file or bool(members))
+    return "!/".join((outer, *members))
+
+
+def repository_file(root: Path, target: Path, filename: str, require_file: bool) -> str:
+    parts = relative_parts(filename)
     base = target if target.is_dir() else target.parent
-    candidate = base.joinpath(*relative.parts)
+    candidate = base.joinpath(*parts)
     resolved = candidate.resolve()
     boundary = target.resolve()
     if (target.is_dir() and not resolved.is_relative_to(boundary)) or (

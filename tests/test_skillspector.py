@@ -286,6 +286,27 @@ class ScanTests(unittest.TestCase):
             ".apm/skills/example/references/context.md",
         )
 
+    def test_inspected_archive_members_map_to_the_outer_archive(self):
+        self.write(".apm/skills/example/bundle.zip", "zip bytes")
+        members = ["bundle.zip", "bundle.zip!/payload.sh", "bundle.zip!/inner.zip!/notes.md"]
+        payload = report("HIGH")
+        payload["components"] += [{"path": path, "type": "archive"} for path in members]
+        payload["issues"][0]["location"]["file"] = "bundle.zip!/payload.sh"
+        self.assertEqual(self.run_with(payload), 1)
+        finding = self.summary()["scans"][0]["findings"][0]
+        self.assertEqual(finding["path"], ".apm/skills/example/bundle.zip!/payload.sh")
+        self.accept([{"path": finding["path"], "rule": "R1", "severity": "HIGH",
+                      "evidence": "Synthetic evidence", "reason": "Reviewed archive member."}])
+        self.output = Path(self.temporary.name) / "accepted"
+        self.assertEqual(self.run_with(payload), 0)
+        for index, path in enumerate((
+            "missing.zip!/payload.sh", "references!/x.md", "bundle.zip!/", "bundle.zip!/../x.md",
+            "bundle.zip!//etc/passwd", "../bundle.zip!/x.md",
+        )):
+            with self.subTest(path=path):
+                self.output = Path(self.temporary.name) / f"archive-{index}"
+                self.assertEqual(self.run_with({**report(), "components": [{"path": path}]}), 2)
+
     def test_reviewed_acceptance_passes_only_the_matching_finding(self):
         entry = {"path": SKILL, "rule": "R1", "severity": "HIGH", "evidence": "Synthetic evidence",
                  "reason": "Reviewed false positive."}
