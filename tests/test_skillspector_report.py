@@ -104,6 +104,17 @@ class RenderTests(unittest.TestCase):
         self.assertIn("✅ Passed", body)
         self.assertNotIn("### Findings", body)
 
+    def test_archive_members_point_at_the_archive_file(self):
+        data = summary(finding("HIGH", path=".apm/skills/x/bundle.zip!/payload.sh", line=4), exit_code=1)
+        body = report.render(data, limit=10)
+        self.assertIn("(https://github.com/owner/repo/blob/abc1234def/.apm/skills/x/bundle.zip)", body)
+        self.assertIn("payload.sh:4", body)
+        result = report.build_sarif(data)["runs"][0]["results"][0]
+        location = result["locations"][0]["physicalLocation"]
+        self.assertEqual((location["artifactLocation"]["uri"], location["region"]),
+                         (".apm/skills/x/bundle.zip", {"startLine": 1}))
+        self.assertIn("Archive member: payload.sh (line 4)", result["message"]["text"])
+
 
 class SarifTests(unittest.TestCase):
     def test_sarif_has_stable_rules_encoded_uris_and_accepted_notes(self):

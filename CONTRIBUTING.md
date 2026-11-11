@@ -185,7 +185,9 @@ limitation is a reviewed false positive, add it to
 same PR, with the `reason` you accepted it:
 
 - For a finding, copy `path`, `rule`, `severity` and the exact `evidence` from
-  `summary.json` in the `skillspector-reports` artifact.
+  `summary.json` in the `skillspector-reports` artifact. Findings inside an
+  inspected archive use the `<archive>!/<member>` path that SkillSpector reports;
+  their links and Code Scanning alerts point at the archive file.
 - For a limitation, copy `path`, `reason_code` and its `analyzers` list (omit it
   when the limitation names no analyzers).
 

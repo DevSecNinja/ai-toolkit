@@ -48,6 +48,9 @@ def github_url(*parts: str) -> str | None:
 def source_link(path: str, line: int | None = None) -> str:
     label = cell(path + (f":{line}" if line else ""), 200)
     revision = os.environ.get("GITHUB_SHA")
+    # Archive members ('outer!/member') link to the archive file; member lines have no blob anchor.
+    path, member = path.partition("!/")[::2]
+    line = None if member else line
     url = github_url("blob", quote(revision or "", safe=""), quote(path, safe="/")) if revision else None
     if not url:
         return label
@@ -163,21 +166,23 @@ def build_sarif(summary: dict) -> dict:
                 "tags": ["security"], "security-severity": SECURITY_SCORES[item["severity"]],
             },
         }
+        archive, member = item["path"].partition("!/")[::2]
         message = "\n\n".join(text for text in (
             f"Accepted {item['severity']} finding: {item['accepted']}" if accepted else "",
+            f"Archive member: {member} (line {item['line']})" if member else "",
             item["title"], item["explanation"],
             f"Evidence: {item['evidence']}" if item["evidence"] else "",
             f"Remediation: {item['remediation']}" if item["remediation"] else "",
         ) if text)
-        region = {"startLine": item["line"]}
-        if item["end_line"] is not None:
+        region = {"startLine": 1 if member else item["line"]}
+        if item["end_line"] is not None and not member:
             region["endLine"] = item["end_line"]
         result = {
             "ruleId": rule_id,
             "level": level,
             "message": {"text": message or item["rule"]},
             "locations": [{"physicalLocation": {
-                "artifactLocation": {"uri": quote(item["path"], safe="/")}, "region": region,
+                "artifactLocation": {"uri": quote(archive, safe="/")}, "region": region,
             }}],
         }
         if accepted:
