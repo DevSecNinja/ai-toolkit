@@ -22,8 +22,18 @@ def top_level_value(content, key):
     return match.group(1) if match else None
 
 
+def strip_comments(content):
+    """Drop YAML comment lines and trailing ` # ...` comments.
+
+    `#` directly after a token (`owner/repo#v1.0.0`) is a ref, not a comment.
+    """
+    lines = (re.sub(r"[ \t]+#.*$", "", line) for line in content.splitlines())
+    return "\n".join(line for line in lines if not re.match(r"^[ \t]*#", line)) + "\n"
+
+
 def top_level_block(content, key):
     """Return the indented block under a top-level `key:` (empty if absent)."""
+    content = strip_comments(content)
     match = re.search(rf"(?ms)^{re.escape(key)}:[^\n]*\n(.*?)(?=^\S|\Z)", content)
     return match.group(1) if match else ""
 
@@ -77,6 +87,21 @@ class DetectorTests(unittest.TestCase):
             "scripts:\n  sync: apm install DevSecNinja/ai-toolkit\n"
         )
         self.assertEqual(self_references(manifest, self.REPOS), [])
+
+    def test_comments_neither_hide_nor_add_self_entries(self):
+        hidden = (
+            "name: ai-toolkit\ndependencies:\n  apm:\n"
+            "    - github/awesome-copilot/agents/x.agent.md#abc\n"
+            "# Self-consumption note at column zero\n"
+            "    - DevSecNinja/ai-toolkit#v0.8.0\n"
+        )
+        self.assertTrue(self_references(hidden, self.REPOS))
+        commented = (
+            "name: ai-toolkit\ndependencies:\n  apm:\n"
+            "    # - DevSecNinja/ai-toolkit#v0.8.0\n"
+            "    - github/awesome-copilot/agents/x.agent.md#abc  # not DevSecNinja/ai-toolkit\n"
+        )
+        self.assertEqual(self_references(commented, self.REPOS), [])
 
     def test_self_repo_comes_from_author_and_name(self):
         manifest = "name: ai-toolkit\nversion: 1.0.0\nauthor: DevSecNinja\n"
