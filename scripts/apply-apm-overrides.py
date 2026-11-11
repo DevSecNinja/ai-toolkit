@@ -54,7 +54,12 @@ def load_overrides(root):
 
 
 def set_frontmatter(text, values):
-    """Return `text` with top-level frontmatter `values` set; add missing keys."""
+    """Return `text` with top-level frontmatter `values` set; add missing keys.
+
+    Only a single-line value is replaced. Any other layout (block or flow
+    collection, block scalar, continued plain scalar) raises instead of
+    risking invalid YAML; update such an override by hand.
+    """
     lines = text.splitlines(keepends=True)
     if not lines or lines[0].rstrip("\r\n") != "---":
         raise OverrideError("no YAML frontmatter")
@@ -62,9 +67,10 @@ def set_frontmatter(text, values):
     if end is None:
         raise OverrideError("unterminated YAML frontmatter")
     newline = "\r\n" if lines[0].endswith("\r\n") else "\n"
+    top_level_key = re.compile(r"""(?:[A-Za-z0-9_-]+|'[^']*'|"[^"]*")[ \t]*:(?:[ \t]|$)""")
     for key, value in values.items():
         line = f"{key}: {json.dumps(value, ensure_ascii=False)}{newline}"
-        pattern = re.compile(rf"{re.escape(key)}[ \t]*:")
+        pattern = re.compile(rf"""(?:{re.escape(key)}|'{re.escape(key)}'|"{re.escape(key)}")[ \t]*:(?:[ \t]|$)""")
         matches = [i for i in range(1, end) if pattern.match(lines[i])]
         if len(matches) > 1:
             raise OverrideError(f"frontmatter key `{key}` appears more than once")
@@ -72,16 +78,22 @@ def set_frontmatter(text, values):
             lines.insert(end, line)
             end += 1
             continue
-        start = stop = matches[0]
-        # Swallow a multi-line value: indented lines or a column-0 `- ` list,
-        # including blank and comment lines between its items.
-        for i in range(start + 1, end):
-            if lines[i].strip() and re.match(r"[ \t]|-([ \t]|$)", lines[i]):
-                stop = i
-            elif lines[i].strip() and not lines[i].startswith("#"):
-                break
-        lines[start:stop + 1] = [line]
-        end -= stop - start
+        index = matches[0]
+        current = lines[index].split(":", 1)[1].strip()
+        following = next(
+            (candidate for candidate in lines[index + 1:end] if candidate.strip() and not candidate.startswith("#")),
+            None,
+        )
+        multi_line = (
+            not current
+            or current[0] in "|>"
+            or (current[0] == "[" and not current.rstrip().endswith("]"))
+            or (current[0] == "{" and not current.rstrip().endswith("}"))
+            or (following is not None and not top_level_key.match(following))
+        )
+        if multi_line:
+            raise OverrideError(f"frontmatter key `{key}` has a multi-line value; update it by hand")
+        lines[index] = line
     return "".join(lines)
 
 

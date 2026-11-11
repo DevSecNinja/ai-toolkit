@@ -123,6 +123,7 @@ jobs:
         run: git fetch origin chore/apm-materialize || true
 
       - name: Open materialize PR
+        id: open-pr
         if: steps.precheck.outputs.skip != 'true'
         # renovate: datasource=github-tags depName=DevSecNinja/.github
         uses: DevSecNinja/.github/actions/open-pr@27fd66740c629ea38380dcd3bf93e7bc74c54247 # v1.9.0
@@ -157,3 +158,14 @@ jobs:
             `docs/apm.md`.
 
             Triggered by `${{ github.workflow }}` at commit `${{ github.sha }}`.
+
+      - name: Label reused materialize PR
+        # The pinned open-pr only labels a PR it creates, so a PR left open by
+        # an earlier run would miss the review labels (DevSecNinja/.github#484
+        # fixes this in the action).
+        if: steps.open-pr.outputs.created == 'false' && steps.open-pr.outputs.pr-number != ''
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          PR_NUMBER: ${{ steps.open-pr.outputs.pr-number }}
+        run: |-
+          gh pr edit "${PR_NUMBER}" --add-label apm-sync --add-label external-primitives --add-label "merge: manual"

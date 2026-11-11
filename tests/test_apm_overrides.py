@@ -37,15 +37,24 @@ class SetFrontmatterTests(unittest.TestCase):
         self.assertEqual(once, '---\nname: x\nmodel: "Claude Sonnet 5"\n---\nbody\n')
         self.assertEqual(overrides.set_frontmatter(once, {"model": "Claude Sonnet 5"}), once)
 
-    def test_replaces_multi_line_values(self):
-        text = "---\nmodel:\n  - a\n  - b\ntools:\n- x\nname: n\n---\n"
-        result = overrides.set_frontmatter(text, {"model": "m", "tools": "t"})
-        self.assertEqual(result, '---\nmodel: "m"\ntools: "t"\nname: n\n---\n')
+    def test_replaces_quoted_keys_without_duplicating_them(self):
+        for key in ("'model'", '"model"'):
+            with self.subTest(key=key):
+                text = f"---\n{key}: 'Claude Sonnet 4.6'\nname: n\n---\n"
+                result = overrides.set_frontmatter(text, {"model": "m"})
+                self.assertEqual(result, '---\nmodel: "m"\nname: n\n---\n')
 
-    def test_multi_line_values_may_contain_blank_and_comment_lines(self):
-        text = "---\nmodel:\n- a\n\n# note\n- b\n\n# keep\nname: n\n---\n"
-        result = overrides.set_frontmatter(text, {"model": "m"})
-        self.assertEqual(result, '---\nmodel: "m"\n\n# keep\nname: n\n---\n')
+    def test_rejects_multi_line_values_instead_of_corrupting_them(self):
+        for value in (
+            "model:\n  - a\n  - b\n",
+            "model:\n- a\n\n# note\n- b\n",
+            'model: [\n  "upstream"\n]\n',
+            "model: {a: 1,\n  b: 2}\n",
+            "model: |\n  text\n",
+            "model: plain\n  continued\n",
+        ):
+            with self.subTest(value=value), self.assertRaises(overrides.OverrideError):
+                overrides.set_frontmatter(f"---\n{value}name: n\n---\n", {"model": "m"})
 
     def test_keeps_crlf_line_endings(self):
         result = overrides.set_frontmatter(AGENT.replace("\n", "\r\n"), {"model": "M", "extra": "E"})

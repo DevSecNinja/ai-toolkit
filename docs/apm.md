@@ -224,7 +224,9 @@ has no override setting). Add the change to
 }
 ```
 
-Each entry sets top-level frontmatter keys to string values.
+Each entry sets top-level frontmatter keys to string values. Only a
+single-line value is replaced; if upstream switches a key to a multi-line
+value, the script fails and the override needs a manual update.
 [`scripts/apply-apm-overrides.py`](../scripts/apply-apm-overrides.py) applies
 them, and APM Materialize runs it after `apm install`. Run it yourself after a
 local `apm install`. It fails when a file is missing, so drop stale entries
