@@ -119,6 +119,8 @@ What runs on **pre-commit**:
   — checks `apm.yml` doesn't list `ai-toolkit` as its own dependency.
 - `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -p 'test_apm_overrides.py'`
   — checks vendored agents keep their `apm-overrides.json` pins.
+- `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -p 'test_skillspector*.py'`
+  — checks the SkillSpector severity gate, reviewed acceptances and report rendering.
 - `bash scripts/generate-index.sh` — regenerates `INDEX.md` / `README.md` from
   `.apm/` and re-stages them, so the index never drifts from the primitives.
 
@@ -137,6 +139,77 @@ label; review the `.github/agents/` diff in the materialize PR before merging.
 Don't hand-edit a vendored agent: put local changes such as a model pin in
 `apm-overrides.json`. See "External primitives: review gate" in
 [the APM guide](docs/apm.md).
+
+## 🛡️ SkillSpector security scans
+
+The [SkillSpector workflow](.github/workflows/skillspector.yml) runs a static
+[NVIDIA SkillSpector](https://github.com/NVIDIA/SkillSpector) scan of every AI
+primitive: each `.apm/skills/` and `.agents/skills/` skill (with its supporting
+files), the other `.apm/` and `.agents/` primitives, `.github/agents|prompts|instructions|hooks/`,
+and the hook scripts in `scripts/git-push-approval/` and `scripts/tool-guardian/`.
+Add new hook script directories to `EXTRA_ROOTS` in
+[`scripts/scan-skills.py`](scripts/scan-skills.py).
+
+**When it runs.** The **Scan AI primitives** job reports on every pull request.
+It builds and scans only when the PR changes `apm.yml`, `apm.lock.yaml`, any of
+the paths above, or the scanner itself; otherwise it passes in seconds. That
+includes materialize review PRs (`apm-sync`) and Renovate `github/awesome-copilot`
+bumps (`external-primitives`). It also runs on pushes to `main`, weekly and on
+demand.
+
+**What fails the check.** Any HIGH or CRITICAL finding that isn't accepted,
+scanner errors, missing or malformed reports, scope exclusions and incomplete
+inspection all fail it. LOW and MEDIUM findings are reported but never block.
+Scans run in a non-root, read-only container with no network, no credentials,
+no LLM and bounded resources, with a three-minute timeout per target. A passing
+static scan is not a safety guarantee: OSV lookups use the offline fallback.
+
+**Where to read the report.**
+
+- A **PR comment** (updated in place on every re-run) shows counts by severity,
+  the top findings with file/line links, accepted items and links to the run.
+  Comments are posted only on PRs from this repository; fork PRs get a read-only
+  token.
+- The **Actions run summary** lists up to 100 findings and every analysis
+  limitation.
+- **Security > Code scanning** (tool: SkillSpector) holds every finding as
+  SARIF. Accepted findings carry a SARIF `suppressions` justification.
+- The `skillspector-reports` artifact keeps raw JSON, scanner logs, `summary.json`
+  and `findings.sarif` for 14 days. Reports can quote source text.
+
+**Approving a finding.** When a HIGH/CRITICAL finding or an inspection
+limitation is a reviewed false positive, add it to
+[`.github/skillspector-accepted.json`](.github/skillspector-accepted.json) in the
+same PR. Copy `path`, `rule` and `severity` (and `evidence` to pin the exact
+match) from the report, or `path` and `reason_code` for a limitation, and write
+the `reason` you accepted it. Leaving out `evidence` accepts that rule anywhere
+in the file; only do that for deny-lists. New, escalated or changed findings
+still block, and entries that no longer match anything fail the check, so remove
+them when the content changes. Never accept a finding just to get a green check.
+
+**Making it a required check.** In **Settings > Rules > Rulesets**, add a status
+check rule for the default branch requiring **Scan AI primitives** (source:
+GitHub Actions). Because the job always reports, PRs that don't touch AI
+primitives aren't left waiting. Don't require **Post SkillSpector report**: it
+is skipped for fork PRs and unrelated changes.
+
+**Upgrading SkillSpector.** The workflow builds the upstream Dockerfile from a
+commit SHA with a `# renovate: datasource=github-tags depName=NVIDIA/SkillSpector`
+comment. Building resolves upstream's Python dependencies, which aren't frozen.
+Review the release notes and any new findings before merging a bump.
+
+**Run it locally** on Linux with Docker:
+
+```bash
+git clone https://github.com/NVIDIA/SkillSpector /tmp/skillspector
+git -C /tmp/skillspector checkout <sha-from-the-workflow>
+docker build --tag skillspector-ci /tmp/skillspector
+python3 tests/smoke-skillspector.py --output-dir /tmp/skillspector-smoke
+python3 scripts/scan-skills.py --output-dir /tmp/skillspector-reports
+python3 scripts/skillspector-report.py /tmp/skillspector-reports/summary.json --markdown /tmp/report.md
+```
+
+Use a new output directory for each run; existing reports are never reused.
 
 ## 🚀 Submission Process
 

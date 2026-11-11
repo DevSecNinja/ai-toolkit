@@ -1,0 +1,93 @@
+{
+  "findings": [
+    {
+      "path": ".apm/skills/obsidian/SKILL.md",
+      "rule": "AE1",
+      "severity": "HIGH",
+      "evidence": "references/FUNCTIONS_REFERENCE.md (partial)",
+      "reason": "Derived from the accepted static_parse_limit on FUNCTIONS_REFERENCE.md: a Markdown link to bundled reference docs, not a risky artifact."
+    },
+    {
+      "path": ".apm/skills/renovate-triage-and-merge/references/testing.md",
+      "rule": "AR2",
+      "severity": "HIGH",
+      "evidence": "no warning",
+      "reason": "Test expectation that happy-path results emit no warning; not an instruction to suppress refusals."
+    },
+    {
+      "path": ".apm/skills/renovate-triage-and-merge/references/testing.md",
+      "rule": "AR2",
+      "severity": "HIGH",
+      "evidence": "without warnings",
+      "reason": "Test expectation that valid ports are accepted without warnings; not an instruction to suppress refusals."
+    },
+    {
+      "path": ".apm/skills/renovate-triage-and-merge/scripts/renovate_prs.py",
+      "rule": "E2",
+      "severity": "HIGH",
+      "evidence": "os.environ.copy()",
+      "reason": "Passes the caller's environment to the local gh CLI so it can authenticate; nothing is read out or sent elsewhere."
+    },
+    {
+      "path": ".github/agents/project-architecture-planner.agent.md",
+      "rule": "YR4",
+      "severity": "HIGH",
+      "evidence": "tools:; description:; <!-- System boundary -->",
+      "reason": "External awesome-copilot agent: the HTML comment labels a draw.io diagram example, not a hidden tool instruction."
+    },
+    {
+      "path": ".github/agents/project-architecture-planner.agent.md",
+      "rule": "P2",
+      "severity": "HIGH",
+      "evidence": "<!-- System boundary -->",
+      "reason": "External awesome-copilot agent: XML comment inside a draw.io diagram example, not a hidden instruction."
+    },
+    {
+      "path": ".github/agents/sast-sca-security-analyzer.agent.md",
+      "rule": "TM1",
+      "severity": "HIGH",
+      "evidence": "subprocess.call(cmd, shell=True",
+      "reason": "External awesome-copilot agent: listed as a vulnerable pattern to detect (CWE-78), not code to run."
+    },
+    {
+      "path": "scripts/tool-guardian/guard-tool.sh",
+      "rule": "TM1",
+      "severity": "HIGH",
+      "reason": "Tool Guardian's deny-list: these destructive commands are the regexes it blocks, never commands it runs."
+    },
+    {
+      "path": "scripts/tool-guardian/guard-tool.sh",
+      "rule": "PE3",
+      "severity": "HIGH",
+      "evidence": ".env ",
+      "reason": "Tool Guardian's deny-list text about protecting .env files; it does not read credentials."
+    }
+  ],
+  "limitations": [
+    {
+      "path": ".apm/skills/obsidian/SKILL.md",
+      "reason_code": "reference_missing",
+      "reason": "The path-like reference is generic `[text](url)` link syntax in prose, not a bundled file."
+    },
+    {
+      "path": ".apm/skills/obsidian/references/FUNCTIONS_REFERENCE.md",
+      "reason_code": "static_parse_limit",
+      "reason": "Obsidian Bases formula examples in a reference doc; the parser cannot bound them as commands but checked all input."
+    },
+    {
+      "path": ".apm/skills/tripit-exporter/SKILL.md",
+      "reason_code": "static_parse_limit",
+      "reason": "A JavaScript template literal builds an output file name at runtime; the export only writes a local JSON file."
+    },
+    {
+      "path": ".apm/skills/tripit-exporter/SKILL.md",
+      "reason_code": "reference_missing",
+      "reason": "Links to the repository-root THIRD_PARTY_NOTICES.md, which lives outside the skill directory by design."
+    },
+    {
+      "path": ".github/agents/sast-sca-security-analyzer.agent.md",
+      "reason_code": "static_parse_limit",
+      "reason": "External awesome-copilot agent: example report/code snippets the parser cannot bound; all parser input was checked."
+    }
+  ]
+}

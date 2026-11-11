@@ -25,9 +25,9 @@ run = "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -p 'test_
 [pre-commit.commands.apm-overrides]
 run = "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -p 'test_apm_overrides.py'"
 
-# SkillSpector gate: severity policy, report contract and reviewed acceptances.
+# SkillSpector gate and report: severity policy, reviewed acceptances, PR comment.
 [pre-commit.commands.skillspector-gate]
-run = "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -p 'test_skillspector.py'"
+run = "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -p 'test_skillspector*.py'"
 
 # Regenerate INDEX.md / README index from .apm/ and re-stage the result, so the
 # generated index never drifts from the primitives (the common contributor miss).
