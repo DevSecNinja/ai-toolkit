@@ -113,7 +113,8 @@ def render(summary: dict, limit: int, pr: int | None = None) -> str:
         lines.extend(["", "### Errors", ""])
         lines.extend(f"- {cell(item['target'], 120)}: {cell(item['error'], 600)}" for item in summary["errors"][:limit])
     limitations = [
-        {**item, "complete": scan["complete"], "target": scan["target"]}
+        {**item, "target": scan["target"], "blocking": item["kind"] == "scope_exclusions" or not scan["complete"]
+         or bool(set(item.get("analyzers", [])) & set(scan.get("analyzer_gaps", [])))}
         for scan in summary["scans"] for item in scan["diagnostics"]
     ]
     if limitations:
@@ -124,8 +125,9 @@ def render(summary: dict, limit: int, pr: int | None = None) -> str:
             if item["accepted"]:
                 status = f"Accepted: {cell(item['accepted'], 160)}"
             else:
-                # Caveats on otherwise complete scans are informational; anything else blocks.
-                status = "Caveat, non-blocking" if item["complete"] else "**Blocking**"
+                # Scope exclusions, incomplete scans and degraded analyzers block until accepted;
+                # caveats on otherwise complete scans are informational.
+                status = "**Blocking**" if item["blocking"] else "Caveat, non-blocking"
             lines.append(f"| {cell(item['target'], 120)} | {location} | {cell(item['reason_code'], 64)} | {status} |")
         if len(limitations) > limit:
             lines.append(f"\nShowing {limit} of {len(limitations)} limitations; see the run summary for all.")

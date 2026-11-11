@@ -193,7 +193,8 @@ them when the content changes. Never accept a finding just to get a green check.
 check rule for the default branch requiring **Scan AI primitives** (source:
 GitHub Actions). Because the job always reports, PRs that don't touch AI
 primitives aren't left waiting. Don't require **Post SkillSpector report**: it
-is skipped for fork PRs and unrelated changes. First, stop the
+only posts on same-repository PRs that were scanned, and passes as a no-op
+otherwise. First, stop the
 [Generate Index workflow](.github/workflows/generate-index.yml) from pushing
 `[skip ci]` commits to PR branches with `GITHUB_TOKEN`. Those commits don't
 trigger CI, so a required check would stay pending on the new head.

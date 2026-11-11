@@ -34,7 +34,7 @@ def summary(*findings, exit_code=0, errors=(), diagnostics=(), counts=True):
         "skillspector_version": "2.13.4",
         "exit_code": exit_code,
         "scans": [{
-            "target": ".apm/skills/x", "status": "PASS", "complete": True, "version": "2.13.4",
+            "target": ".apm/skills/x", "status": "PASS", "complete": True, "version": "2.13.4", "analyzer_gaps": [],
             "counts": {} if counts else None, "findings": list(findings), "diagnostics": list(diagnostics),
         }],
         "errors": list(errors),
@@ -88,8 +88,16 @@ class RenderTests(unittest.TestCase):
         self.assertIn("Analysis limitations (2)", body)
         self.assertIn("Accepted: Reviewed.", body)
         self.assertIn("Caveat, non-blocking", body)
-        data["scans"][0]["complete"] = False
-        self.assertIn("| static&#95;parse&#95;limit | **Blocking** |", report.render(data, limit=10))
+        blocking = "| static&#95;parse&#95;limit | **Blocking** |"
+        self.assertNotIn(blocking, body)
+        for change in ({"complete": False}, {"analyzer_gaps": ["tool_misuse"]}):
+            with self.subTest(change):
+                scan = {**data["scans"][0], **change}
+                scan["diagnostics"] = [dict(item, analyzers=["tool_misuse"]) for item in scan["diagnostics"]]
+                self.assertIn(blocking, report.render({**data, "scans": [scan]}, limit=10))
+        excluded = {**diagnostic, "kind": "scope_exclusions", "reason_code": "excluded", "accepted": None}
+        scan = {**data["scans"][0], "diagnostics": [excluded]}
+        self.assertIn("| excluded | **Blocking** |", report.render({**data, "scans": [scan]}, limit=10))
 
     def test_clean_report_passes(self):
         body = report.render(summary(), limit=100)
