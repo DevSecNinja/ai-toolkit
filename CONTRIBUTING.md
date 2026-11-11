@@ -182,12 +182,19 @@ static scan is not a safety guarantee: OSV lookups use the offline fallback.
 **Approving a finding.** When a HIGH/CRITICAL finding or an inspection
 limitation is a reviewed false positive, add it to
 [`.github/skillspector-accepted.json`](.github/skillspector-accepted.json) in the
-same PR. Copy `path`, `rule` and `severity` (and `evidence` to pin the exact
-match) from the report, or `path` and `reason_code` for a limitation, and write
-the `reason` you accepted it. Leaving out `evidence` accepts that rule anywhere
-in the file; only do that for deny-lists. New, escalated or changed findings
-still block, and entries that no longer match anything fail the check, so remove
-them when the content changes. Never accept a finding just to get a green check.
+same PR, with the `reason` you accepted it:
+
+- For a finding, copy `path`, `rule`, `severity` and the exact `evidence` from
+  `summary.json` in the `skillspector-reports` artifact.
+- For a limitation, copy `path`, `reason_code` and its `analyzers` list (omit it
+  when the limitation names no analyzers).
+
+Each entry accepts exactly one occurrence, so a repeated finding needs one entry
+per occurrence. Line numbers aren't part of the match, so unrelated edits don't
+invalidate approvals. New, escalated or changed findings, and limitations that
+degrade another analyzer, still block. Entries that no longer match anything
+fail the check, so remove them when the content changes. Never accept a finding
+just to get a green check.
 
 **Making it a required check.** In **Settings > Rules > Rulesets**, add a status
 check rule for the default branch requiring **Scan AI primitives** (source:

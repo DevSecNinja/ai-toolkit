@@ -3,9 +3,9 @@
 # Pull requests are checked out at their merge commit, so HEAD^1..HEAD is the PR diff.
 set -euo pipefail
 
-pattern='^(apm\.yml|apm\.lock\.yaml|\.apm/|\.agents/|\.github/(agents|prompts|instructions|hooks)/'
-pattern+='|\.github/skillspector-accepted\.json|\.github/workflows/skillspector\.yml'
-pattern+='|scripts/(scan-skills\.py|skillspector-report\.py|skillspector-changes\.sh|git-push-approval/|tool-guardian/)'
+pattern='^((\.apm|\.agents|\.github/(agents|prompts|instructions|hooks)|scripts/(git-push-approval|tool-guardian))(/|$)'
+pattern+='|apm\.yml$|apm\.lock\.yaml$|\.github/skillspector-accepted\.json$|\.github/workflows/skillspector\.yml$'
+pattern+='|scripts/(scan-skills\.py|skillspector-report\.py|skillspector-changes\.sh)$'
 pattern+='|tests/(test_skillspector|test_skillspector_report|smoke-skillspector)\.py$)'
 
 relevant=true

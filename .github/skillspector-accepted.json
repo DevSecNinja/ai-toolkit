@@ -53,6 +53,28 @@
       "path": "scripts/tool-guardian/guard-tool.sh",
       "rule": "TM1",
       "severity": "HIGH",
+      "evidence": "rm -rf /",
+      "reason": "Tool Guardian's deny-list: these destructive commands are the regexes it blocks, never commands it runs."
+    },
+    {
+      "path": "scripts/tool-guardian/guard-tool.sh",
+      "rule": "TM1",
+      "severity": "HIGH",
+      "evidence": "'rm' on specific paths instead of root\"\n    \"destructive_file_ops:::critical:::rm -rf ~:::Use targeted 'rm' on specific paths instead of home directory\"\n    \"destructive_file_ops:::critical:::rm -rf \\",
+      "reason": "Tool Guardian's deny-list: these destructive commands are the regexes it blocks, never commands it runs."
+    },
+    {
+      "path": "scripts/tool-guardian/guard-tool.sh",
+      "rule": "TM1",
+      "severity": "HIGH",
+      "evidence": "rm -rf /:::Use",
+      "reason": "Tool Guardian's deny-list: these destructive commands are the regexes it blocks, never commands it runs."
+    },
+    {
+      "path": "scripts/tool-guardian/guard-tool.sh",
+      "rule": "TM1",
+      "severity": "HIGH",
+      "evidence": "rm -rf ~",
       "reason": "Tool Guardian's deny-list: these destructive commands are the regexes it blocks, never commands it runs."
     },
     {
@@ -61,6 +83,34 @@
       "severity": "HIGH",
       "evidence": ".env ",
       "reason": "Tool Guardian's deny-list text about protecting .env files; it does not read credentials."
+    },
+    {
+      "path": "scripts/tool-guardian/guard-tool.sh",
+      "rule": "TM1",
+      "severity": "HIGH",
+      "evidence": "git push --force",
+      "reason": "Tool Guardian's deny-list: these destructive commands are the regexes it blocks, never commands it runs."
+    },
+    {
+      "path": "scripts/tool-guardian/guard-tool.sh",
+      "rule": "TM1",
+      "severity": "HIGH",
+      "evidence": "git push --force",
+      "reason": "Tool Guardian's deny-list: these destructive commands are the regexes it blocks, never commands it runs."
+    },
+    {
+      "path": "scripts/tool-guardian/guard-tool.sh",
+      "rule": "TM1",
+      "severity": "HIGH",
+      "evidence": "git reset --hard",
+      "reason": "Tool Guardian's deny-list: these destructive commands are the regexes it blocks, never commands it runs."
+    },
+    {
+      "path": "scripts/tool-guardian/guard-tool.sh",
+      "rule": "TM1",
+      "severity": "HIGH",
+      "evidence": "chmod 777:::Use 'chmod 755' for directories or 'chmod 644' for files\"\n    \"permission_abuse:::high:::chmod -R 777",
+      "reason": "Tool Guardian's deny-list: these destructive commands are the regexes it blocks, never commands it runs."
     }
   ],
   "limitations": [
@@ -72,11 +122,17 @@
     {
       "path": ".apm/skills/obsidian/references/FUNCTIONS_REFERENCE.md",
       "reason_code": "static_parse_limit",
+      "analyzers": [
+        "static_patterns_tool_misuse"
+      ],
       "reason": "Obsidian Bases formula examples in a reference doc; the parser cannot bound them as commands but checked all input."
     },
     {
       "path": ".apm/skills/tripit-exporter/SKILL.md",
       "reason_code": "static_parse_limit",
+      "analyzers": [
+        "static_patterns_tool_misuse"
+      ],
       "reason": "A JavaScript template literal builds an output file name at runtime; the export only writes a local JSON file."
     },
     {
@@ -87,6 +143,9 @@
     {
       "path": ".github/agents/sast-sca-security-analyzer.agent.md",
       "reason_code": "static_parse_limit",
+      "analyzers": [
+        "static_patterns_tool_misuse"
+      ],
       "reason": "External awesome-copilot agent: example report/code snippets the parser cannot bound; all parser input was checked."
     }
   ]

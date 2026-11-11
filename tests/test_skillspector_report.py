@@ -92,8 +92,8 @@ class RenderTests(unittest.TestCase):
         self.assertNotIn(blocking, body)
         for change in ({"complete": False}, {"analyzer_gaps": ["tool_misuse"]}):
             with self.subTest(change):
+                # Any analyzer gap blocks every unaccepted limitation, whatever analyzers it names.
                 scan = {**data["scans"][0], **change}
-                scan["diagnostics"] = [dict(item, analyzers=["tool_misuse"]) for item in scan["diagnostics"]]
                 self.assertIn(blocking, report.render({**data, "scans": [scan]}, limit=10))
         excluded = {**diagnostic, "kind": "scope_exclusions", "reason_code": "excluded", "accepted": None}
         scan = {**data["scans"][0], "diagnostics": [excluded]}

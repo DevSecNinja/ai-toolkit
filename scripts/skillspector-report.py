@@ -113,8 +113,8 @@ def render(summary: dict, limit: int, pr: int | None = None) -> str:
         lines.extend(["", "### Errors", ""])
         lines.extend(f"- {cell(item['target'], 120)}: {cell(item['error'], 600)}" for item in summary["errors"][:limit])
     limitations = [
-        {**item, "target": scan["target"], "blocking": item["kind"] == "scope_exclusions" or not scan["complete"]
-         or bool(set(item.get("analyzers", [])) & set(scan.get("analyzer_gaps", [])))}
+        {**item, "target": scan["target"],
+         "blocking": item["kind"] == "scope_exclusions" or not scan["complete"] or bool(scan.get("analyzer_gaps"))}
         for scan in summary["scans"] for item in scan["diagnostics"]
     ]
     if limitations:
