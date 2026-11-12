@@ -22,6 +22,7 @@ MARKER = "<!-- skillspector-report -->"
 SECURITY_SCORES = {"LOW": "3.0", "MEDIUM": "5.0", "HIGH": "8.0", "CRITICAL": "9.5"}
 LEVELS = {"LOW": "note", "MEDIUM": "warning", "HIGH": "error", "CRITICAL": "error"}
 VERDICTS = {0: "✅ Passed", 1: "❌ Blocked: HIGH/CRITICAL findings", 2: "⚠️ Failed: scan errors"}
+NOT_NEEDED = "➖ Not needed"
 
 
 ESCAPES = {ord(character): f"&#{ord(character)};" for character in "\\`*_{}[]()!|<>&\"'"}
@@ -213,9 +214,16 @@ def build_sarif(summary: dict) -> dict:
                 "exitCode": summary["exit_code"],
                 "toolExecutionNotifications": notifications,
             }],
-            "properties": {"analysisComplete": not summary["errors"], "scanMode": "static"},
+            "properties": {"analysisComplete": analysis_complete(summary), "scanMode": "static"},
         }],
     }
+
+
+def analysis_complete(summary: dict) -> bool:
+    # Coverage, not the gate verdict: an accepted limitation can pass the gate on a partial scan.
+    return not summary["errors"] and all(
+        scan["complete"] is True and not scan["analyzer_gaps"] for scan in summary["scans"]
+    )
 
 
 def gh(*args: str, payload: dict | None = None) -> str:
@@ -228,7 +236,7 @@ def gh(*args: str, payload: dict | None = None) -> str:
     return result.stdout
 
 
-def upsert_comment(pr: int, body: str) -> None:
+def upsert_comment(pr: int, body: str, create: bool = True) -> None:
     """Create the report comment or update the bot's previous one in place."""
     repository = os.environ["GITHUB_REPOSITORY"]
     existing = gh(
@@ -238,18 +246,39 @@ def upsert_comment(pr: int, body: str) -> None:
     if existing:
         gh("--method", "PATCH", f"repos/{repository}/issues/comments/{existing[0]}", "--input", "-",
            payload={"body": body})
-    else:
+    elif create:
         gh("--method", "POST", f"repos/{repository}/issues/{pr}/comments", "--input", "-",
            payload={"body": body})
 
 
+def not_needed() -> str:
+    revision = (os.environ.get("GITHUB_SHA") or "")[:7]
+    return (f"{MARKER}\n## SkillSpector report: {NOT_NEEDED}\n\n"
+            "This PR no longer changes AI primitives or the scanner"
+            + (f" at `{revision}`" if revision else "") + ", so it wasn't scanned. "
+            "Earlier results in this comment no longer apply.\n")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("summary", type=Path, help="summary.json written by scan-skills.py")
+    parser.add_argument("summary", type=Path, nargs="?", help="summary.json written by scan-skills.py")
     parser.add_argument("--markdown", type=Path, help="Append the detailed Markdown summary here.")
     parser.add_argument("--sarif", type=Path, help="Write SARIF 2.1.0 for GitHub Code Scanning here.")
     parser.add_argument("--comment-pr", type=int, help="Create or update the PR summary comment.")
+    parser.add_argument("--not-needed-pr", type=int,
+                        help="Mark an existing PR comment as not needed after the PR stops changing AI primitives.")
     args = parser.parse_args()
+    if args.not_needed_pr:
+        if args.summary or args.markdown or args.sarif or args.comment_pr:
+            parser.error("--not-needed-pr takes no summary or other outputs.")
+        try:
+            upsert_comment(args.not_needed_pr, not_needed(), create=False)
+        except (KeyError, RuntimeError, subprocess.TimeoutExpired) as error:
+            print(f"SkillSpector report failed: {error}", file=sys.stderr)
+            return 2
+        return 0
+    if not args.summary:
+        parser.error("a summary path is required.")
     try:
         if not args.summary.is_file():
             if args.comment_pr:

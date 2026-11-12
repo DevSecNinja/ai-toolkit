@@ -169,7 +169,8 @@ static scan is not a safety guarantee: OSV lookups use the offline fallback.
 - A **PR comment** (updated in place on every re-run) shows counts by severity,
   the top findings with file/line links, accepted items and links to the run.
   Comments are posted only on PRs from this repository; fork PRs get a read-only
-  token.
+  token. If a later push stops changing AI primitives, the comment is marked
+  "Not needed" so stale results don't linger.
 - The **Actions run summary** lists up to 100 findings and every analysis
   limitation.
 - **Security > Code scanning** (tool: SkillSpector) holds every finding as

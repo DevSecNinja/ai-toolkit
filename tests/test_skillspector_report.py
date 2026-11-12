@@ -137,6 +137,17 @@ class SarifTests(unittest.TestCase):
         self.assertEqual(medium["locations"][0]["physicalLocation"]["artifactLocation"]["uri"], ".apm/a%20%23b.md")
         self.assertTrue(run["invocations"][0]["executionSuccessful"])
 
+    def test_partial_coverage_is_not_reported_as_complete(self):
+        self.assertTrue(report.build_sarif(summary())["runs"][0]["properties"]["analysisComplete"])
+        for change in ({"complete": False}, {"analyzer_gaps": ["tool_misuse"]}):
+            with self.subTest(change):
+                # An accepted limitation can pass the gate while coverage stays partial.
+                data = summary()
+                data["scans"][0].update(change)
+                run = report.build_sarif(data)["runs"][0]
+                self.assertFalse(run["properties"]["analysisComplete"])
+                self.assertTrue(run["invocations"][0]["executionSuccessful"])
+
     def test_errors_mark_sarif_execution_unsuccessful(self):
         data = summary(finding("HIGH"), exit_code=2, errors=[{"target": "t", "error": "boom"}])
         invocation = report.build_sarif(data)["runs"][0]["invocations"][0]
@@ -162,6 +173,19 @@ class CommentTests(unittest.TestCase):
         with patch.object(report, "gh", side_effect=["", ""]) as gh:
             report.upsert_comment(7, "body")
         self.assertEqual(gh.call_args_list[1].args[:3], ("--method", "POST", "repos/owner/repo/issues/7/comments"))
+
+    def test_not_needed_updates_only_an_existing_comment(self):
+        with patch.object(report, "gh", side_effect=["101\n", ""]) as gh, \
+                patch("sys.argv", ["report", "--not-needed-pr", "7"]):
+            self.assertEqual(report.main(), 0)
+        self.assertEqual(gh.call_args_list[1].args[:2], ("--method", "PATCH"))
+        body = gh.call_args_list[1].kwargs["payload"]["body"]
+        self.assertTrue(body.startswith(report.MARKER))
+        self.assertIn("➖ Not needed", body)
+        with patch.object(report, "gh", side_effect=[""]) as gh, \
+                patch("sys.argv", ["report", "--not-needed-pr", "7"]):
+            self.assertEqual(report.main(), 0)
+        self.assertEqual(gh.call_count, 1)
 
     def test_missing_summary_still_comments_and_fails(self):
         with tempfile.TemporaryDirectory() as temporary, \
