@@ -9,7 +9,9 @@
 set -euo pipefail
 
 relevant='^(\.apm/|\.github/prompts/|\.github/agents/|INDEX\.md$|README\.md$|scripts/generate-index\.sh$)'
-if ! git diff --cached --name-only --no-renames | grep -Eq "${relevant}"; then
+# No `grep -q`: an early exit would SIGPIPE git diff and, with pipefail, skip
+# regeneration even though a relevant path is staged.
+if ! git diff --cached --name-only --no-renames | grep -E "${relevant}" >/dev/null; then
     exit 0
 fi
 
