@@ -191,6 +191,14 @@
       "evidence": "chmod 777:::Use 'chmod 755' for directories or 'chmod 644' for files\"\n    \"permission_abuse:::high:::chmod -R 777",
       "fingerprint": "2df784ea404c1b90428a92adcdca4a3baa68d299c8051bba0d1f995439b20c8d",
       "reason": "Tool Guardian's deny-list: these destructive commands are the regexes it blocks, never commands it runs."
+    },
+    {
+      "path": "scripts/git-push-approval/require-push-approval.sh",
+      "rule": "TM1",
+      "severity": "HIGH",
+      "evidence": "Git Push Approval Hook\n# Forces an explicit, interactive human approval before the AI coding agent runs\n# any `git push`. A commit is entirely local and rewritable (amend / reset /\n# rebase) until it ",
+      "fingerprint": "988147c59b2aaa7d1a16a85b17db5d8b2ce9b5db3a5c6747142ad8e19d3413b6",
+      "reason": "Push-approval hook: it names --force options only to detect them and ask for approval; it never runs them."
     }
   ],
   "limitations": [
