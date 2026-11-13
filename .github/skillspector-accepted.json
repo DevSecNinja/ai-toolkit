@@ -1,6 +1,70 @@
 {
   "findings": [
     {
+      "path": ".agents/skills/security-audit/AI-AND-LLM.md",
+      "rule": "MP3",
+      "severity": "HIGH",
+      "evidence": "delete memory",
+      "fingerprint": "d7eaa774b59696baea967276d3aaea034b9ff963d36b9e80b85947ceb8988d16",
+      "reason": "External cloudflare/security-audit-skill (vendored via apm.yml): audit guidance asking who may create, update and delete agent memory across tenants; it does not touch memory."
+    },
+    {
+      "path": ".agents/skills/security-audit/ATTACK-CLASSES.md",
+      "rule": "PE3",
+      "severity": "HIGH",
+      "evidence": "credentials.json",
+      "fingerprint": "07a0b37ad28a14919446682ad9b1f38223a950eb02c424e48b49fe75c25268c0",
+      "reason": "External cloudflare/security-audit-skill (vendored via apm.yml): checklist item asking whether credentials.json or .env files are committed to the audited repo; it reads no credentials."
+    },
+    {
+      "path": ".agents/skills/security-audit/DESKTOP-MOBILE-AND-LOCAL-IPC.md",
+      "rule": "PE3",
+      "severity": "HIGH",
+      "evidence": "keychain",
+      "fingerprint": "cf159af5f3c5aa20214f7ff51b2ec06e8190ff1ab76c35f09188a749bd35c424",
+      "reason": "External cloudflare/security-audit-skill (vendored via apm.yml): names keychain ACLs as an OS control to account for when judging a trust boundary; it does not access a keychain."
+    },
+    {
+      "path": ".agents/skills/security-audit/SKILL.md",
+      "rule": "AE1",
+      "severity": "HIGH",
+      "evidence": "validate-coverage-ledger.cjs (partial)",
+      "fingerprint": "ffbdf0c2bb6241335b47e21e84339e431664e9ec1437c7cf78dc5e86775a8add",
+      "reason": "External cloudflare/security-audit-skill (vendored via apm.yml): derived from the accepted static_parse_limit on the bundled validator, which only reads its JSON input with fs/path/util."
+    },
+    {
+      "path": ".agents/skills/security-audit/SKILL.md",
+      "rule": "AE1",
+      "severity": "HIGH",
+      "evidence": "validate-findings.cjs (partial)",
+      "fingerprint": "5f42f146942e94498e8cc1c37a04b94ed3024d6394c96b81c7d43a5f20c40929",
+      "reason": "External cloudflare/security-audit-skill (vendored via apm.yml): derived from the accepted static_parse_limit on the bundled validator, which only reads its JSON input with fs/path/util."
+    },
+    {
+      "path": ".agents/skills/security-audit/validate-coverage-ledger.test.cjs",
+      "rule": "PE3",
+      "severity": "HIGH",
+      "evidence": "/etc/passwd",
+      "fingerprint": "ac75eea6ed115d0252fb13bbb10e9c4421764d5a7612787edcde6a78569d8f88",
+      "reason": "External cloudflare/security-audit-skill (vendored via apm.yml): test fixture asserting the ledger validator rejects /etc/passwd as an unsafe absolute path; the file is never read."
+    },
+    {
+      "path": ".agents/skills/security-audit/validate-findings.test.cjs",
+      "rule": "PE3",
+      "severity": "HIGH",
+      "evidence": "/etc/passwd",
+      "fingerprint": "ac75eea6ed115d0252fb13bbb10e9c4421764d5a7612787edcde6a78569d8f88",
+      "reason": "External cloudflare/security-audit-skill (vendored via apm.yml): test fixture (unsafe source paths) asserting the findings validator rejects /etc/passwd; the file is never read."
+    },
+    {
+      "path": ".agents/skills/security-audit/validate-findings.test.cjs",
+      "rule": "PE3",
+      "severity": "HIGH",
+      "evidence": "/etc/passwd",
+      "fingerprint": "ac75eea6ed115d0252fb13bbb10e9c4421764d5a7612787edcde6a78569d8f88",
+      "reason": "External cloudflare/security-audit-skill (vendored via apm.yml): test fixture (unsafe fingerprint paths) asserting the findings validator rejects /etc/passwd; the file is never read."
+    },
+    {
       "path": ".apm/skills/obsidian/SKILL.md",
       "rule": "AE1",
       "severity": "HIGH",
@@ -130,6 +194,108 @@
     }
   ],
   "limitations": [
+    {
+      "path": ".agents/skills/security-audit/SKILL.md",
+      "reason_code": "reference_missing",
+      "reason": "External cloudflare/security-audit-skill (vendored via apm.yml): run-metadata.json is a file the audit writes to its external output directory at runtime, not a bundled file."
+    },
+    {
+      "path": ".agents/skills/security-audit/SKILL.md",
+      "reason_code": "reference_missing",
+      "reason": "External cloudflare/security-audit-skill (vendored via apm.yml): architecture.md is a file the audit writes to its external output directory at runtime, not a bundled file."
+    },
+    {
+      "path": ".agents/skills/security-audit/SKILL.md",
+      "reason_code": "reference_missing",
+      "reason": "External cloudflare/security-audit-skill (vendored via apm.yml): coverage-ledger.json is a file the audit writes to its external output directory at runtime, not a bundled file."
+    },
+    {
+      "path": ".agents/skills/security-audit/SKILL.md",
+      "reason_code": "reference_missing",
+      "reason": "External cloudflare/security-audit-skill (vendored via apm.yml): findings.json is a file the audit writes to its external output directory at runtime, not a bundled file."
+    },
+    {
+      "path": ".agents/skills/security-audit/SKILL.md",
+      "reason_code": "reference_missing",
+      "reason": "External cloudflare/security-audit-skill (vendored via apm.yml): REPORT.md is a file the audit writes to its external output directory at runtime, not a bundled file."
+    },
+    {
+      "path": ".agents/skills/security-audit/SKILL.md",
+      "reason_code": "reference_missing",
+      "reason": "External cloudflare/security-audit-skill (vendored via apm.yml): FINDINGS-DETAIL.md is a file the audit writes to its external output directory at runtime, not a bundled file."
+    },
+    {
+      "path": ".agents/skills/security-audit/SKILL.md",
+      "reason_code": "reference_missing",
+      "reason": "External cloudflare/security-audit-skill (vendored via apm.yml): NEEDS-VALIDATION.md is a file the audit writes to its external output directory at runtime, not a bundled file."
+    },
+    {
+      "path": ".agents/skills/security-audit/SKILL.md",
+      "reason_code": "reference_missing",
+      "reason": "External cloudflare/security-audit-skill (vendored via apm.yml): run-metadata.json fields described for the parent to write at runtime; not a bundled file."
+    },
+    {
+      "path": ".agents/skills/security-audit/SKILL.md",
+      "reason_code": "reference_missing",
+      "reason": "External cloudflare/security-audit-skill (vendored via apm.yml): prior runs' coverage-ledger.json and findings.json in the output directory, read at runtime; not bundled files."
+    },
+    {
+      "path": ".agents/skills/security-audit/SKILL.md",
+      "reason_code": "reference_missing",
+      "reason": "External cloudflare/security-audit-skill (vendored via apm.yml): run-metadata.json profile fields written at runtime; not a bundled file."
+    },
+    {
+      "path": ".agents/skills/security-audit/SKILL.md",
+      "reason_code": "reference_missing",
+      "reason": "External cloudflare/security-audit-skill (vendored via apm.yml): run-metadata.json budget field written at runtime; not a bundled file."
+    },
+    {
+      "path": ".agents/skills/security-audit/SKILL.md",
+      "reason_code": "reference_missing",
+      "reason": "External cloudflare/security-audit-skill (vendored via apm.yml): run-metadata.json run_status written at runtime when a budget runs out; not a bundled file."
+    },
+    {
+      "path": ".agents/skills/security-audit/SKILL.md",
+      "reason_code": "reference_missing",
+      "reason": "External cloudflare/security-audit-skill (vendored via apm.yml): findings.json is runtime audit output validated by the bundled scripts; not a bundled file."
+    },
+    {
+      "path": ".agents/skills/security-audit/SKILL.md",
+      "reason_code": "reference_missing",
+      "reason": "External cloudflare/security-audit-skill (vendored via apm.yml): REPORT.md, FINDINGS-DETAIL.md and NEEDS-VALIDATION.md are runtime report output; not bundled files."
+    },
+    {
+      "path": ".agents/skills/security-audit/validate-coverage-ledger.cjs",
+      "reason_code": "static_parse_limit",
+      "analyzers": [
+        "static_patterns_tool_misuse"
+      ],
+      "reason": "External cloudflare/security-audit-skill (vendored via apm.yml): a template literal that escapes control characters in diagnostics; the validator only reads its input with fs/path/util and runs no commands."
+    },
+    {
+      "path": ".agents/skills/security-audit/validate-coverage-ledger.test.cjs",
+      "reason_code": "static_parse_limit",
+      "analyzers": [
+        "static_patterns_tool_misuse"
+      ],
+      "reason": "External cloudflare/security-audit-skill (vendored via apm.yml): a template literal joining a child process's stdout and stderr; the tests only spawn node on the validator and mkfifo inside mkdtemp directories."
+    },
+    {
+      "path": ".agents/skills/security-audit/validate-findings.cjs",
+      "reason_code": "static_parse_limit",
+      "analyzers": [
+        "static_patterns_tool_misuse"
+      ],
+      "reason": "External cloudflare/security-audit-skill (vendored via apm.yml): a template literal that escapes control characters in diagnostics; the validator only reads its input with fs/path/util and runs no commands."
+    },
+    {
+      "path": ".agents/skills/security-audit/validate-findings.test.cjs",
+      "reason_code": "static_parse_limit",
+      "analyzers": [
+        "static_patterns_tool_misuse"
+      ],
+      "reason": "External cloudflare/security-audit-skill (vendored via apm.yml): a template literal joining a child process's stdout and stderr; the tests only spawn node on the validator and mkfifo inside mkdtemp directories."
+    },
     {
       "path": ".apm/skills/obsidian/SKILL.md",
       "reason_code": "reference_missing",
