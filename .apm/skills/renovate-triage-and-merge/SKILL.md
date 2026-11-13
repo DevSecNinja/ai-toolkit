@@ -1,6 +1,6 @@
 ---
 name: renovate-triage-and-merge
-description: "Use when asked to review a Renovate backlog or Dependency Dashboard, investigate abandoned dependencies, find manual-only PRs, or process selected updates. Recommends an evidence-driven processing and merge order, then requires exact confirmation before a deterministic SHA-bound merge or queue request."
+description: "Use when asked to review a Renovate backlog or Dependency Dashboard, investigate abandoned dependencies, find manual-only PRs, or process selected updates. Recommends an evidence-driven processing and merge order, then requires exact confirmation before a deterministic SHA-bound merge or queue request. For fleet-wide, policy-driven Renovate work in a repo that ships its own steward skill (for example repo-steward's `renovate-steward`), use that skill instead."
 targets:
   - copilot
   - claude
