@@ -1400,10 +1400,14 @@ class RepositoryScriptTests(unittest.TestCase):
         )
         (self.path / "README.md").write_text("# Example\n\n<!-- INDEX_START -->\n<!-- INDEX_END -->\n")
 
+    def env(self):
+        # Hooks export GIT_DIR / GIT_INDEX_FILE etc.; keep fixtures off the real repo.
+        clean = {k: v for k, v in os.environ.items() if not k.startswith("GIT_")}
+        return {**clean, "TMPDIR": str(self.path / "tmp")}
+
     def run_script(self, path):
         return subprocess.run(["/bin/bash", path], cwd=self.path, capture_output=True,
-                              text=True, timeout=20, check=False,
-                              env={**os.environ, "TMPDIR": str(self.path / "tmp")})
+                              text=True, timeout=20, check=False, env=self.env())
 
     def test_recursive_validation_on_system_bash(self):
         file = self.path / ".apm/prompts/nested/example.prompt.md"
@@ -1501,7 +1505,7 @@ class RepositoryScriptTests(unittest.TestCase):
 
     def git(self, *args):
         return subprocess.run(["git", "-c", "user.name=t", "-c", "user.email=t@example.com",
-                               "-c", "commit.gpgsign=false", *args], cwd=self.path,
+                               "-c", "commit.gpgsign=false", *args], cwd=self.path, env=self.env(),
                               capture_output=True, text=True, timeout=20, check=True).stdout
 
     def init_repo_with_fresh_index(self):
@@ -1529,6 +1533,19 @@ class RepositoryScriptTests(unittest.TestCase):
         self.assertNotIn("Unstaged prose.", self.git("show", ":README.md"))
         self.assertTrue(readme.read_text().startswith("Unstaged prose.\n"))
         self.assertEqual(list((self.path / "tmp").iterdir()), [])
+
+    def test_git_fixtures_ignore_hook_git_environment(self):
+        outside = self.path.parent / f"{self.path.name}-outside"
+        hook_env = {"GIT_DIR": str(outside / ".git"), "GIT_INDEX_FILE": str(outside / "index")}
+        with patch.dict(os.environ, hook_env):
+            self.init_repo_with_fresh_index()
+            (self.path / ".apm/prompts/new.prompt.md").write_text(
+                "---\ndescription: New prompt\ncategory: coding\n---\nBody.\n")
+            self.git("add", ".apm/prompts/new.prompt.md")
+            self.assertEqual(self.run_script("scripts/stage-index.sh").returncode, 0)
+            self.assertIn("New prompt", self.git("show", ":INDEX.md"))
+        self.assertFalse(outside.exists())
+        self.assertTrue((self.path / ".git/index").is_file())
 
     def test_stage_index_handles_deletions_and_skips_unrelated_changes(self):
         self.init_repo_with_fresh_index()
