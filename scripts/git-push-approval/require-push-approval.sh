@@ -58,8 +58,11 @@ fi
 # Only shell-execution tools can run `git push`. Gate on the tool name so that,
 # for example, editing a document that merely mentions "git push" is unaffected.
 # An empty/unknown tool name falls through to scanning, erring toward asking.
+# Lowercase with `tr`, not `${1,,}`: stock macOS runs this under Bash 3.2.
 is_shell_tool() {
-    case "${1,,}" in
+    local name
+    name="$(printf '%s' "$1" | tr '[:upper:]' '[:lower:]')"
+    case "${name}" in
     bash | powershell | shell | "") return 0 ;;
     *) return 1 ;;
     esac
