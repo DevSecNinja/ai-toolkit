@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.10.0](https://github.com/DevSecNinja/ai-toolkit/compare/v0.9.1...v0.10.0) (2026-11-13)
+
+
+### Features
+
+* add cloudflare security-audit skill ([#226](https://github.com/DevSecNinja/ai-toolkit/issues/226)) ([b2945ba](https://github.com/DevSecNinja/ai-toolkit/commit/b2945ba6777172d9d2f2ee8da6aedae8525cbc5a))
+* **security:** add SkillSpector severity gate with reviewed acceptances ([#215](https://github.com/DevSecNinja/ai-toolkit/issues/215)) ([c22e17a](https://github.com/DevSecNinja/ai-toolkit/commit/c22e17a612051db2d1940b2b7a97edcbd2891207))
+
+
+### Bug Fixes
+
+* **hooks:** make git-push-approval hook work with macOS Bash 3.2 ([#222](https://github.com/DevSecNinja/ai-toolkit/issues/222)) ([8b99a82](https://github.com/DevSecNinja/ai-toolkit/commit/8b99a8241a2e1154ba1058164e719495666e3c13))
+* restore the review gate for external APM primitives ([#214](https://github.com/DevSecNinja/ai-toolkit/issues/214)) ([a398c92](https://github.com/DevSecNinja/ai-toolkit/commit/a398c92fd754f70008a3adbfeda83f7080816339))
+
 ## [0.9.1](https://github.com/DevSecNinja/ai-toolkit/compare/v0.9.0...v0.9.1) (2026-11-11)
 
 
