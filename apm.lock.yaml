@@ -1,6 +1,6 @@
 lockfile_version: '1'
-generated_at: '2026-11-11T19:19:54.391806+00:00'
-apm_version: 0.21.0
+generated_at: '2026-11-13T13:15:25.769863+00:00'
+apm_version: 0.35.1
 dependencies:
 - repo_url: github/awesome-copilot
   name: awesome-copilot-accessibility
@@ -436,7 +436,7 @@ deployments:
   owners:
   - .
   active_owner: .
-  content_hash: sha256:e9de7093d511a2320f48cce13c8717919dbd7856533d71876672eba8eb8de057
+  content_hash: sha256:88f3c5b7347ff1c182e0a5bb00706bd364c3698757735f86585a5256d35d1caf
 - kind: project-relative
   target: copilot
   value: .agents/skills/renovate-triage-and-merge/references/dashboard.md
@@ -679,7 +679,7 @@ deployments:
   owners:
   - .
   active_owner: .
-  content_hash: sha256:cf4096ad00f53f6dbaa24bfb4365d01f6405c158636393bd4f6ca6fdca3bd11f
+  content_hash: sha256:ebe004f6416201b1c6869c6049931245fc62db407d6637a8a022e2d2766d2ac5
 - kind: project-relative
   target: copilot
   value: .github/hooks/scripts/ai-toolkit/scripts/tool-guardian/guard-tool.sh
@@ -743,6 +743,24 @@ deployments:
   - .
   active_owner: .
   content_hash: sha256:bef7b8a47605fd61dcdd6eb1e60b8294e9f25f5bf2a60662e1cfa7a8c7e2b64a
+- kind: uri
+  target: mcp
+  value: io.github.github/github-mcp-server
+  runtime: copilot
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: null
+- kind: uri
+  target: mcp
+  value: microsoft-learn
+  runtime: copilot
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: null
 mcp_servers:
 - io.github.github/github-mcp-server
 - microsoft-learn
@@ -754,7 +772,10 @@ mcp_configs:
     transport: http
     registry: false
     url: https://learn.microsoft.com/api/mcp
-mcp_target_servers: {}
+mcp_target_servers:
+  copilot:
+  - io.github.github/github-mcp-server
+  - microsoft-learn
 local_deployed_files:
 - .agents/skills/commit-and-release
 - .agents/skills/commit-and-release/SKILL.md
@@ -822,7 +843,7 @@ local_deployed_file_hashes:
   .agents/skills/obsidian/references/FUNCTIONS_REFERENCE.md: sha256:af0a31376a59f5b4fdbe6f51dcfe6d3aa971c8cda386b1b9801fac0cdbedbc59
   .agents/skills/obsidian/references/PROPERTIES.md: sha256:10e854dbfdf1a6a154e3ed058f0b1756a353f5fc02c0e94144a65e6158aa3d8b
   .agents/skills/ooo-task-handoff-planner/SKILL.md: sha256:8886cdf1b9effe8a877e890d09fa54281ab680516a3837f0b24b0110d7c4d8b9
-  .agents/skills/renovate-triage-and-merge/SKILL.md: sha256:e9de7093d511a2320f48cce13c8717919dbd7856533d71876672eba8eb8de057
+  .agents/skills/renovate-triage-and-merge/SKILL.md: sha256:88f3c5b7347ff1c182e0a5bb00706bd364c3698757735f86585a5256d35d1caf
   .agents/skills/renovate-triage-and-merge/references/dashboard.md: sha256:d9bf9f37ed711a6fa9d1dbe7af160cdaf432294cf343939e9134f1820a7fa976
   .agents/skills/renovate-triage-and-merge/references/handoff.md: sha256:070f6a08eec8cfcc531df231b244a1ad4507b479f99763787360f12fb1df3f35
   .agents/skills/renovate-triage-and-merge/references/processing-order.md: sha256:7fd21952556551ce957ddba53ec0d2e4e560068fde9877b2dbb22dfbbad46857
@@ -835,7 +856,7 @@ local_deployed_file_hashes:
   .github/agents/personal-assistant.agent.md: sha256:a48a53144bfc4bc62d2a20f2a984f1fb55ad9ec98d30dfeccff0276e86740b65
   .github/hooks/ai-toolkit-git-push-approval.json: sha256:e882ddb46538d7653a14b1e91273795c6c8023271fe1fb25ab371439f995839f
   .github/hooks/ai-toolkit-tool-guardian.json: sha256:ac518c3b22487e2ab72a2624262f7eb0739874853be30cf0db6184ff58d01e0b
-  .github/hooks/scripts/ai-toolkit/scripts/git-push-approval/require-push-approval.sh: sha256:cf4096ad00f53f6dbaa24bfb4365d01f6405c158636393bd4f6ca6fdca3bd11f
+  .github/hooks/scripts/ai-toolkit/scripts/git-push-approval/require-push-approval.sh: sha256:ebe004f6416201b1c6869c6049931245fc62db407d6637a8a022e2d2766d2ac5
   .github/hooks/scripts/ai-toolkit/scripts/tool-guardian/guard-tool.sh: sha256:d500ad6b087dd2653d49590fc4926d21eaff66445f3057290808b63ea9440384
   .github/instructions/devsecninja-conventions.instructions.md: sha256:8ced62d8d79f3bd41fdb2378dc1c38a04292039148c46b39df30f4adf8a628a5
   .github/instructions/untrusted-repositories.instructions.md: sha256:894e27a4dcac80182d0f08506ce73631aaa0ed23f047185425592c21b32cd581
