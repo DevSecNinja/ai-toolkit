@@ -211,6 +211,12 @@ for our own `.apm/skills/` copies, so each external skill needs a negation in
 [`.gitignore`](../.gitignore) to stay in the reviewable snapshot. The whole
 folder is committed, including its companion files and scripts.
 
+APM installs only the skill's subpath, so an upstream `LICENSE` at the
+repository root doesn't travel with it. [`THIRD_PARTY_NOTICES.md`](../THIRD_PARTY_NOTICES.md)
+carries the copyright and licence text for each external skill. If you commit
+or redistribute an installed external skill folder elsewhere, as consumers of
+this package might, keep that notice with it.
+
 The labels come from [`.github/labels-base.yaml`](../.github/labels-base.yaml)
 (org-wide, synced from `DevSecNinja/.github` by Config Sync) and
 [`.github/labels.yaml`](../.github/labels.yaml), applied by
