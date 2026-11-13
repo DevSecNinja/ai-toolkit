@@ -16,7 +16,7 @@
 # command provably targets a non-default, non-protected branch on `origin`
 # (including `--force-with-lease`), the hook stays silent so unattended
 # autopilot sessions can update their own PR branches. Anything it can't resolve
-# with certainty still asks. See scripts/git-push-approval/README.md.
+# with certainty still asks. See docs/git-push-approval.md.
 #
 # IMPORTANT: `preToolUse` command hooks are fail-closed — a non-zero exit (or a
 # crash) denies the tool call. This script therefore always exits 0 and only
@@ -115,6 +115,7 @@ rgit() { git -C "${REPO_DIR}" "$@" 2>/dev/null; }
 is_protected() {
     case "$1" in
     "" | HEAD | main | master | trunk | develop | gh-pages | release | release/* | releases/* | release-please--*) return 0 ;;
+    *) ;;
     esac
     [[ -n "${DEFAULT_BRANCH}" && "$1" == "${DEFAULT_BRANCH}" ]]
 }
@@ -132,7 +133,7 @@ flush_word() {
 tokenize() {
     local s="$1" n=${#1} i=0 c next q="" word="" inword=0 skip=0
     WORDS=()
-    case "${s}" in *'$'* | *'`'* | *'\'* | *"${SEP}"*) return 1 ;; esac
+    case "${s}" in *'$'* | *'`'* | *\\* | *"${SEP}"*) return 1 ;; *) ;; esac
     while [[ ${i} -lt ${n} ]]; do
         c="${s:${i}:1}"
         i=$((i + 1))
@@ -147,7 +148,7 @@ tokenize() {
         '>' | '<')
             next="${s:${i}:1}"
             [[ "${next}" == '(' || "${c}${next}" == '<<' ]] && return 1
-            case "${next}" in '>' | '&' | '|') i=$((i + 1)) ;; esac
+            case "${next}" in '>' | '&' | '|') i=$((i + 1)) ;; *) ;; esac
             case "${word}" in *[!0-9]*) ;; *) word="" && inword=0 ;; esac # fd, as in 2>&1
             flush_word
             skip=1
@@ -164,13 +165,16 @@ tokenize() {
     [[ ${skip} -eq 0 ]]
 }
 
-# Call "$1" with SEG set to the words of each command in WORDS.
+# Run scan_command ("$1" = scan) or check_command on each command in WORDS,
+# with SEG set to its words.
 for_each_command() {
     local i=0 n=${#WORDS[@]}
     SEG=()
     while [[ ${i} -le ${n} ]]; do
         if [[ ${i} -eq ${n} || "${WORDS[${i}]}" == "${SEP}" ]]; then
-            if [[ ${#SEG[@]} -gt 0 ]]; then "$1" || return 1; fi
+            if [[ ${#SEG[@]} -gt 0 ]]; then
+                if [[ "$1" == scan ]]; then scan_command; else check_command || return 1; fi
+            fi
             SEG=()
         else
             SEG+=("${WORDS[${i}]}")
@@ -196,8 +200,9 @@ git_subcommand() {
 # First pass: note commands that change directory, move HEAD or create branches.
 scan_command() {
     local i positional=0
-    case "$(printf '%s' "${SEG[0]}" | tr '[:upper:]' '[:lower:]')" in
+    case "$(tr '[:upper:]' '[:lower:]' <<<"${SEG[0]}")" in
     cd | pushd | popd | chdir | sl | set-location | push-location | pop-location) DIR_MAY_CHANGE=1 ;;
+    *) ;;
     esac
     git_subcommand || return 0
     i=${SUB_AT}
@@ -205,7 +210,7 @@ scan_command() {
     checkout | switch)
         HEAD_MAY_MOVE=1
         while [[ ${i} -lt $((${#SEG[@]} - 1)) ]]; do
-            case "${SEG[${i}]}" in -b | -B | -c | -C) CREATED="${CREATED}${SEP}${SEG[$((i + 1))]}${SEP}" ;; esac
+            case "${SEG[${i}]}" in -b | -B | -c | -C) CREATED="${CREATED}${SEP}${SEG[$((i + 1))]}${SEP}" ;; *) ;; esac
             i=$((i + 1))
         done
         ;;
@@ -218,6 +223,7 @@ scan_command() {
         done
         [[ ${positional} -le 1 ]] || HEAD_MAY_MOVE=1
         ;;
+    *) ;;
     esac
     return 0
 }
@@ -230,10 +236,12 @@ current_branch() {
 # `git push [origin]`: targets follow from the current branch, its upstream and
 # push config; only the default-like push.default modes are resolved.
 push_current() {
-    local remote="$1" merge
+    local remote="$1" merge mode refspecs
     current_branch || return 1
-    case "$(rgit config --get push.default)" in "" | simple | current | upstream) ;; *) return 1 ;; esac
-    [[ -z "$(rgit config --get-all remote.origin.push)" ]] || return 1
+    mode="$(rgit config --get push.default)"
+    case "${mode}" in "" | simple | current | upstream) ;; *) return 1 ;; esac
+    refspecs="$(rgit config --get-all remote.origin.push)"
+    [[ -z "${refspecs}" ]] || return 1
     if [[ -z "${remote}" ]]; then
         remote="$(rgit config --get "branch.${CURRENT}.pushRemote" ||
             rgit config --get remote.pushDefault ||
@@ -288,9 +296,10 @@ check_push() {
             -u | --set-upstream | -q | --quiet | -v | --verbose | -n | --dry-run | --progress | --no-progress | \
                 --porcelain | --atomic | --force-with-lease | --force-with-lease=* | --force-if-includes) continue ;;
             -*) return 1 ;; # --force, --tags, --all, --mirror, --delete, --no-verify, ...
+            *) ;;
             esac
         fi
-        case "${a}" in "" | +* | *[*?{}~,@^]* | *'['* | *']'*) return 1 ;; esac
+        case "${a}" in "" | +* | *[*?{}~,@^]* | *'['* | *']'*) return 1 ;; *) ;; esac
         POS+=("${a}")
     done
     [[ ${#POS[@]} -gt 0 ]] || {
@@ -320,13 +329,15 @@ check_command() {
 
 # push_is_safe DIR COMMAND
 push_is_safe() {
+    local mirror
     REPO_DIR="$1"
     rgit rev-parse --git-dir >/dev/null || return 1
-    [[ "$(rgit config --get --bool remote.origin.mirror)" != "true" ]] || return 1
+    mirror="$(rgit config --get --bool remote.origin.mirror)"
+    [[ "${mirror}" != "true" ]] || return 1
     DEFAULT_BRANCH="$(rgit symbolic-ref --quiet --short refs/remotes/origin/HEAD)"
     DEFAULT_BRANCH="${DEFAULT_BRANCH#origin/}"
     tokenize "$2" || return 1
-    for_each_command scan_command && for_each_command check_command
+    for_each_command scan && for_each_command check
 }
 
 if is_shell_tool "${TOOL_NAME}" && printf '%s' "${TOOL_ARGS}" | grep -qiE "${GIT_PUSH_REGEX}"; then

@@ -1,7 +1,7 @@
 # Git push approval hook
 
-[`require-push-approval.sh`](require-push-approval.sh) is a Copilot `preToolUse`
-hook, shipped by [`.apm/hooks/git-push-approval.json`](../../.apm/hooks/git-push-approval.json).
+[`require-push-approval.sh`](../scripts/git-push-approval/require-push-approval.sh) is a Copilot `preToolUse`
+hook, shipped by [`.apm/hooks/git-push-approval.json`](../.apm/hooks/git-push-approval.json).
 Commits stay local and rewritable until they're pushed, so `git push` is where it
 asks for a human checkpoint.
 
