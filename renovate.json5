@@ -13,21 +13,23 @@
     "github>DevSecNinja/.github//.renovate/packageRules.json5",
     "github>DevSecNinja/.github//.renovate/semanticCommits.json5",
   ],
-  // The org customManagers preset (above) tracks `#vX.Y.Z` tag pins. The curated
-  // github/awesome-copilot agents in apm.yml are pinned to a commit SHA on the
-  // upstream default branch (no release tags), so they need their own manager:
-  // track main's HEAD as a digest. A merged bump triggers apm-materialize.yml,
-  // which regenerates .github/agents/ for review.
+  // The org customManagers preset (above) tracks `#vX.Y.Z` tag pins. The
+  // external primitives in apm.yml (github/awesome-copilot agents,
+  // cloudflare/security-audit-skill) are pinned to a commit SHA on the upstream
+  // default branch (no release tags), so they need their own manager: track
+  // main's HEAD as a digest. Any `owner/repo/<subpath>#<40-hex SHA>` entry is
+  // picked up; a new dependency on a non-`main` default branch needs its own
+  // manager. A merged bump triggers apm-materialize.yml, which regenerates
+  // .github/agents/ and .agents/skills/ for review.
   customManagers: [
     {
       customType: "regex",
-      description: "Bump SHA-pinned github/awesome-copilot agents in apm.yml",
+      description: "Bump SHA-pinned external APM primitives in apm.yml",
       managerFilePatterns: ["/^apm\\.yml$/"],
       matchStrings: [
-        "github/awesome-copilot/[^#\\s]+#(?<currentDigest>[0-9a-f]{40})",
+        "(?<depName>[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)/[^#\\s]+#(?<currentDigest>[0-9a-f]{40})",
       ],
-      depNameTemplate: "github/awesome-copilot",
-      packageNameTemplate: "https://github.com/github/awesome-copilot",
+      packageNameTemplate: "https://github.com/{{{depName}}}",
       datasourceTemplate: "git-refs",
       currentValueTemplate: "main",
     },
@@ -43,8 +45,10 @@
       // updates into one weekly PR: re-enable them here and keep this bump in
       // its own PR. git-refs has no release timestamps, so the 14-day soak
       // can't apply; without timestamp-optional the update stays pending.
-      description: "Never auto-merge github/awesome-copilot bumps: third-party agent text needs owner review",
-      matchDepNames: ["github/awesome-copilot"],
+      // Every dependency in apm.yml is third-party primitive text, so match
+      // the file rather than a list of names that a new dependency could miss.
+      description: "Never auto-merge external APM primitive bumps: third-party agent and skill text needs owner review",
+      matchFileNames: ["apm.yml"],
       enabled: true,
       groupName: null,
       minimumReleaseAgeBehaviour: "timestamp-optional",

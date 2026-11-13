@@ -32,6 +32,8 @@ dependencies:
       github/awesome-copilot/agents/se-ux-ui-designer.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
     - >-
       github/awesome-copilot/agents/linkedin-post-writer.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
+    - >-
+      cloudflare/security-audit-skill/skills/security-audit#c1c8a8c1471069fb0e188eeaff69b8e8db6564a8
   mcp:
     - io.github.github/github-mcp-server
     - name: microsoft-learn

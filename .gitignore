@@ -10,7 +10,14 @@ apm_modules/
 # dependencies. Bumping a dep (`apm update`) + re-running `apm install` shows the
 # real agent-text diff in the PR — a guard against prompt-hijacking. Everything
 # else below is trivially regenerable from .apm/ and stays out of git.
-.agents/
+#
+# External skills are committed for the same reason, so their upstream text
+# shows up in the bump's materialize PR. Our own .apm/skills/ copies stay
+# ignored. When adding an external skill dependency, negate its folder here.
+.agents/*
+!.agents/skills/
+.agents/skills/*
+!.agents/skills/security-audit/
 .github/instructions/
 .github/hooks/
 

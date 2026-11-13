@@ -186,25 +186,39 @@ unavailable or denied, halt rather than bypassing it.
 
 ## 🛡️ External primitives: review gate
 
-The agents from `github/awesome-copilot` in `apm.yml` are third-party prompt
-text, so every change to them needs the owner's approval. Neither PR in the
+Every dependency in `apm.yml` is third-party prompt text: the
+`github/awesome-copilot` agents and the
+[`cloudflare/security-audit-skill`](https://github.com/cloudflare/security-audit-skill)
+skill. Every change to them needs the owner's approval, and neither PR in the
 flow below may auto-merge.
 
 1. **Renovate bump.** Renovate's custom manager (see
-   [`renovate.json5`](../renovate.json5)) bumps the pinned SHA. A package rule
-   re-enables these digest updates (off org-wide) in their own PR rather than
-   the weekly batch, turns off the shared auto-merge preset and adds the
-   `external-primitives` and `merge: manual` labels. The diff only shows a
-   hash. Renovate can't remove the preset's `merge: auto` label, but
+   [`renovate.json5`](../renovate.json5)) bumps the pinned SHA of any
+   `owner/repo/<subpath>#<sha>` entry. A package rule matching every
+   `apm.yml` dependency re-enables these digest updates (off org-wide) in their
+   own PR rather than the weekly batch, turns off the shared auto-merge preset
+   and adds the `external-primitives` and `merge: manual` labels. The diff only
+   shows a hash. Renovate can't remove the preset's `merge: auto` label, but
    `automerge: false` takes precedence.
 2. **Materialize PR.** Merging the bump triggers
    [APM Materialize](../.github/workflows/apm-materialize.yml). It runs
    `apm install`, re-applies the local overrides and opens
    `chore: materialize APM primitives` from `chore/apm-materialize`, labelled
    `apm-sync`, `external-primitives` and `merge: manual`. **Review the
-   `.github/agents/` diff**: this is where upstream agent text changes become
-   visible. Merge it yourself once you're satisfied; close it and revert the bump
-   if not.
+   `.github/agents/` and `.agents/skills/` diff**: this is where upstream text
+   changes become visible. Merge it yourself once you're satisfied; close it
+   and revert the bump if not.
+
+External skills deploy to `.agents/skills/<name>/`. That folder is gitignored
+for our own `.apm/skills/` copies, so each external skill needs a negation in
+[`.gitignore`](../.gitignore) to stay in the reviewable snapshot. The whole
+folder is committed, including its companion files and scripts.
+
+APM installs only the skill's subpath, so an upstream `LICENSE` at the
+repository root doesn't travel with it. [`THIRD_PARTY_NOTICES.md`](../THIRD_PARTY_NOTICES.md)
+carries the copyright and licence text for each external skill. If you commit
+or redistribute an installed external skill folder elsewhere, as consumers of
+this package might, keep that notice with it.
 
 The labels come from [`.github/labels-base.yaml`](../.github/labels-base.yaml)
 (org-wide, synced from `DevSecNinja/.github` by Config Sync) and
@@ -236,6 +250,36 @@ local `apm install`. It fails when a file is missing, so drop stale entries
 when an agent is removed. `tests/test_apm_overrides.py` fails if a committed
 agent doesn't match its override. `apm audit` reports overridden files as
 drift from the lockfile, which is expected.
+
+## 🔐 Security primitives: which one to use
+
+The toolkit bundles several security primitives. They overlap, so pick by the
+depth of evidence you need:
+
+| Need                                                                                                    | Use                                                                  |
+| ------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| Quick SAST/SCA pass: flag CWE-mapped flaws, vulnerable dependencies or licence risk in a diff or repo   | `sast-sca-security-analyzer` agent                                   |
+| Security-focused review of a change against OWASP, Zero Trust and LLM guidance                          | `se-security-reviewer` agent                                         |
+| A focused security question, or triage of one suspected issue                                           | `security-audit` skill in **guidance mode** (the default)            |
+| Full, verified source audit of a repository, with a coverage ledger and independently verified findings | `security-audit` skill in **full audit mode** (ask for a full audit) |
+
+Use the analyzer for fast feedback; it reports likely issues without proving
+them. Use the `security-audit` skill when you need to show a finding is real:
+it traces each candidate to a concrete trust-boundary violation, has fresh
+agents verify it, and writes `findings.json` and `coverage-ledger.json`, checked
+by its bundled `validate-*.cjs` scripts (Node.js, standard library only)
+against `report-schema.json`. Full audits are expensive, so keep them for
+release reviews, new executable skill helpers, hooks or scripts, and
+repositories that consume the toolkit.
+
+**Sandbox.** The skill only runs target code (builds, tests, fixtures) inside
+an OS-enforced sandbox with no network, an empty environment, a read-only
+target and resource limits. Without one it stays read-only: it inspects source
+and records unproven leads as `needs_validation` instead of executing anything.
+That matches the
+[untrusted-repositories policy](#untrusted-repositories-before-the-first-fork)
+and is the expected mode on a work machine. Full audit output goes outside the
+target by default (`~/security-audit-skill/<repo>/run-<N>`).
 
 ## 🏷️ Versioning
 
