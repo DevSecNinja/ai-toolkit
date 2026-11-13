@@ -102,7 +102,6 @@ GIT_PUSH_REGEX='(^|[^[:alnum:]_])git([[:space:]]+[^[:space:];&|]+)*[[:space:]]+p
 SEP=$'\x1e' # marks a command boundary in WORDS
 REPO_DIR=""
 DEFAULT_BRANCH=""
-DIR_MAY_CHANGE=0
 HEAD_MAY_MOVE=0
 CREATED=""
 CURRENT=""
@@ -153,10 +152,11 @@ tokenize() {
             flush_word
             skip=1
             ;;
-        '#')
-            [[ ${inword} -eq 1 ]] || return 1 # a comment
+        '#' | '~')
+            [[ ${inword} -eq 1 ]] || return 1 # a comment or tilde expansion
             word="${word}${c}"
             ;;
+        '*' | '?' | '[' | ']' | '{' | '}') return 1 ;; # unquoted glob or brace expansion
         *) word="${word}${c}" && inword=1 ;;
         esac
     done
@@ -173,7 +173,7 @@ for_each_command() {
     while [[ ${i} -le ${n} ]]; do
         if [[ ${i} -eq ${n} || "${WORDS[${i}]}" == "${SEP}" ]]; then
             if [[ ${#SEG[@]} -gt 0 ]]; then
-                if [[ "$1" == scan ]]; then scan_command; else check_command || return 1; fi
+                if [[ "$1" == scan ]]; then scan_command || return 1; else check_command || return 1; fi
             fi
             SEG=()
         else
@@ -184,6 +184,8 @@ for_each_command() {
 }
 
 # Set SUB / SUB_AT when SEG is a plain `git [--no-pager] <subcommand> ...`.
+# Other global options (-c, -C, --git-dir, ...) can change the repository,
+# config or aliases, so they don't count as plain.
 git_subcommand() {
     local i=1
     SUB=""
@@ -197,16 +199,29 @@ git_subcommand() {
     SUB_AT=$((i + 1))
 }
 
-# First pass: note commands that change directory, move HEAD or create branches.
+# First pass: every command must be on a short allowlist that can't change the
+# directory, push config or remotes, nor run other programs. Note commands that
+# move HEAD or create branches.
 scan_command() {
     local i positional=0
-    case "$(tr '[:upper:]' '[:lower:]' <<<"${SEG[0]}")" in
-    cd | pushd | popd | chdir | sl | set-location | push-location | pop-location) DIR_MAY_CHANGE=1 ;;
+    case "${SEG[0]}" in
+    echo | head | tail | grep | wc | true)
+        ! grep -qiE "${GIT_PUSH_REGEX}" <<<"${SEG[*]}"
+        return
+        ;;
     *) ;;
     esac
-    git_subcommand || return 0
+    git_subcommand || return 1
     i=${SUB_AT}
+    while [[ ${i} -lt ${#SEG[@]} ]]; do
+        case "${SEG[${i}]}" in -x | --exec* | --upload-pack* | --receive-pack*) return 1 ;; *) ;; esac
+        i=$((i + 1))
+    done
+    i=${SUB_AT}
+    # Built-in names only: git aliases can't shadow them.
     case "${SUB}" in
+    push) return 0 ;;
+    add | commit | diff | fetch | log | rev-parse | show | status) ;;
     checkout | switch)
         HEAD_MAY_MOVE=1
         while [[ ${i} -lt $((${#SEG[@]} - 1)) ]]; do
@@ -214,7 +229,7 @@ scan_command() {
             i=$((i + 1))
         done
         ;;
-    branch | worktree) HEAD_MAY_MOVE=1 ;;
+    branch) HEAD_MAY_MOVE=1 ;;
     rebase)
         # `git rebase <upstream> <branch>` checks out <branch> first.
         while [[ ${i} -lt ${#SEG[@]} ]]; do
@@ -223,9 +238,9 @@ scan_command() {
         done
         [[ ${positional} -le 1 ]] || HEAD_MAY_MOVE=1
         ;;
-    *) ;;
+    *) return 1 ;;
     esac
-    return 0
+    ! grep -qiE "${GIT_PUSH_REGEX}" <<<"${SEG[*]}"
 }
 
 current_branch() {
@@ -236,12 +251,10 @@ current_branch() {
 # `git push [origin]`: targets follow from the current branch, its upstream and
 # push config; only the default-like push.default modes are resolved.
 push_current() {
-    local remote="$1" merge mode refspecs
+    local remote="$1" merge mode
     current_branch || return 1
     mode="$(rgit config --get push.default)"
     case "${mode}" in "" | simple | current | upstream) ;; *) return 1 ;; esac
-    refspecs="$(rgit config --get-all remote.origin.push)"
-    [[ -z "${refspecs}" ]] || return 1
     if [[ -z "${remote}" ]]; then
         remote="$(rgit config --get "branch.${CURRENT}.pushRemote" ||
             rgit config --get remote.pushDefault ||
@@ -257,35 +270,30 @@ push_current() {
 }
 
 check_refspec() {
-    local src="$1" dst="$1"
+    local src="$1" dst
     if [[ "$1" == *:* ]]; then
-        src="${1%%:*}"
+        # Git resolves an unqualified destination against the remote's refs,
+        # which may hold a tag of that name, so require refs/heads/.
         dst="${1#*:}"
+        [[ -n "${1%%:*}" && "${dst}" == refs/heads/* && "${dst}" != *:* ]] || return 1
+        ! is_protected "${dst#refs/heads/}"
+        return
     fi
-    [[ -n "${src}" && -n "${dst}" && "${dst}" != *:* && "${src}" != tag ]] || return 1
+    # A source-only refspec pushes to the same ref name, so it must be a branch
+    # (existing, or created earlier in the command).
     if [[ "${src}" == HEAD ]]; then
         current_branch || return 1
         src="${CURRENT}"
-        [[ "$1" == *:* ]] || dst="${CURRENT}"
     fi
     src="${src#refs/heads/}"
-    case "${dst}" in
-    refs/heads/*) dst="${dst#refs/heads/}" ;;
-    refs/*) return 1 ;;
-    *)
-        # An unqualified destination takes its ref type from the source, which
-        # must therefore be a branch (existing, or created earlier in the command).
-        rgit show-ref --verify --quiet "refs/tags/${dst}" && return 1
-        rgit show-ref --verify --quiet "refs/heads/${src}" ||
-            [[ "${CREATED}" == *"${SEP}${src}${SEP}"* ]] || return 1
-        ;;
-    esac
-    ! is_protected "${dst}"
+    rgit show-ref --verify --quiet "refs/tags/${src}" && return 1
+    rgit show-ref --verify --quiet "refs/heads/${src}" ||
+        [[ "${CREATED}" == *"${SEP}${src}${SEP}"* ]] || return 1
+    ! is_protected "${src}"
 }
 
 check_push() {
     local i=${SUB_AT} a options=1
-    [[ ${DIR_MAY_CHANGE} -eq 0 ]] || return 1
     POS=()
     while [[ ${i} -lt ${#SEG[@]} ]]; do
         a="${SEG[${i}]}"
@@ -318,24 +326,30 @@ check_push() {
     done
 }
 
-# Second pass: every push must be safe, and nothing else may hide a push.
+# Second pass: every push must target a feature branch.
 check_command() {
     if git_subcommand && [[ "${SUB}" == "push" ]]; then
         check_push
         return
     fi
-    ! grep -qiE "${GIT_PUSH_REGEX}" <<<"${SEG[*]}"
+    return 0
 }
 
 # push_is_safe DIR COMMAND
 push_is_safe() {
-    local mirror
+    local mirror follow refspecs
     REPO_DIR="$1"
     rgit rev-parse --git-dir >/dev/null || return 1
+    # Config that silently adds or remaps targets: mirroring, tag following and
+    # remote.origin.push refspecs (which also remap source-only refspecs).
     mirror="$(rgit config --get --bool remote.origin.mirror)"
-    [[ "${mirror}" != "true" ]] || return 1
+    follow="$(rgit config --get --bool push.followTags)"
+    refspecs="$(rgit config --get-all remote.origin.push)"
+    [[ "${mirror}" != true && "${follow}" != true && -z "${refspecs}" ]] || return 1
+    # An unknown default branch can't be told apart from a feature branch.
     DEFAULT_BRANCH="$(rgit symbolic-ref --quiet --short refs/remotes/origin/HEAD)"
     DEFAULT_BRANCH="${DEFAULT_BRANCH#origin/}"
+    [[ -n "${DEFAULT_BRANCH}" ]] || return 1
     tokenize "$2" || return 1
     for_each_command scan && for_each_command check
 }
