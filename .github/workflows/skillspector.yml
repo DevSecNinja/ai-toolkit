@@ -1,0 +1,149 @@
+---
+name: SkillSpector
+
+# Static NVIDIA SkillSpector scan of every AI primitive. "Scan AI primitives"
+# reports on every PR so it can be a required check; it only builds and scans
+# when the PR touches AI primitives or the scanner (scripts/skillspector-changes.sh).
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: "23 5 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: skillspector-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  scan:
+    name: Scan AI primitives
+    runs-on: ubuntu-24.04
+    # Targets scan sequentially with a 300 s worst case each (CLIENT_TIMEOUT); keep room for
+    # every target to time out (about 20 today) plus build, smoke tests and publishing.
+    # A normal run takes about 3 minutes.
+    timeout-minutes: 150
+    permissions:
+      contents: read
+      security-events: write
+    outputs:
+      scanned: ${{ steps.changes.outputs.relevant }}
+    steps:
+      - name: Harden runner
+        uses: DevSecNinja/.github/actions/harden-runner@27fd66740c629ea38380dcd3bf93e7bc74c54247 # v1.9.0
+
+      - name: Checkout toolkit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+
+      - name: Check for AI primitive changes
+        id: changes
+        run: bash scripts/skillspector-changes.sh
+
+      - name: Test scan gate and report
+        if: steps.changes.outputs.relevant == 'true'
+        run: python3 -m unittest discover -s tests -p 'test_skillspector*.py'
+
+      - name: Checkout pinned SkillSpector
+        if: steps.changes.outputs.relevant == 'true'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: NVIDIA/SkillSpector
+          # renovate: datasource=github-tags depName=NVIDIA/SkillSpector
+          ref: 54824463814a0be01360792523ec7245a69190fc # v2.13.4
+          path: .skillspector-source
+          persist-credentials: false
+
+      - name: Build scanner
+        if: steps.changes.outputs.relevant == 'true'
+        run: docker build --tag skillspector-ci .skillspector-source
+
+      - name: Exercise the real scanner container
+        if: steps.changes.outputs.relevant == 'true'
+        run: python3 tests/smoke-skillspector.py --output-dir "$RUNNER_TEMP/skillspector-reports/smoke"
+
+      - name: Scan and enforce severity gate
+        id: scan
+        if: steps.changes.outputs.relevant == 'true'
+        run: python3 scripts/scan-skills.py --output-dir "$RUNNER_TEMP/skillspector-reports/repository"
+
+      - name: Render summary and SARIF
+        id: report
+        if: ${{ !cancelled() && steps.scan.outcome != 'skipped' }}
+        run: >-
+          python3 scripts/skillspector-report.py "$RUNNER_TEMP/skillspector-reports/repository/summary.json"
+          --markdown "$GITHUB_STEP_SUMMARY" --sarif "$RUNNER_TEMP/skillspector-reports/repository/findings.sarif"
+
+      - name: Publish findings to Code Scanning
+        if: ${{ !cancelled() && steps.report.outcome == 'success' }}
+        uses: github/codeql-action/upload-sarif@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
+        with:
+          sarif_file: ${{ runner.temp }}/skillspector-reports/repository/findings.sarif
+          category: skillspector/static
+          wait-for-processing: true
+
+      - name: Upload reports
+        if: ${{ !cancelled() && steps.changes.outputs.relevant == 'true' }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: skillspector-reports
+          path: ${{ runner.temp }}/skillspector-reports
+          if-no-files-found: warn
+          retention-days: 14
+
+  comment:
+    name: Post SkillSpector report
+    needs: scan
+    # Always reports on PRs: a skipped job blocks tools that require every check to succeed.
+    if: ${{ !cancelled() && github.event_name == 'pull_request' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: write
+    env:
+      # Only same-repository PRs that were scanned get a comment; fork PRs have a read-only token.
+      POST: ${{ needs.scan.outputs.scanned == 'true' && !github.event.pull_request.head.repo.fork }}
+      # A PR that stopped changing AI primitives marks its earlier comment as stale instead.
+      CLEAR: ${{ needs.scan.outputs.scanned == 'false' && !github.event.pull_request.head.repo.fork }}
+    steps:
+      - name: Harden runner
+        uses: DevSecNinja/.github/actions/harden-runner@27fd66740c629ea38380dcd3bf93e7bc74c54247 # v1.9.0
+
+      - name: Checkout toolkit
+        if: env.POST == 'true' || env.CLEAR == 'true'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Download reports
+        if: env.POST == 'true'
+        # A missing artifact still produces a "no readable results" comment below.
+        continue-on-error: true
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: skillspector-reports
+          path: ${{ runner.temp }}/skillspector-reports
+
+      - name: Create or update the PR comment
+        if: env.POST == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: >-
+          python3 scripts/skillspector-report.py "$RUNNER_TEMP/skillspector-reports/repository/summary.json"
+          --comment-pr "$PR_NUMBER"
+
+      - name: Mark an earlier PR comment as not needed
+        if: env.CLEAR == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: python3 scripts/skillspector-report.py --not-needed-pr "$PR_NUMBER"

@@ -1,0 +1,168 @@
+{
+  "findings": [
+    {
+      "path": ".apm/skills/obsidian/SKILL.md",
+      "rule": "AE1",
+      "severity": "HIGH",
+      "evidence": "references/FUNCTIONS_REFERENCE.md (partial)",
+      "fingerprint": "a98fb594e6cdfe645f2a06d85f243bb80e4f5f02cadf94c381d57c0eae8b9624",
+      "reason": "Derived from the accepted static_parse_limit on FUNCTIONS_REFERENCE.md: a Markdown link to bundled reference docs, not a risky artifact."
+    },
+    {
+      "path": ".apm/skills/renovate-triage-and-merge/references/testing.md",
+      "rule": "AR2",
+      "severity": "HIGH",
+      "evidence": "no warning",
+      "fingerprint": "449e47b25897541aa26f8824417d1280ef58d2d29e5e3ba95502143b7207c9ec",
+      "reason": "Test expectation that happy-path results emit no warning; not an instruction to suppress refusals."
+    },
+    {
+      "path": ".apm/skills/renovate-triage-and-merge/references/testing.md",
+      "rule": "AR2",
+      "severity": "HIGH",
+      "evidence": "without warnings",
+      "fingerprint": "5794522f6c58178944cac8e9c872993a23e09b00e15b2f4981f8cd97acee1cf9",
+      "reason": "Test expectation that valid ports are accepted without warnings; not an instruction to suppress refusals."
+    },
+    {
+      "path": ".apm/skills/renovate-triage-and-merge/scripts/renovate_prs.py",
+      "rule": "E2",
+      "severity": "HIGH",
+      "evidence": "os.environ.copy()",
+      "fingerprint": "23b3d476caf63d859a2a3bade37548b7986b00b138b45df1b6a49782c4e2984b",
+      "reason": "Passes the caller's environment to the local gh CLI so it can authenticate; nothing is read out or sent elsewhere."
+    },
+    {
+      "path": ".github/agents/project-architecture-planner.agent.md",
+      "rule": "YR4",
+      "severity": "HIGH",
+      "evidence": "tools:; description:; <!-- System boundary -->",
+      "fingerprint": "137048b3b6be085cab625795bafa2f3f257af88a999bbfd670732e79f71093d2",
+      "reason": "External awesome-copilot agent: the HTML comment labels a draw.io diagram example, not a hidden tool instruction."
+    },
+    {
+      "path": ".github/agents/project-architecture-planner.agent.md",
+      "rule": "P2",
+      "severity": "HIGH",
+      "evidence": "<!-- System boundary -->",
+      "fingerprint": "ad470b71e9667217b4b56927c5358c7cc28e4e07efdc5a1121b76747386b0e30",
+      "reason": "External awesome-copilot agent: XML comment inside a draw.io diagram example, not a hidden instruction."
+    },
+    {
+      "path": ".github/agents/sast-sca-security-analyzer.agent.md",
+      "rule": "TM1",
+      "severity": "HIGH",
+      "evidence": "subprocess.call(cmd, shell=True",
+      "fingerprint": "779fb9591a6b32e605e7608dc5d7984b91a8bc98090ffd38127fc5b254509836",
+      "reason": "External awesome-copilot agent: listed as a vulnerable pattern to detect (CWE-78), not code to run."
+    },
+    {
+      "path": "scripts/tool-guardian/guard-tool.sh",
+      "rule": "TM1",
+      "severity": "HIGH",
+      "evidence": "rm -rf /",
+      "fingerprint": "f3ff4d6cfbe1b7f6b23dd4d1379edae984c14738c5f5b14db40e215beb673f08",
+      "reason": "Tool Guardian's deny-list: these destructive commands are the regexes it blocks, never commands it runs."
+    },
+    {
+      "path": "scripts/tool-guardian/guard-tool.sh",
+      "rule": "TM1",
+      "severity": "HIGH",
+      "evidence": "'rm' on specific paths instead of root\"\n    \"destructive_file_ops:::critical:::rm -rf ~:::Use targeted 'rm' on specific paths instead of home directory\"\n    \"destructive_file_ops:::critical:::rm -rf \\",
+      "fingerprint": "7fe134484b49b5a987f3c2e2a509e41683442354c0696b3fef87bbbbd234da61",
+      "reason": "Tool Guardian's deny-list: these destructive commands are the regexes it blocks, never commands it runs."
+    },
+    {
+      "path": "scripts/tool-guardian/guard-tool.sh",
+      "rule": "TM1",
+      "severity": "HIGH",
+      "evidence": "rm -rf /:::Use",
+      "fingerprint": "1e47dfe1c665fe0312ed8554496c3bfd7db7e46c694b1bd9f361bc38e22f8b4d",
+      "reason": "Tool Guardian's deny-list: these destructive commands are the regexes it blocks, never commands it runs."
+    },
+    {
+      "path": "scripts/tool-guardian/guard-tool.sh",
+      "rule": "TM1",
+      "severity": "HIGH",
+      "evidence": "rm -rf ~",
+      "fingerprint": "26e22f4cfd2aa77cd384519bed5efdd6f6dba6aab2e61d67ae29c1cbcadc466e",
+      "reason": "Tool Guardian's deny-list: these destructive commands are the regexes it blocks, never commands it runs."
+    },
+    {
+      "path": "scripts/tool-guardian/guard-tool.sh",
+      "rule": "PE3",
+      "severity": "HIGH",
+      "evidence": ".env ",
+      "fingerprint": "66ef81c27c03406fd9935e5fc86fc4126d7150c15b8d076fdc528d05cea7c7bf",
+      "reason": "Tool Guardian's deny-list text about protecting .env files; it does not read credentials."
+    },
+    {
+      "path": "scripts/tool-guardian/guard-tool.sh",
+      "rule": "TM1",
+      "severity": "HIGH",
+      "evidence": "git push --force",
+      "fingerprint": "588985d404a57a20e57a9346ad923a32f942548b83c815a3d0565b5856c6609c",
+      "reason": "Tool Guardian's deny-list: these destructive commands are the regexes it blocks, never commands it runs."
+    },
+    {
+      "path": "scripts/tool-guardian/guard-tool.sh",
+      "rule": "TM1",
+      "severity": "HIGH",
+      "evidence": "git push --force",
+      "fingerprint": "588985d404a57a20e57a9346ad923a32f942548b83c815a3d0565b5856c6609c",
+      "reason": "Tool Guardian's deny-list: these destructive commands are the regexes it blocks, never commands it runs."
+    },
+    {
+      "path": "scripts/tool-guardian/guard-tool.sh",
+      "rule": "TM1",
+      "severity": "HIGH",
+      "evidence": "git reset --hard",
+      "fingerprint": "f21f5124192a6ca491d13034d2b1dcaae69642decbd659201773b11a2bc5c2a5",
+      "reason": "Tool Guardian's deny-list: these destructive commands are the regexes it blocks, never commands it runs."
+    },
+    {
+      "path": "scripts/tool-guardian/guard-tool.sh",
+      "rule": "TM1",
+      "severity": "HIGH",
+      "evidence": "chmod 777:::Use 'chmod 755' for directories or 'chmod 644' for files\"\n    \"permission_abuse:::high:::chmod -R 777",
+      "fingerprint": "2df784ea404c1b90428a92adcdca4a3baa68d299c8051bba0d1f995439b20c8d",
+      "reason": "Tool Guardian's deny-list: these destructive commands are the regexes it blocks, never commands it runs."
+    }
+  ],
+  "limitations": [
+    {
+      "path": ".apm/skills/obsidian/SKILL.md",
+      "reason_code": "reference_missing",
+      "reason": "The path-like reference is generic `[text](url)` link syntax in prose, not a bundled file."
+    },
+    {
+      "path": ".apm/skills/obsidian/references/FUNCTIONS_REFERENCE.md",
+      "reason_code": "static_parse_limit",
+      "analyzers": [
+        "static_patterns_tool_misuse"
+      ],
+      "reason": "Obsidian Bases formula examples in a reference doc; the parser cannot bound them as commands but checked all input."
+    },
+    {
+      "path": ".apm/skills/tripit-exporter/SKILL.md",
+      "reason_code": "static_parse_limit",
+      "analyzers": [
+        "static_patterns_tool_misuse"
+      ],
+      "reason": "A JavaScript template literal builds an output file name at runtime; the export only writes a local JSON file."
+    },
+    {
+      "path": ".apm/skills/tripit-exporter/SKILL.md",
+      "reason_code": "reference_missing",
+      "reason": "Links to the repository-root THIRD_PARTY_NOTICES.md, which lives outside the skill directory by design."
+    },
+    {
+      "path": ".github/agents/sast-sca-security-analyzer.agent.md",
+      "reason_code": "static_parse_limit",
+      "analyzers": [
+        "static_patterns_tool_misuse"
+      ],
+      "reason": "External awesome-copilot agent: example report/code snippets the parser cannot bound; all parser input was checked."
+    }
+  ]
+}
