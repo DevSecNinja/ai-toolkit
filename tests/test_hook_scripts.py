@@ -175,5 +175,136 @@ class HookBehaviourTest(unittest.TestCase):
             self.assertIn("destructive_file_ops", dangerous.stdout)
 
 
+class FeatureBranchPushTest(unittest.TestCase):
+    """#228: feature-branch pushes to origin pass silently; everything else asks."""
+
+    ALLOWED = (
+        "git push origin feat",
+        "git push --force-with-lease origin feat",
+        "git push --force-with-lease=feat:abc123 --force-if-includes origin HEAD",
+        "git push -u origin HEAD:refs/heads/new-topic",
+        "git push",
+        "git --no-pager push origin",
+        "git fetch origin && git rebase origin/main && git push --force-with-lease 2>&1 | tail -n 5",
+        "git checkout -b new-topic && git push -u origin new-topic",
+        "git push origin 'feat' > /dev/null; git status",
+    )
+    ASKED = (
+        # Default and protected branches; `stable` is the default via origin/HEAD.
+        "git push origin main",
+        "git push origin feat:master",
+        "git push origin HEAD:refs/heads/main",
+        "git push origin stable",
+        "git push origin feat:release-please--branches--main",
+        # Force without a lease, tags and bulk pushes.
+        "git push --force origin feat",
+        "git push -f origin feat",
+        "git push origin +feat",
+        "git push --force-with-lease --force origin feat",
+        "git push --tags",
+        "git push origin --all",
+        "git push --mirror origin",
+        "git push origin v1",
+        "git push origin tag v1",
+        "git push origin refs/tags/v1",
+        # Deletions and other remotes.
+        "git push --delete origin feat",
+        "git push origin :feat",
+        "git push upstream feat",
+        "git push https://example.invalid/repo.git feat",
+        # Anything the hook can't resolve with certainty.
+        "git push origin $BRANCH",
+        "git push origin $(git branch --show-current)",
+        "git push origin `whoami`",
+        "git push origin 'feat",
+        "git push origin {feat,main}",
+        "git push origin missing-branch",
+        "git -C /tmp push origin feat",
+        "sudo git push origin feat",
+        "bash -c 'git push origin feat'",
+        # Compound commands where one push is unsafe or the target may move.
+        "git push origin feat && git push origin main",
+        "cd ../other && git push origin feat",
+        "git checkout main && git push",
+        "git rebase origin/main main && git push",
+    )
+
+    @classmethod
+    def setUpClass(cls):
+        cls.tmp = tempfile.TemporaryDirectory()
+        gitconfig = Path(cls.tmp.name) / "gitconfig"
+        gitconfig.write_text("", encoding="utf-8")
+        cls.env = {"GIT_CONFIG_GLOBAL": str(gitconfig), "GIT_CONFIG_NOSYSTEM": "1"}
+        cls.repo = str(Path(cls.tmp.name) / "repo")
+        subprocess.run(["git", "init", "-q", "-b", "main", cls.repo], check=True,
+                       env={**os.environ, **cls.env})
+        for args in (
+            ["-c", "user.name=t", "-c", "user.email=t@example.com", "commit", "-q", "--allow-empty", "-m", "init"],
+            ["remote", "add", "origin", "https://example.invalid/repo.git"],
+            ["branch", "feat"],
+            ["branch", "wip"],
+            ["tag", "v1"],
+            ["update-ref", "refs/remotes/origin/feat", "HEAD"],
+            ["update-ref", "refs/remotes/origin/stable", "HEAD"],
+            ["symbolic-ref", "refs/remotes/origin/HEAD", "refs/remotes/origin/stable"],
+            ["config", "branch.feat.remote", "origin"],
+            ["config", "branch.feat.merge", "refs/heads/feat"],
+            ["config", "branch.wip.remote", "origin"],
+            ["config", "branch.wip.merge", "refs/heads/main"],
+        ):
+            cls.git(*args)
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.tmp.cleanup()
+
+    @classmethod
+    def git(cls, *args):
+        subprocess.run(["git", "-C", cls.repo, *args], check=True, capture_output=True,
+                       env={**os.environ, **cls.env})
+
+    def setUp(self):
+        self.git("checkout", "-q", "feat")
+
+    def push(self, command, vscode=False):
+        if vscode:
+            payload = {"tool_name": "Bash", "tool_input": {"command": command}, "cwd": self.repo}
+        else:
+            payload = {"toolName": "bash", "toolArgs": json.dumps({"command": command}), "cwd": self.repo}
+        return run_hook(PUSH_HOOK, payload, **self.env)
+
+    def assert_decision(self, result, expected):
+        self.assertEqual(result.returncode, 0, result.stderr)
+        decision = json.loads(result.stdout)["permissionDecision"] if result.stdout.strip() else None
+        self.assertEqual(decision, expected)
+
+    def test_feature_branch_pushes_are_allowed(self):
+        for command in self.ALLOWED:
+            with self.subTest(command=command):
+                self.assert_decision(self.push(command), None)
+        self.assert_decision(self.push("git push origin feat", vscode=True), None)
+
+    def test_risky_or_unresolved_pushes_ask(self):
+        for command in self.ASKED:
+            with self.subTest(command=command):
+                self.assert_decision(self.push(command), "ask")
+
+    def test_implicit_push_resolves_current_branch_and_upstream(self):
+        for checkout in (["main"], ["wip"], ["--detach"]):
+            with self.subTest(checkout=checkout):
+                self.git("checkout", "-q", *checkout)
+                self.assert_decision(self.push("git push --force-with-lease"), "ask")
+
+    def test_implicit_push_asks_for_unresolved_push_config(self):
+        for key, value in (("push.default", "matching"), ("remote.pushDefault", "upstream"),
+                           ("remote.origin.push", "refs/heads/*:refs/heads/*")):
+            with self.subTest(key=key):
+                self.git("config", key, value)
+                try:
+                    self.assert_decision(self.push("git push"), "ask")
+                finally:
+                    self.git("config", "--unset", key)
+
+
 if __name__ == "__main__":
     unittest.main()
