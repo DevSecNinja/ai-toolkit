@@ -113,6 +113,12 @@ jobs:
         if: steps.precheck.outputs.skip != 'true'
         run: python3 scripts/apply-apm-overrides.py
 
+      - name: Regenerate index
+        # Agent descriptions feed INDEX.md / README.md. The materialize PR must
+        # carry the refreshed index, or its Generate Index check fails as stale.
+        if: steps.precheck.outputs.skip != 'true'
+        run: bash scripts/generate-index.sh
+
       - name: Fetch materialize branch
         # Populate refs/remotes/origin/chore/apm-materialize so that the
         # --force-with-lease push in open-pr has a valid lease to compare

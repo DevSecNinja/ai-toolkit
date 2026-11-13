@@ -1392,17 +1392,22 @@ class RepositoryScriptTests(unittest.TestCase):
         for directory in (".apm/prompts/nested", ".apm/instructions", ".apm/skills/example",
                           ".apm/agents", ".github/prompts", "scripts", "tests", "tmp"):
             (self.path / directory).mkdir(parents=True, exist_ok=True)
-        for file in ("scripts/generate-index.sh", "tests/validate-prompts.sh"):
+        for file in ("scripts/generate-index.sh", "scripts/check-index.sh", "scripts/stage-index.sh",
+                     "tests/validate-prompts.sh"):
             shutil.copyfile(ROOT / file, self.path / file)
         (self.path / ".apm/skills/example/SKILL.md").write_text(
             "---\nname: example\ndescription: Example skill\n---\nSkill body.\n"
         )
         (self.path / "README.md").write_text("# Example\n\n<!-- INDEX_START -->\n<!-- INDEX_END -->\n")
 
+    def env(self):
+        # Hooks export GIT_DIR / GIT_INDEX_FILE etc.; keep fixtures off the real repo.
+        clean = {k: v for k, v in os.environ.items() if not k.startswith("GIT_")}
+        return {**clean, "TMPDIR": str(self.path / "tmp")}
+
     def run_script(self, path):
         return subprocess.run(["/bin/bash", path], cwd=self.path, capture_output=True,
-                              text=True, timeout=20, check=False,
-                              env={**os.environ, "TMPDIR": str(self.path / "tmp")})
+                              text=True, timeout=20, check=False, env=self.env())
 
     def test_recursive_validation_on_system_bash(self):
         file = self.path / ".apm/prompts/nested/example.prompt.md"
@@ -1459,6 +1464,102 @@ class RepositoryScriptTests(unittest.TestCase):
         result = self.run_script("scripts/generate-index.sh")
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn(b"Literal \\\\path and \\\\n text", (self.path / "README.md").read_bytes())
+
+    def index_files(self):
+        return {name: (self.path / name).read_bytes() for name in ("INDEX.md", "README.md")
+                if (self.path / name).exists()}
+
+    def test_index_check_passes_when_fresh_and_fails_without_rewriting_when_stale(self):
+        result = self.run_script("scripts/generate-index.sh")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        fresh = self.index_files()
+        result = self.run_script("scripts/check-index.sh")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(fresh, self.index_files())
+        (self.path / ".apm/skills/example/SKILL.md").write_text(
+            "---\nname: example\ndescription: Changed skill\n---\nBody.\n"
+        )
+        result = self.run_script("scripts/check-index.sh")
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("bash scripts/generate-index.sh", result.stderr)
+        self.assertIn("Changed skill", result.stdout)
+        self.assertEqual(fresh, self.index_files())
+        self.assertEqual(list((self.path / "tmp").iterdir()), [])
+
+    def test_index_check_fails_when_index_missing_and_leaves_tree_untouched(self):
+        original = self.index_files()
+        result = self.run_script("scripts/check-index.sh")
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("INDEX.md", result.stderr)
+        self.assertEqual(original, self.index_files())
+        self.assertEqual(list((self.path / "tmp").iterdir()), [])
+
+    def test_index_check_surfaces_generator_failure_and_restores_files(self):
+        (self.path / "README.md").write_text("# Missing markers\n")
+        result = self.run_script("scripts/check-index.sh")
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("index marker pair", result.stderr)
+        self.assertEqual((self.path / "README.md").read_text(), "# Missing markers\n")
+        self.assertFalse((self.path / "INDEX.md").exists())
+        self.assertEqual(list((self.path / "tmp").iterdir()), [])
+
+    def git(self, *args):
+        return subprocess.run(["git", "-c", "user.name=t", "-c", "user.email=t@example.com",
+                               "-c", "commit.gpgsign=false", *args], cwd=self.path, env=self.env(),
+                              capture_output=True, text=True, timeout=20, check=True).stdout
+
+    def init_repo_with_fresh_index(self):
+        self.git("init", "-q")
+        self.assertEqual(self.run_script("scripts/generate-index.sh").returncode, 0)
+        self.git("add", "-A")
+        self.git("commit", "-qm", "init")
+
+    def test_stage_index_uses_staged_tree_only(self):
+        self.init_repo_with_fresh_index()
+        readme = self.path / "README.md"
+        readme.write_text("Unstaged prose.\n" + readme.read_text())
+        (self.path / ".apm/prompts/staged.prompt.md").write_text(
+            "---\ndescription: Staged prompt\ncategory: coding\n---\nBody.\n")
+        (self.path / ".apm/prompts/untracked.prompt.md").write_text(
+            "---\ndescription: Untracked prompt\ncategory: coding\n---\nBody.\n")
+        self.git("add", ".apm/prompts/staged.prompt.md")
+        result = self.run_script("scripts/stage-index.sh")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        for name in ("INDEX.md", "README.md"):
+            staged = self.git("show", f":{name}")
+            self.assertIn("Staged prompt", staged)
+            self.assertNotIn("Untracked prompt", staged)
+            self.assertIn("Untracked prompt", (self.path / name).read_text())
+        self.assertNotIn("Unstaged prose.", self.git("show", ":README.md"))
+        self.assertTrue(readme.read_text().startswith("Unstaged prose.\n"))
+        self.assertEqual(list((self.path / "tmp").iterdir()), [])
+
+    def test_git_fixtures_ignore_hook_git_environment(self):
+        outside = self.path.parent / f"{self.path.name}-outside"
+        hook_env = {"GIT_DIR": str(outside / ".git"), "GIT_INDEX_FILE": str(outside / "index")}
+        with patch.dict(os.environ, hook_env):
+            self.init_repo_with_fresh_index()
+            (self.path / ".apm/prompts/new.prompt.md").write_text(
+                "---\ndescription: New prompt\ncategory: coding\n---\nBody.\n")
+            self.git("add", ".apm/prompts/new.prompt.md")
+            self.assertEqual(self.run_script("scripts/stage-index.sh").returncode, 0)
+            self.assertIn("New prompt", self.git("show", ":INDEX.md"))
+        self.assertFalse(outside.exists())
+        self.assertTrue((self.path / ".git/index").is_file())
+
+    def test_stage_index_handles_deletions_and_skips_unrelated_changes(self):
+        self.init_repo_with_fresh_index()
+        (self.path / "notes.txt").write_text("x\n")
+        self.git("add", "notes.txt")
+        result = self.run_script("scripts/stage-index.sh")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(self.git("diff", "--cached", "--name-only").split(), ["notes.txt"])
+        self.git("rm", "-q", ".apm/skills/example/SKILL.md")
+        result = self.run_script("scripts/stage-index.sh")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertNotIn(".apm/skills/example/SKILL.md", self.git("show", ":INDEX.md"))
+        self.assertEqual(sorted(self.git("diff", "--cached", "--name-only").split()),
+                         [".apm/skills/example/SKILL.md", "INDEX.md", "README.md", "notes.txt"])
 
 
 if __name__ == "__main__":

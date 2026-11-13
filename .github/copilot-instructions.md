@@ -89,9 +89,9 @@ bash scripts/generate-index.sh   # regenerate INDEX.md + README index (~1s)
 
 ## CI/CD Workflows
 
-- **Generate Index** (`generate-index.yml`): on changes to `.apm/prompts/**` or
-  `.github/prompts/**`, runs `generate-index.sh` and auto-commits `INDEX.md` /
-  `README.md` (`[skip ci]`).
+- **Generate Index** (`generate-index.yml`): on pull requests, `check-index.sh`
+  fails if `INDEX.md` / `README.md` are stale (it never pushes to PR branches);
+  on `main` it regenerates and commits the index (`[skip ci]`).
 - **Markdown Validation** (`markdown-validation.yml`): markdownlint + link check
   (informational) and `validate-prompts.sh` (MUST pass).
 - **Release Please** (`release-please.yml`): on push to `main` (or
