@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.0](https://github.com/DevSecNinja/ai-toolkit/compare/v0.10.0...v0.11.0) (2026-11-13)
+
+
+### Features
+
+* **hooks:** let git-push-approval allow feature-branch pushes ([#230](https://github.com/DevSecNinja/ai-toolkit/issues/230)) ([c2bed29](https://github.com/DevSecNinja/ai-toolkit/commit/c2bed29bfed6043607b284dd28de541fe1b3297a))
+
 ## [0.10.0](https://github.com/DevSecNinja/ai-toolkit/compare/v0.9.1...v0.10.0) (2026-11-13)
 
 
