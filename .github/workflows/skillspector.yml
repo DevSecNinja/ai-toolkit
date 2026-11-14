@@ -23,7 +23,7 @@ concurrency:
 jobs:
   scan:
     name: Scan AI primitives
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     # Targets scan sequentially with a 300 s worst case each (CLIENT_TIMEOUT); keep room for
     # every target to time out (about 20 today) plus build, smoke tests and publishing.
     # A normal run takes about 3 minutes.
@@ -103,7 +103,7 @@ jobs:
     needs: scan
     # Always reports on PRs: a skipped job blocks tools that require every check to succeed.
     if: ${{ !cancelled() && github.event_name == 'pull_request' }}
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 5
     permissions:
       contents: read
