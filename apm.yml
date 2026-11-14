@@ -7,31 +7,31 @@ author: DevSecNinja
 dependencies:
   apm:
     - >-
-      github/awesome-copilot/agents/devops-expert.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
+      github/awesome-copilot/agents/devops-expert.agent.md#8ecd5b17f02fe5fbebf35eccd1867265eded811f
     - >-
-      github/awesome-copilot/agents/github-actions-expert.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
+      github/awesome-copilot/agents/github-actions-expert.agent.md#8ecd5b17f02fe5fbebf35eccd1867265eded811f
     - >-
-      github/awesome-copilot/agents/sast-sca-security-analyzer.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
+      github/awesome-copilot/agents/sast-sca-security-analyzer.agent.md#8ecd5b17f02fe5fbebf35eccd1867265eded811f
     - >-
-      github/awesome-copilot/agents/se-security-reviewer.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
+      github/awesome-copilot/agents/se-security-reviewer.agent.md#8ecd5b17f02fe5fbebf35eccd1867265eded811f
     - >-
-      github/awesome-copilot/agents/project-architecture-planner.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
+      github/awesome-copilot/agents/project-architecture-planner.agent.md#8ecd5b17f02fe5fbebf35eccd1867265eded811f
     - >-
-      github/awesome-copilot/agents/adr-generator.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
+      github/awesome-copilot/agents/adr-generator.agent.md#8ecd5b17f02fe5fbebf35eccd1867265eded811f
     - >-
-      github/awesome-copilot/agents/software-engineer-agent-v1.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
+      github/awesome-copilot/agents/software-engineer-agent-v1.agent.md#8ecd5b17f02fe5fbebf35eccd1867265eded811f
     - >-
-      github/awesome-copilot/agents/task-planner.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
+      github/awesome-copilot/agents/task-planner.agent.md#8ecd5b17f02fe5fbebf35eccd1867265eded811f
     - >-
-      github/awesome-copilot/agents/prompt-builder.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
+      github/awesome-copilot/agents/prompt-builder.agent.md#8ecd5b17f02fe5fbebf35eccd1867265eded811f
     - >-
-      github/awesome-copilot/agents/se-technical-writer.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
+      github/awesome-copilot/agents/se-technical-writer.agent.md#8ecd5b17f02fe5fbebf35eccd1867265eded811f
     - >-
-      github/awesome-copilot/agents/accessibility.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
+      github/awesome-copilot/agents/accessibility.agent.md#8ecd5b17f02fe5fbebf35eccd1867265eded811f
     - >-
-      github/awesome-copilot/agents/se-ux-ui-designer.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
+      github/awesome-copilot/agents/se-ux-ui-designer.agent.md#8ecd5b17f02fe5fbebf35eccd1867265eded811f
     - >-
-      github/awesome-copilot/agents/linkedin-post-writer.agent.md#3e36d367091a1e67b77974cade6f1aa48bc77a81
+      github/awesome-copilot/agents/linkedin-post-writer.agent.md#8ecd5b17f02fe5fbebf35eccd1867265eded811f
     - >-
       cloudflare/security-audit-skill/skills/security-audit#c1c8a8c1471069fb0e188eeaff69b8e8db6564a8
   mcp:
