@@ -11,8 +11,9 @@ then deletes them all as stale (microsoft/apm#3372).
            holds the committed copy, so the materialize diff shows upstream
            changes. Run it only right before `apm install`.
   check    fail if a locked dependency deploys nothing, a deployed file is
-           missing or git-ignored, or a committed .agents/skills/ file isn't
-           in the lock.
+           missing or git-ignored, a dependency lost a deployed file at the
+           commit HEAD's lock already pins, or a committed .agents/skills/
+           file isn't in the lock.
 
 Usage: apm-external-skills.py {prepare,check} [--root DIR]
 
@@ -34,8 +35,8 @@ class LockError(Exception):
     pass
 
 
-def locked_dependencies(text):
-    """Return {dependency: [deployed file, ...]} from apm.lock.yaml text."""
+def parse_lock(text):
+    """Return {dependency: (resolved commit, [deployed file, ...])} from apm.lock.yaml text."""
     deps, current, in_deps, in_files = {}, None, False, False
     for number, line in enumerate(text.splitlines(), 1):
         if not line.strip():
@@ -49,19 +50,34 @@ def locked_dependencies(text):
             key, _, value = line[2:].partition(":")
             if key != "repo_url" or not value.strip():
                 raise LockError(f"{LOCK}:{number}: expected `- repo_url:` to start a dependency")
-            current = [value.strip(), "", []]
+            current = {"repo_url": value.strip(), "files": []}
             deps[number] = current
             in_files = False
         elif line.startswith("  - ") and in_files:
-            current[2].append(line[4:].strip())
+            current["files"].append(line[4:].strip())
         elif line.startswith("  ") and not line.startswith("   "):
             key, _, value = line[2:].partition(":")
             in_files = key == "deployed_files"
-            if key == "virtual_path":
-                current[1] = value.strip()
+            current[key] = value.strip()
     if not deps:
         raise LockError(f"{LOCK}: no dependencies found")
-    return {"/".join(filter(None, (url, path))): files for url, path, files in deps.values()}
+    return {
+        "/".join(filter(None, (dep["repo_url"], dep.get("virtual_path")))): (dep.get("resolved_commit"), dep["files"])
+        for dep in deps.values()
+    }
+
+
+def locked_dependencies(text):
+    """Return {dependency: [deployed file, ...]} from apm.lock.yaml text."""
+    return {dep: files for dep, (_, files) in parse_lock(text).items()}
+
+
+def committed_lock(root):
+    """Return the parsed apm.lock.yaml at HEAD, or {} when there is none."""
+    result = subprocess.run(
+        ["git", "show", f"HEAD:{LOCK}"], cwd=root, capture_output=True, text=True, encoding="utf-8"
+    )
+    return parse_lock(result.stdout) if result.returncode == 0 else {}
 
 
 def external_skill_dirs(deps):
@@ -128,18 +144,34 @@ def check(root, deps, tracked, ignored=frozenset()):
     return problems
 
 
+def dropped_files(previous, current):
+    """List deployed paths a dependency lost although its resolved commit didn't change."""
+    problems = []
+    for dep, (commit, files) in sorted(current.items()):
+        old_commit, old_files = previous.get(dep, (None, []))
+        if commit and commit == old_commit:
+            problems += [
+                f"{path} from {dep} was dropped at unchanged commit {commit[:8]}"
+                for path in old_files
+                if path not in files
+            ]
+    return problems
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("command", choices=("prepare", "check"))
     parser.add_argument("--root", type=Path, default=Path(__file__).resolve().parents[1])
     args = parser.parse_args(argv)
     try:
-        deps = locked_dependencies((args.root / LOCK).read_text(encoding="utf-8"))
+        lock = parse_lock((args.root / LOCK).read_text(encoding="utf-8"))
+        deps = {dep: files for dep, (_, files) in lock.items()}
         if args.command == "prepare":
             prepare(args.root, deps)
             return 0
         claimed = sorted({entry for files in deps.values() for entry in files})
         problems = check(args.root, deps, tracked_skill_files(args.root), ignored_paths(args.root, claimed))
+        problems += dropped_files(committed_lock(args.root), lock)
     except (OSError, LockError, subprocess.CalledProcessError) as error:
         print(f"error: {error}", file=sys.stderr)
         return 2

@@ -24,6 +24,7 @@ LOCK = f"""lockfile_version: '1'
 dependencies:
 - repo_url: owner/skills
   name: audit
+  resolved_commit: c1c8a8c1471069fb
   virtual_path: skills/audit
   package_type: claude_skill
   deployed_files:
@@ -58,6 +59,16 @@ class LockParsingTests(unittest.TestCase):
         for text in ("lockfile_version: '1'\n", "dependencies:\n- name: x\n"):
             with self.subTest(text=text), self.assertRaises(skills.LockError):
                 skills.locked_dependencies(text)
+
+    def test_flags_files_dropped_at_an_unchanged_commit_only(self):
+        before = skills.parse_lock(LOCK.replace(f"  - {SKILL}/SKILL.md\n", f"  - {SKILL}/SKILL.md\n  - {SKILL}/schema.json\n"))
+        after = skills.parse_lock(LOCK)
+        self.assertEqual(
+            skills.dropped_files(before, after),
+            [f"{SKILL}/schema.json from owner/skills/skills/audit was dropped at unchanged commit c1c8a8c1"],
+        )
+        bumped = skills.parse_lock(LOCK.replace("c1c8a8c1471069fb", "0123456789abcdef"))
+        self.assertEqual(skills.dropped_files(before, bumped), [])
 
 
 class WorkTreeTests(unittest.TestCase):
