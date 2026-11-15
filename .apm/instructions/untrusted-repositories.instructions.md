@@ -61,8 +61,9 @@ checks were skipped and why; static review is not proof of runtime correctness
 or safety. If completing the task requires execution, request scoped approval
 rather than silently running code or claiming validation passed.
 
-All commits must be signed with **1Password**. Halt if 1Password signing is
-unavailable or fails. Never substitute another signer, create an unsigned
+All local Git commits must be signed with **1Password**. Halt if 1Password
+signing is unavailable or fails. API-only commits use GitHub-signed GraphQL
+`createCommitOnBranch`. Never substitute another signer, create an unsigned
 commit, bypass signing or tool denials, or disable required checks to finish.
 If a commit would execute unauthorized hooks or filters, stop before committing
 and request approval; do not bypass the trust gate to satisfy a commit request.
