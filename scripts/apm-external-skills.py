@@ -65,20 +65,20 @@ def locked_dependencies(text):
 
 def external_skill_dirs(deps):
     """Return the .agents/skills/<name> folders that locked dependencies deploy."""
-    dirs = set()
-    for files in deps.values():
-        for entry in files:
-            path = PurePosixPath(entry)
-            if path.parent == SKILLS and ".." not in path.parts:
-                dirs.add(path)
-    return sorted(dirs)
+    return sorted({folder for files in deps.values() for folder in skill_dirs(files)})
+
+
+def skill_dirs(files):
+    paths = (PurePosixPath(entry) for entry in files)
+    return [path for path in paths if path.parent == SKILLS and ".." not in path.parts]
 
 
 def prepare(root, deps):
     for folder in external_skill_dirs(deps):
         target = root / folder
-        if target.is_symlink() or (target.exists() and not target.is_dir()):
-            raise LockError(f"{folder} is not a regular folder; refusing to remove it")
+        linked = [part for part in (folder.parents[1], folder.parent, folder) if (root / part).is_symlink()]
+        if linked or (target.exists() and not target.is_dir()):
+            raise LockError(f"{folder} is not a regular folder in the checkout; refusing to remove it")
         if target.is_dir():
             shutil.rmtree(target)
             print(f"Removed {folder} for a fresh deploy from its pinned commit")
@@ -101,6 +101,10 @@ def check(root, deps, tracked):
         for entry in files:
             if not (root / entry).exists():
                 problems.append(f"{entry} from {dep} is missing")
+        for folder in skill_dirs(files):
+            anchor = folder / "SKILL.md"
+            if str(anchor) not in files or not (root / anchor).is_file():
+                problems.append(f"{folder} from {dep} has no deployed SKILL.md")
     for path in tracked:
         if path not in claimed and (root / path).exists():
             problems.append(f"{path} is committed but no locked dependency deploys it")

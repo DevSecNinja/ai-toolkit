@@ -75,6 +75,20 @@ class WorkTreeTests(unittest.TestCase):
         self.assertTrue((self.root / AGENT).exists())
         self.assertTrue((self.root / ".agents/skills/local-skill/SKILL.md").exists())
 
+    def test_prepare_refuses_a_symlinked_skills_parent(self):
+        outside = self.root / "outside"
+        (outside / "audit").mkdir(parents=True)
+        skills_root = self.root / ".agents/skills"
+        moved = self.root / "moved-skills"
+        skills_root.rename(moved)
+        try:
+            skills_root.symlink_to(outside, target_is_directory=True)
+        except OSError:
+            self.skipTest("symlinks unavailable")
+        with self.assertRaises(skills.LockError):
+            skills.prepare(self.root, skills.locked_dependencies(LOCK))
+        self.assertTrue((outside / "audit").is_dir())
+
     def test_check_passes_a_complete_deploy(self):
         deps = skills.locked_dependencies(LOCK)
         self.assertEqual(skills.check(self.root, deps, [f"{SKILL}/SKILL.md"]), [])
@@ -86,7 +100,19 @@ class WorkTreeTests(unittest.TestCase):
         self.assertIn(f"{SKILL}/SKILL.md is committed but no locked dependency deploys it", problems[1])
         (self.root / f"{SKILL}/SKILL.md").unlink()
         problems = skills.check(self.root, skills.locked_dependencies(LOCK), [])
-        self.assertEqual(problems, [f"{SKILL}/SKILL.md from owner/skills/skills/audit is missing"])
+        self.assertEqual(
+            problems,
+            [
+                f"{SKILL}/SKILL.md from owner/skills/skills/audit is missing",
+                f"{SKILL} from owner/skills/skills/audit has no deployed SKILL.md",
+            ],
+        )
+
+    def test_check_fails_when_only_the_skill_folder_is_left(self):
+        (self.root / f"{SKILL}/SKILL.md").unlink()
+        (self.root / f"{SKILL}/notes.md").unlink()
+        deps = skills.locked_dependencies(LOCK.replace(f"  - {SKILL}/SKILL.md\n", ""))
+        self.assertEqual(skills.check(self.root, deps, []), [f"{SKILL} from owner/skills/skills/audit has no deployed SKILL.md"])
 
 
 class RepoTests(unittest.TestCase):
