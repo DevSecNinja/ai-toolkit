@@ -33,7 +33,7 @@ class PyLauncherTests(unittest.TestCase):
                 path.chmod(0o755)
             return subprocess.run([posix_shell("sh"), str(LAUNCHER), "-m", "unittest"],
                                   env=dict(os.environ, PATH=f"{store}{os.pathsep}{temp}"),
-                                  capture_output=True, text=True, timeout=20, check=False)
+                                  capture_output=True, encoding="utf-8", timeout=20, check=False)
 
     def test_skips_store_stub_and_old_python_for_first_new_enough(self):
         result = self.run_launcher(python3=STUB, py=interpreter("py", "3.9"),

@@ -14,10 +14,13 @@ def posix_shell(name="bash"):
         return f"/bin/{name}"
     # Like lefthook: the default Git for Windows install first, then next to git
     # (its exec path is <root>/<mingw64|clangarm64>/libexec/git-core).
-    exec_path = subprocess.run(["git", "--exec-path"], capture_output=True, text=True,
-                               timeout=20, check=True).stdout.strip()
-    roots = [Path(os.environ.get("ProgramFiles", r"C:\Program Files")) / "Git", Path(exec_path).parents[2]]
-    for root in roots:
+    def roots():
+        yield Path(os.environ.get("ProgramFiles", r"C:\Program Files")) / "Git"
+        exec_path = subprocess.run(["git", "--exec-path"], capture_output=True, encoding="utf-8",
+                                   timeout=20, check=True).stdout.strip()
+        yield Path(exec_path).parents[2]
+
+    for root in roots():
         for directory in ("bin", "usr/bin"):
             candidate = root / directory / f"{name}.exe"
             if candidate.is_file():
