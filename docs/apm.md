@@ -214,6 +214,21 @@ for our own `.apm/skills/` copies, so each external skill needs a negation in
 [`.gitignore`](../.gitignore) to stay in the reviewable snapshot. The whole
 folder is committed, including its companion files and scripts.
 
+apm-cli 0.35 won't overwrite a skill file unless that machine deployed it
+earlier: it trusts only its per-user receipts in `~/.apm/`, never
+`apm.lock.yaml`. On a fresh clone or runner it skips the committed external
+skill files and then deletes them as stale
+([microsoft/apm#3372](https://github.com/microsoft/apm/issues/3372), #237). So
+APM Materialize runs `python3 scripts/apm-external-skills.py prepare` before
+`apm install`. It removes the external skill folders recorded in the lock, and
+APM redeploys them from the pinned commit. Do the same before `apm install` in
+a fresh clone. After the install, `scripts/apm-external-skills.py check` fails
+the run when a locked dependency deploys nothing or loses a file, or when a
+committed `.agents/skills/` file isn't in the lock.
+`tests/test_apm_external_skills.py` runs the same check on every PR. Drop the
+`prepare` step once apm-cli adopts unchanged committed skills
+([microsoft/apm#3638](https://github.com/microsoft/apm/pull/3638)).
+
 APM installs only the skill's subpath, so an upstream `LICENSE` at the
 repository root doesn't travel with it. [`THIRD_PARTY_NOTICES.md`](../THIRD_PARTY_NOTICES.md)
 carries the copyright and licence text for each external skill. If you commit

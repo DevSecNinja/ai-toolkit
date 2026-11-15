@@ -1,0 +1,132 @@
+#!/usr/bin/env python3
+"""Keep committed external APM skills through APM Materialize (see #237).
+
+apm-cli 0.35 trusts a skill file's overwrite baseline only from per-user
+deployment receipts, never from apm.lock.yaml. A fresh CI checkout has none,
+so `apm install` skips every committed external skill file and its cleanup
+then deletes them all as stale (microsoft/apm#3372).
+
+  prepare  remove the external skill folders recorded in apm.lock.yaml, so
+           `apm install` redeploys them from the pinned commit. Git still
+           holds the committed copy, so the materialize diff shows upstream
+           changes. Run it only right before `apm install`.
+  check    fail if a locked dependency deploys nothing, a deployed file is
+           missing, or a committed .agents/skills/ file isn't in the lock.
+
+Usage: apm-external-skills.py {prepare,check} [--root DIR]
+
+Standard library only. Parses the block-style YAML that APM writes.
+"""
+
+import argparse
+from pathlib import Path, PurePosixPath
+import shutil
+import subprocess
+import sys
+
+
+LOCK = "apm.lock.yaml"
+SKILLS = PurePosixPath(".agents/skills")
+
+
+class LockError(Exception):
+    pass
+
+
+def locked_dependencies(text):
+    """Return {dependency: [deployed file, ...]} from apm.lock.yaml text."""
+    deps, current, in_deps, in_files = {}, None, False, False
+    for number, line in enumerate(text.splitlines(), 1):
+        if not line.strip():
+            continue
+        if not line.startswith((" ", "-")):
+            in_deps, current = line.rstrip() == "dependencies:", None
+            continue
+        if not in_deps:
+            continue
+        if line.startswith("- "):
+            key, _, value = line[2:].partition(":")
+            if key != "repo_url" or not value.strip():
+                raise LockError(f"{LOCK}:{number}: expected `- repo_url:` to start a dependency")
+            current = [value.strip(), "", []]
+            deps[number] = current
+            in_files = False
+        elif line.startswith("  - ") and in_files:
+            current[2].append(line[4:].strip())
+        elif line.startswith("  ") and not line.startswith("   "):
+            key, _, value = line[2:].partition(":")
+            in_files = key == "deployed_files"
+            if key == "virtual_path":
+                current[1] = value.strip()
+    if not deps:
+        raise LockError(f"{LOCK}: no dependencies found")
+    return {"/".join(filter(None, (url, path))): files for url, path, files in deps.values()}
+
+
+def external_skill_dirs(deps):
+    """Return the .agents/skills/<name> folders that locked dependencies deploy."""
+    dirs = set()
+    for files in deps.values():
+        for entry in files:
+            path = PurePosixPath(entry)
+            if path.parent == SKILLS and ".." not in path.parts:
+                dirs.add(path)
+    return sorted(dirs)
+
+
+def prepare(root, deps):
+    for folder in external_skill_dirs(deps):
+        target = root / folder
+        if target.is_symlink() or (target.exists() and not target.is_dir()):
+            raise LockError(f"{folder} is not a regular folder; refusing to remove it")
+        if target.is_dir():
+            shutil.rmtree(target)
+            print(f"Removed {folder} for a fresh deploy from its pinned commit")
+
+
+def tracked_skill_files(root):
+    out = subprocess.run(
+        ["git", "ls-files", "-z", "--", str(SKILLS)], cwd=root, check=True, capture_output=True, text=True
+    ).stdout
+    return [path for path in out.split("\0") if path]
+
+
+def check(root, deps, tracked):
+    problems = []
+    claimed = set()
+    for dep, files in sorted(deps.items()):
+        if not files:
+            problems.append(f"{dep} deploys no files; `apm install` dropped it")
+        claimed.update(files)
+        for entry in files:
+            if not (root / entry).exists():
+                problems.append(f"{entry} from {dep} is missing")
+    for path in tracked:
+        if path not in claimed and (root / path).exists():
+            problems.append(f"{path} is committed but no locked dependency deploys it")
+    return problems
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument("command", choices=("prepare", "check"))
+    parser.add_argument("--root", type=Path, default=Path(__file__).resolve().parents[1])
+    args = parser.parse_args(argv)
+    try:
+        deps = locked_dependencies((args.root / LOCK).read_text(encoding="utf-8"))
+        if args.command == "prepare":
+            prepare(args.root, deps)
+            return 0
+        problems = check(args.root, deps, tracked_skill_files(args.root))
+    except (OSError, LockError, subprocess.CalledProcessError) as error:
+        print(f"error: {error}", file=sys.stderr)
+        return 2
+    for problem in problems:
+        print(f"::error::{problem}", file=sys.stderr)
+    if problems:
+        print(f"{len(problems)} problem(s); see docs/apm.md (external primitives).", file=sys.stderr)
+    return 1 if problems else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

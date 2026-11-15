@@ -89,6 +89,16 @@ jobs:
           python3 -m pip install --user "apm-cli==${apm_cli_version}"
           echo "${HOME}/.local/bin" >> "${GITHUB_PATH}"
 
+      - name: Clear committed external skills
+        # apm-cli 0.35 trusts a skill's overwrite baseline only from per-user
+        # receipts, which a fresh runner lacks. It then skips the committed
+        # external skill files and deletes them as stale (#237,
+        # microsoft/apm#3372). Removing the lock-recorded skill folders makes
+        # `apm install` redeploy them from the pinned commit; git still holds
+        # the committed copy, so the PR diff shows any upstream change.
+        if: steps.precheck.outputs.skip != 'true'
+        run: python3 scripts/apm-external-skills.py prepare
+
       - name: Materialize primitives (apm install)
         if: steps.precheck.outputs.skip != 'true'
         env:
@@ -114,6 +124,11 @@ jobs:
         # such as the security analyzer's model. apm-overrides.json keeps them.
         if: steps.precheck.outputs.skip != 'true'
         run: python3 scripts/apply-apm-overrides.py
+
+      - name: Check external primitives survived
+        # Fail instead of opening a PR that drops a dependency's files.
+        if: steps.precheck.outputs.skip != 'true'
+        run: python3 scripts/apm-external-skills.py check
 
       - name: Regenerate index
         # Agent descriptions feed INDEX.md / README.md. The materialize PR must

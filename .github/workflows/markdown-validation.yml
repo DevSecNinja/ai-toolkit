@@ -12,6 +12,8 @@ on:
       - 'tests/**'
       - 'scripts/generate-index.sh'
       - 'scripts/apply-apm-overrides.py'
+      - 'scripts/apm-external-skills.py'
+      - '.agents/skills/**'
       - 'scripts/scan-skills.py'
       - 'apm.yml'
       - 'apm-overrides.json'
@@ -28,6 +30,8 @@ on:
       - 'tests/**'
       - 'scripts/generate-index.sh'
       - 'scripts/apply-apm-overrides.py'
+      - 'scripts/apm-external-skills.py'
+      - '.agents/skills/**'
       - 'scripts/scan-skills.py'
       - 'apm.yml'
       - 'apm-overrides.json'
@@ -80,6 +84,9 @@ jobs:
 
       - name: Check vendored primitives keep their local overrides
         run: PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -p 'test_apm_overrides.py' -v
+
+      - name: Check external primitives match apm.lock.yaml
+        run: PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -p 'test_apm_external_skills.py' -v
 
       - name: Test SkillSpector gate and report
         run: PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -p 'test_skillspector*.py' -v
