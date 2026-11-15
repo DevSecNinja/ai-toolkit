@@ -111,19 +111,36 @@ mise exec -- lefthook install   # wires up the git hooks
 What runs on **pre-commit**:
 
 - `bash tests/validate-prompts.sh` — validates every primitive's frontmatter.
-- `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -p 'test_renovate_prs.py'`
+- `PYTHONDONTWRITEBYTECODE=1 sh scripts/py.sh -m unittest discover -s tests -p 'test_py_launcher.py'`
+  — checks the Python launcher the other hooks use (see below).
+- `PYTHONDONTWRITEBYTECODE=1 sh scripts/py.sh -m unittest discover -s tests -p 'test_renovate_prs.py'`
   — exercises the Renovate helper with offline GitHub fixtures.
-- `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -p 'test_release_please_config.py'`
+- `PYTHONDONTWRITEBYTECODE=1 sh scripts/py.sh -m unittest discover -s tests -p 'test_release_please_config.py'`
   — checks release-please can still find and bump the version in `apm.yml`.
-- `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -p 'test_apm_manifest.py'`
+- `PYTHONDONTWRITEBYTECODE=1 sh scripts/py.sh -m unittest discover -s tests -p 'test_apm_manifest.py'`
   — checks `apm.yml` doesn't list `ai-toolkit` as its own dependency.
-- `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -p 'test_apm_overrides.py'`
+- `PYTHONDONTWRITEBYTECODE=1 sh scripts/py.sh -m unittest discover -s tests -p 'test_apm_overrides.py'`
   — checks vendored agents keep their `apm-overrides.json` pins.
-- `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -p 'test_skillspector*.py'`
+- `PYTHONDONTWRITEBYTECODE=1 sh scripts/py.sh -m unittest discover -s tests -p 'test_skillspector*.py'`
   — checks the SkillSpector severity gate, reviewed acceptances and report rendering.
 - `bash scripts/stage-index.sh` — regenerates `INDEX.md` / `README.md` from the
   **staged** primitives and stages only that result (unstaged README edits and
   untracked primitives stay out of the commit), so the index never drifts.
+
+The Python hooks run through [`scripts/py.sh`](/scripts/py.sh), which uses the
+first of `python3`, `py -3` (the Windows launcher) and `python` that is
+**Python 3.12 or newer**, the version CI tests. It skips the Microsoft Store
+`python3` stub and fails with a clear message when no suitable Python is found.
+
+### Windows
+
+The hooks run natively on Windows: lefthook runs them with Git for Windows'
+`sh`, so you don't need WSL. You need [Git for Windows](https://gitforwindows.org/)
+and Python 3.12+ (`winget install Python.Python.3.12`); the `py` launcher finds
+it even when `python3` is the Store stub. Clone with LF line endings
+(`git config --global core.autocrlf false` or `input`) because the shell hooks
+break on CRLF. The **Windows Hooks** workflow runs the same suite on
+`windows-latest` for changes to hooks, scripts and tests.
 
 Within the authorized execution scope, run the suite on demand with
 `mise exec -- lefthook run pre-commit --all-files`. Do not bypass required hooks,

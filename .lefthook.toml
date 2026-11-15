@@ -10,24 +10,29 @@ parallel = false
 [pre-commit.commands.validate-prompts]
 run = "bash tests/validate-prompts.sh"
 
+# Python hooks go through scripts/py.sh, which finds Python >= 3.12 on Linux,
+# macOS and native Windows (skipping the Microsoft Store python3 stub; #229).
+[pre-commit.commands.py-launcher]
+run = "PYTHONDONTWRITEBYTECODE=1 sh scripts/py.sh -m unittest discover -s tests -p 'test_py_launcher.py'"
+
 [pre-commit.commands.renovate-helper]
-run = "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -p 'test_renovate_prs.py'"
+run = "PYTHONDONTWRITEBYTECODE=1 sh scripts/py.sh -m unittest discover -s tests -p 'test_renovate_prs.py'"
 
 # release-please must be able to bump apm.yml's version (see #204).
 [pre-commit.commands.release-please-config]
-run = "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -p 'test_release_please_config.py'"
+run = "PYTHONDONTWRITEBYTECODE=1 sh scripts/py.sh -m unittest discover -s tests -p 'test_release_please_config.py'"
 
 # apm.yml must not list ai-toolkit as its own dependency (see #207).
 [pre-commit.commands.apm-manifest]
-run = "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -p 'test_apm_manifest.py'"
+run = "PYTHONDONTWRITEBYTECODE=1 sh scripts/py.sh -m unittest discover -s tests -p 'test_apm_manifest.py'"
 
 # Vendored agents must keep their apm-overrides.json pins (see #210).
 [pre-commit.commands.apm-overrides]
-run = "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -p 'test_apm_overrides.py'"
+run = "PYTHONDONTWRITEBYTECODE=1 sh scripts/py.sh -m unittest discover -s tests -p 'test_apm_overrides.py'"
 
 # SkillSpector gate and report: severity policy, reviewed acceptances, PR comment.
 [pre-commit.commands.skillspector-gate]
-run = "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -p 'test_skillspector*.py'"
+run = "PYTHONDONTWRITEBYTECODE=1 sh scripts/py.sh -m unittest discover -s tests -p 'test_skillspector*.py'"
 
 # Regenerate INDEX.md / README index from the staged tree and stage only the
 # result, so the committed index never drifts from the primitives (the common

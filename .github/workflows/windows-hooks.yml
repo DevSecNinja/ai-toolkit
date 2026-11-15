@@ -1,0 +1,64 @@
+---
+name: Windows Hooks
+
+# Run the lefthook pre-commit suite natively on Windows (Git for Windows sh, no
+# WSL) so a Windows-only hook regression fails the PR (#229). Path-filtered to
+# what the hooks execute, to keep runner minutes low.
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.lefthook.toml'
+      - '.mise.toml'
+      - 'scripts/**'
+      - 'tests/**'
+      - '.apm/skills/*/scripts/**'
+      - '.github/workflows/windows-hooks.yml'
+  pull_request:
+    paths:
+      - '.lefthook.toml'
+      - '.mise.toml'
+      - 'scripts/**'
+      - 'tests/**'
+      - '.apm/skills/*/scripts/**'
+      - '.github/workflows/windows-hooks.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  pre-commit:
+    name: Pre-commit Hooks (Windows)
+    runs-on: windows-latest
+    timeout-minutes: 15
+
+    steps:
+      # Windows runners default to core.autocrlf=true; CRLF breaks the shell hooks.
+      - name: Keep LF line endings
+        run: git config --global core.autocrlf false
+
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # The floor scripts/py.sh accepts; tests/test_py_launcher.py keeps them equal.
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version: "3.12"
+
+      - name: Install lefthook
+        uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
+        with:
+          # renovate: datasource=github-releases depName=jdx/mise
+          version: "2026.10.19"
+          install_args: lefthook
+
+      - name: Run pre-commit hooks
+        env:
+          # Make `py -3` pick the Python set up above, not a newer preinstalled one.
+          PY_PYTHON3: "3.12"
+        run: '& (mise which lefthook) run pre-commit --all-files'

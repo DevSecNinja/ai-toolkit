@@ -11,6 +11,7 @@ on:
       - '.github/prompts/**/*.md'
       - 'tests/**'
       - 'scripts/generate-index.sh'
+      - 'scripts/py.sh'
       - 'scripts/apply-apm-overrides.py'
       - 'scripts/scan-skills.py'
       - 'apm.yml'
@@ -27,6 +28,7 @@ on:
       - '.github/prompts/**/*.md'
       - 'tests/**'
       - 'scripts/generate-index.sh'
+      - 'scripts/py.sh'
       - 'scripts/apply-apm-overrides.py'
       - 'scripts/scan-skills.py'
       - 'apm.yml'
@@ -68,6 +70,9 @@ jobs:
       - name: Run validation script
         run: |-
           bash tests/validate-prompts.sh
+
+      - name: Test the hooks' Python launcher
+        run: PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -p 'test_py_launcher.py' -v
 
       - name: Test Renovate helper with offline fixtures
         run: PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -p 'test_renovate_prs.py' -v
