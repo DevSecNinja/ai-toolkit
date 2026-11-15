@@ -223,8 +223,9 @@ APM Materialize runs `python3 scripts/apm-external-skills.py prepare` before
 `apm install`. It removes the external skill folders recorded in the lock, and
 APM redeploys them from the pinned commit. Do the same before `apm install` in
 a fresh clone. After the install, `scripts/apm-external-skills.py check` fails
-the run when a locked dependency deploys nothing or loses a file, or when a
-committed `.agents/skills/` file isn't in the lock.
+the run when a locked dependency deploys nothing, loses a file or deploys a
+git-ignored file (a new or renamed skill folder needs its `.gitignore`
+negation), or when a committed `.agents/skills/` file isn't in the lock.
 `tests/test_apm_external_skills.py` runs the same check on every PR. Drop the
 `prepare` step once apm-cli adopts unchanged committed skills
 ([microsoft/apm#3638](https://github.com/microsoft/apm/pull/3638)).

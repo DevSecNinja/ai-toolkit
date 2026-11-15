@@ -11,7 +11,8 @@ then deletes them all as stale (microsoft/apm#3372).
            holds the committed copy, so the materialize diff shows upstream
            changes. Run it only right before `apm install`.
   check    fail if a locked dependency deploys nothing, a deployed file is
-           missing, or a committed .agents/skills/ file isn't in the lock.
+           missing or git-ignored, or a committed .agents/skills/ file isn't
+           in the lock.
 
 Usage: apm-external-skills.py {prepare,check} [--root DIR]
 
@@ -91,7 +92,21 @@ def tracked_skill_files(root):
     return [path for path in out.split("\0") if path]
 
 
-def check(root, deps, tracked):
+def ignored_paths(root, paths):
+    """Return the paths that .gitignore would keep out of the materialize PR."""
+    result = subprocess.run(
+        ["git", "check-ignore", "-z", "--stdin"],
+        cwd=root,
+        input="".join(f"{path}\0" for path in paths),
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode not in (0, 1):
+        raise subprocess.CalledProcessError(result.returncode, result.args, result.stdout, result.stderr)
+    return {path for path in result.stdout.split("\0") if path}
+
+
+def check(root, deps, tracked, ignored=frozenset()):
     problems = []
     claimed = set()
     for dep, files in sorted(deps.items()):
@@ -101,6 +116,8 @@ def check(root, deps, tracked):
         for entry in files:
             if not (root / entry).exists():
                 problems.append(f"{entry} from {dep} is missing")
+            elif entry in ignored and str(PurePosixPath(entry).parent) not in ignored:
+                problems.append(f"{entry} from {dep} is git-ignored; add a .gitignore exception for it")
         for folder in skill_dirs(files):
             anchor = folder / "SKILL.md"
             if str(anchor) not in files or not (root / anchor).is_file():
@@ -121,7 +138,8 @@ def main(argv=None):
         if args.command == "prepare":
             prepare(args.root, deps)
             return 0
-        problems = check(args.root, deps, tracked_skill_files(args.root))
+        claimed = sorted({entry for files in deps.values() for entry in files})
+        problems = check(args.root, deps, tracked_skill_files(args.root), ignored_paths(args.root, claimed))
     except (OSError, LockError, subprocess.CalledProcessError) as error:
         print(f"error: {error}", file=sys.stderr)
         return 2

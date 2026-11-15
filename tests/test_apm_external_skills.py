@@ -7,6 +7,7 @@ Materialize removes them first and checks the result. Standard library only.
 import importlib.util
 import io
 from pathlib import Path
+import subprocess
 import tempfile
 import unittest
 from contextlib import redirect_stderr, redirect_stdout
@@ -88,6 +89,21 @@ class WorkTreeTests(unittest.TestCase):
         with self.assertRaises(skills.LockError):
             skills.prepare(self.root, skills.locked_dependencies(LOCK))
         self.assertTrue((outside / "audit").is_dir())
+
+    def test_check_fails_when_a_deployed_skill_is_git_ignored(self):
+        (self.root / ".agents/skills/renamed").mkdir()
+        (self.root / ".agents/skills/renamed/SKILL.md").write_text("x\n", encoding="utf-8")
+        (self.root / "apm.lock.yaml").write_text(LOCK.replace(SKILL, ".agents/skills/renamed"), encoding="utf-8")
+        (self.root / ".gitignore").write_text(".agents/skills/*\n!.agents/skills/audit/\n", encoding="utf-8")
+        try:
+            subprocess.run(["git", "init", "-q", str(self.root)], check=True)
+        except (OSError, subprocess.CalledProcessError):
+            self.skipTest("git unavailable")
+        stderr = io.StringIO()
+        with redirect_stderr(stderr):
+            self.assertEqual(skills.main(["check", "--root", str(self.root)]), 1)
+        self.assertEqual(stderr.getvalue().count("git-ignored"), 1, stderr.getvalue())
+        self.assertIn(".agents/skills/renamed from owner/skills/skills/audit is git-ignored", stderr.getvalue())
 
     def test_check_passes_a_complete_deploy(self):
         deps = skills.locked_dependencies(LOCK)
