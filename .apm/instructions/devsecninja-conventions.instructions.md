@@ -1,5 +1,5 @@
 ---
-description: "DevSecNinja org-wide engineering conventions for AI agents: Conventional-Commit PR titles, an issue per PR, reviewable PR size, pre-PR checks, docs, and no force-push."
+description: "DevSecNinja org-wide engineering conventions for AI agents: Conventional-Commit PR titles, an issue per PR, reviewable PR size, pre-PR checks, docs, signed commits, and no force-push."
 applyTo: "**"
 ---
 
@@ -46,6 +46,24 @@ All commits require 1Password signing; halt if unavailable or denied.
   [small CL guidance](https://google.github.io/eng-practices/review/developer/small-cls.html).
 - Never force-push to `main` or any shared/protected branch. All changes land via
   PR through normal CI; branch protection is always respected.
+
+## Signed commits
+
+- Every commit MUST be signed and show **Verified** on GitHub. Never create or
+  push unsigned commits, and never disable signing (`commit.gpgsign=false`,
+  `--no-gpg-sign`).
+- **Local git:** commit with the configured signing (1Password SSH key). If
+  signing fails, retry, then wait and retry; if it stays unavailable or is
+  denied, stop. Never fall back to an unsigned commit.
+- **API-only commits** (repo not cloned locally): use GraphQL
+  `createCommitOnBranch`, which GitHub signs. Never use REST `git/commits`,
+  `git/trees` or contents `PUT` for commits that end up in a PR. In repo-steward,
+  use its steward commit helper (DevSecNinja/repo-steward#82).
+- Never commit directly to the default branch; use a branch and a PR.
+- Before asking for review, check every PR commit is verified:
+  `gh api repos/{o}/{r}/pulls/{n}/commits --jq '.[].commit.verification.verified'`.
+- Bots and workflows MUST NOT `git push` unsigned `GITHUB_TOKEN` commits to
+  protected branches; create them via the API with a GitHub App token instead.
 
 ## Reusing centralized artifacts
 
