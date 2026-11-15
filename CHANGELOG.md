@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.11.1](https://github.com/DevSecNinja/ai-toolkit/compare/v0.11.0...v0.11.1) (2026-11-15)
+
+
+### Bug Fixes
+
+* **hooks:** run the pre-commit hooks natively on Windows ([#243](https://github.com/DevSecNinja/ai-toolkit/issues/243)) ([955d48c](https://github.com/DevSecNinja/ai-toolkit/commit/955d48c57af46975876b0c31acdcecdb92fc07e6))
+* keep committed external skills through APM Materialize ([#240](https://github.com/DevSecNinja/ai-toolkit/issues/240)) ([c7cc7a2](https://github.com/DevSecNinja/ai-toolkit/commit/c7cc7a2938b4f0f47066a80fb59eaae0ba64222f))
+
 ## [0.11.0](https://github.com/DevSecNinja/ai-toolkit/compare/v0.10.0...v0.11.0) (2026-11-13)
 
 
