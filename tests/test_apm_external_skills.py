@@ -116,6 +116,28 @@ class WorkTreeTests(unittest.TestCase):
         self.assertEqual(stderr.getvalue().count("git-ignored"), 1, stderr.getvalue())
         self.assertIn(".agents/skills/renamed from owner/skills/skills/audit is git-ignored", stderr.getvalue())
 
+    def test_check_against_a_base_revision_flags_a_dropped_companion(self):
+        git = ["git", "-C", str(self.root), "-c", "user.name=t", "-c", "user.email=t@t", "-c", "commit.gpgsign=false"]
+        companion = f"  - {SKILL}/SKILL.md\n  - {SKILL}/schema.json\n"
+        (self.root / f"{SKILL}/schema.json").write_text("{}\n", encoding="utf-8")
+        (self.root / "apm.lock.yaml").write_text(LOCK.replace(f"  - {SKILL}/SKILL.md\n", companion), encoding="utf-8")
+        try:
+            subprocess.run(["git", "init", "-q", str(self.root)], check=True)
+            subprocess.run([*git, "add", "apm.lock.yaml"], check=True)
+            subprocess.run([*git, "commit", "-qm", "base"], check=True)
+        except (OSError, subprocess.CalledProcessError):
+            self.skipTest("git unavailable")
+        base = subprocess.run([*git, "rev-parse", "HEAD"], check=True, capture_output=True, text=True).stdout.strip()
+        (self.root / f"{SKILL}/schema.json").unlink()
+        (self.root / "apm.lock.yaml").write_text(LOCK, encoding="utf-8")
+        subprocess.run([*git, "commit", "-qam", "drop the companion"], check=True)
+        stderr = io.StringIO()
+        with redirect_stderr(stderr):
+            self.assertEqual(skills.main(["check", "--root", str(self.root)]), 0, stderr.getvalue())
+            self.assertEqual(skills.main(["check", "--root", str(self.root), "--base", base]), 1)
+            self.assertEqual(skills.main(["check", "--root", str(self.root), "--base", "no-such-rev"]), 2)
+        self.assertIn(f"{SKILL}/schema.json from owner/skills/skills/audit was dropped", stderr.getvalue())
+
     def test_check_passes_a_complete_deploy(self):
         deps = skills.locked_dependencies(LOCK)
         self.assertEqual(skills.check(self.root, deps, [f"{SKILL}/SKILL.md"]), [])

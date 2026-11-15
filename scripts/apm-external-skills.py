@@ -15,7 +15,7 @@ then deletes them all as stale (microsoft/apm#3372).
            commit HEAD's lock already pins, or a committed .agents/skills/
            file isn't in the lock.
 
-Usage: apm-external-skills.py {prepare,check} [--root DIR]
+Usage: apm-external-skills.py {prepare,check} [--root DIR] [--base REV]
 
 Standard library only. Parses the block-style YAML that APM writes.
 """
@@ -72,11 +72,13 @@ def locked_dependencies(text):
     return {dep: files for dep, (_, files) in parse_lock(text).items()}
 
 
-def committed_lock(root):
-    """Return the parsed apm.lock.yaml at HEAD, or {} when there is none."""
+def committed_lock(root, base=None):
+    """Return the parsed apm.lock.yaml at `base`; without one, HEAD's lock or {}."""
     result = subprocess.run(
-        ["git", "show", f"HEAD:{LOCK}"], cwd=root, capture_output=True, text=True, encoding="utf-8"
+        ["git", "show", f"{base or 'HEAD'}:{LOCK}"], cwd=root, capture_output=True, text=True, encoding="utf-8"
     )
+    if result.returncode != 0 and base:
+        raise LockError(f"cannot read {LOCK} at {base}: {result.stderr.strip()}")
     return parse_lock(result.stdout) if result.returncode == 0 else {}
 
 
@@ -162,6 +164,7 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("command", choices=("prepare", "check"))
     parser.add_argument("--root", type=Path, default=Path(__file__).resolve().parents[1])
+    parser.add_argument("--base", help="revision whose lock `check` compares against (default: HEAD)")
     args = parser.parse_args(argv)
     try:
         lock = parse_lock((args.root / LOCK).read_text(encoding="utf-8"))
@@ -171,7 +174,7 @@ def main(argv=None):
             return 0
         claimed = sorted({entry for files in deps.values() for entry in files})
         problems = check(args.root, deps, tracked_skill_files(args.root), ignored_paths(args.root, claimed))
-        problems += dropped_files(committed_lock(args.root), lock)
+        problems += dropped_files(committed_lock(args.root, args.base), lock)
     except (OSError, LockError, subprocess.CalledProcessError) as error:
         print(f"error: {error}", file=sys.stderr)
         return 2

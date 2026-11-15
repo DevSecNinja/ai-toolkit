@@ -227,7 +227,8 @@ the run when a locked dependency deploys nothing, loses a file (compared with
 the lock at `HEAD` while its commit is unchanged) or deploys a
 git-ignored file (a new or renamed skill folder needs its `.gitignore`
 negation), or when a committed `.agents/skills/` file isn't in the lock.
-`tests/test_apm_external_skills.py` runs the same check on every PR. Drop the
+`tests/test_apm_external_skills.py` runs the same check on every PR, and PR CI
+also runs `check --base <PR base>` so a PR can't drop a locked file. Drop the
 `prepare` step once apm-cli adopts unchanged committed skills
 ([microsoft/apm#3638](https://github.com/microsoft/apm/pull/3638)).
 
