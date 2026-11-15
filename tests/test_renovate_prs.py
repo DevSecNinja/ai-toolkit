@@ -12,9 +12,13 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
+from posix_shell import posix_shell
+
 
 ROOT = Path(__file__).resolve().parents[1]
 HELPER = ROOT / ".apm/skills/renovate-triage-and-merge/scripts/renovate_prs.py"
+FAKE_GH = ROOT / "tests/fixtures/renovate/gh"
+RUN_HELPER = ROOT / "tests/fixtures/renovate/run_helper.py"
 SPEC = importlib.util.spec_from_file_location("renovate_prs", HELPER)
 helper = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(helper)
@@ -955,20 +959,23 @@ class OfflineCliTests(unittest.TestCase):
         self.temp = tempfile.TemporaryDirectory(prefix="renovate-tests-", dir=os.environ.get("TMPDIR"))
         self.addCleanup(self.temp.cleanup)
         self.path = Path(self.temp.name)
-        fake = self.path / "gh"
-        shutil.copyfile(ROOT / "tests/fixtures/renovate/gh", fake)
-        fake.chmod(0o700)
         self.fixture = self.path / "scenario.json"
         self.log = self.path / "calls.jsonl"
-        self.env = dict(os.environ, PATH=f"{self.path}{os.pathsep}{os.environ['PATH']}",
-                        RENOVATE_GH_FIXTURE=str(self.fixture),
-                        RENOVATE_GH_LOG=str(self.log), PYTHONDONTWRITEBYTECODE="1")
-        # The fake gh must win even if a developer has live credentials.
-        self.env.pop("GH_DEBUG", None)
+        # The fake gh must win even if a developer has live credentials:
+        # run_helper.py routes every gh call to it, and gh gets no token or config.
+        self.env = dict(os.environ, RENOVATE_GH_FIXTURE=str(self.fixture),
+                        RENOVATE_GH_LOG=str(self.log), PYTHONDONTWRITEBYTECODE="1",
+                        GH_CONFIG_DIR=str(self.path / "gh-config"))
+        for name in ("GH_DEBUG", "GH_TOKEN", "GITHUB_TOKEN", "GH_ENTERPRISE_TOKEN", "GITHUB_ENTERPRISE_TOKEN"):
+            self.env.pop(name, None)
+
+    def fake_gh(self, args, payload):
+        return subprocess.run([sys.executable, str(FAKE_GH), *args], input=json.dumps(payload),
+                              env=self.env, text=True, capture_output=True, timeout=20, check=False)
 
     def invoke(self, args, scenario):
         self.fixture.write_text(json.dumps(scenario))
-        result = subprocess.run([sys.executable, str(HELPER), *args], env=self.env,
+        result = subprocess.run([sys.executable, str(RUN_HELPER), str(HELPER), *args], env=self.env,
                                 text=True, capture_output=True, timeout=20, check=False)
         self.assertEqual(json.loads(self.fixture.read_text()), [], result.stderr + result.stdout)
         return result
@@ -1044,18 +1051,12 @@ class OfflineCliTests(unittest.TestCase):
                     else:
                         field, value = ("jump", True) if action == "queue" else ("mergeMethod", "MERGE")
                         step["payload"]["variables"]["input"][field] = value
-                    result = subprocess.run(
-                        [str(self.path / "gh"), *step["args"]], input=json.dumps(step["payload"]),
-                        env=self.env, text=True, capture_output=True, timeout=20, check=False,
-                    )
+                    result = self.fake_gh(step["args"], step["payload"])
                     self.assertNotEqual(result.returncode, 0)
                     self.assertIn("Unexpected gh arguments or payload", result.stderr)
                     self.assertEqual(self.fixture.read_bytes(), original)
                     readback = scenario[1]
-                    result = subprocess.run(
-                        [str(self.path / "gh"), *readback["args"]], input=json.dumps(readback["payload"]),
-                        env=self.env, text=True, capture_output=True, timeout=20, check=False,
-                    )
+                    result = self.fake_gh(readback["args"], readback["payload"])
                     self.assertNotEqual(result.returncode, 0)
                     self.assertEqual(self.fixture.read_bytes(), original)
 
@@ -1406,8 +1407,9 @@ class RepositoryScriptTests(unittest.TestCase):
         return {**clean, "TMPDIR": str(self.path / "tmp")}
 
     def run_script(self, path):
-        return subprocess.run(["/bin/bash", path], cwd=self.path, capture_output=True,
-                              text=True, timeout=20, check=False, env=self.env())
+        # The scripts print UTF-8 (emoji) whatever the platform's locale encoding.
+        return subprocess.run([posix_shell(), path], cwd=self.path, capture_output=True,
+                              encoding="utf-8", timeout=20, check=False, env=self.env())
 
     def test_recursive_validation_on_system_bash(self):
         file = self.path / ".apm/prompts/nested/example.prompt.md"
@@ -1455,7 +1457,7 @@ class RepositoryScriptTests(unittest.TestCase):
         self.assertEqual(result.returncode, 1)
         self.assertIn("index marker pair", result.stderr)
         self.assertFalse((self.path / "README.md.tmp").exists())
-        self.assertEqual((self.path / "README.md").read_text(), "# Missing markers\n")
+        self.assertEqual((self.path / "README.md").read_text(encoding="utf-8"), "# Missing markers\n")
 
     def test_index_preserves_backslashes_in_descriptions(self):
         (self.path / ".apm/skills/example/SKILL.md").write_text(
@@ -1499,14 +1501,14 @@ class RepositoryScriptTests(unittest.TestCase):
         result = self.run_script("scripts/check-index.sh")
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("index marker pair", result.stderr)
-        self.assertEqual((self.path / "README.md").read_text(), "# Missing markers\n")
+        self.assertEqual((self.path / "README.md").read_text(encoding="utf-8"), "# Missing markers\n")
         self.assertFalse((self.path / "INDEX.md").exists())
         self.assertEqual(list((self.path / "tmp").iterdir()), [])
 
     def git(self, *args):
         return subprocess.run(["git", "-c", "user.name=t", "-c", "user.email=t@example.com",
                                "-c", "commit.gpgsign=false", *args], cwd=self.path, env=self.env(),
-                              capture_output=True, text=True, timeout=20, check=True).stdout
+                              capture_output=True, encoding="utf-8", timeout=20, check=True).stdout
 
     def init_repo_with_fresh_index(self):
         self.git("init", "-q")
@@ -1517,7 +1519,7 @@ class RepositoryScriptTests(unittest.TestCase):
     def test_stage_index_uses_staged_tree_only(self):
         self.init_repo_with_fresh_index()
         readme = self.path / "README.md"
-        readme.write_text("Unstaged prose.\n" + readme.read_text())
+        readme.write_text("Unstaged prose.\n" + readme.read_text(encoding="utf-8"), encoding="utf-8")
         (self.path / ".apm/prompts/staged.prompt.md").write_text(
             "---\ndescription: Staged prompt\ncategory: coding\n---\nBody.\n")
         (self.path / ".apm/prompts/untracked.prompt.md").write_text(
@@ -1529,9 +1531,9 @@ class RepositoryScriptTests(unittest.TestCase):
             staged = self.git("show", f":{name}")
             self.assertIn("Staged prompt", staged)
             self.assertNotIn("Untracked prompt", staged)
-            self.assertIn("Untracked prompt", (self.path / name).read_text())
+            self.assertIn("Untracked prompt", (self.path / name).read_text(encoding="utf-8"))
         self.assertNotIn("Unstaged prose.", self.git("show", ":README.md"))
-        self.assertTrue(readme.read_text().startswith("Unstaged prose.\n"))
+        self.assertTrue(readme.read_text(encoding="utf-8").startswith("Unstaged prose.\n"))
         self.assertEqual(list((self.path / "tmp").iterdir()), [])
 
     def test_git_fixtures_ignore_hook_git_environment(self):
