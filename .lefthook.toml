@@ -32,7 +32,7 @@ run = "PYTHONDONTWRITEBYTECODE=1 sh scripts/py.sh -m unittest discover -s tests 
 
 # Every locked dependency must still deploy its files (see #237).
 [pre-commit.commands.apm-external-skills]
-run = "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -p 'test_apm_external_skills.py'"
+run = "PYTHONDONTWRITEBYTECODE=1 sh scripts/py.sh -m unittest discover -s tests -p 'test_apm_external_skills.py'"
 
 # SkillSpector gate and report: severity policy, reviewed acceptances, PR comment.
 [pre-commit.commands.skillspector-gate]

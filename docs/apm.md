@@ -51,6 +51,32 @@ for offline fixtures, clean-context scenarios and live-enforcement limitations.
 | `scripts/generate-index.sh`           | Generates `INDEX.md` + README index **from** `.apm/`.                         |
 | `INDEX.md` / README index             | Generated, human-browsable catalog.                                           |
 
+### Humanizer
+
+[`blader/humanizer`](https://github.com/blader/humanizer) is vendored in
+[`.apm/skills/humanizer/`](../.apm/skills/humanizer/) from commit
+`b48c832f0f809c1b5658edbb838c2521b72f2413` (`v4.0.0`).
+Only the unmodified upstream `SKILL.md` and MIT `LICENSE` are included.
+The copyright notice and license travel with the skill.
+
+Upstream keeps `SKILL.md` at the repository root, not in a dedicated skill
+subfolder. APM 0.35.0 cannot install it as a single-file primitive, and the
+root plugin metadata produces duplicate skill deployments. Vendoring avoids
+those duplicates and excludes upstream workflows, plugin files and scripts.
+The `.apm/` source is included in the existing SkillSpector scan.
+
+Use it to edit AI-sounding prose after drafting a blog post, while preserving
+the author's voice, factual claims, citations and frontmatter. It complements
+repository-specific writing instructions, including the preference for
+"recommended practices" over "best practices"; those instructions still apply.
+Invoke it with `/humanizer` or ask to humanize a post by file path.
+
+Updates are manual: copy `SKILL.md` and `LICENSE` from a reviewed upstream
+commit, update the SHA above, and regenerate the index. Keep upstream text
+changes visible for external-primitives owner review.
+Consumers pinned to an older toolkit release will not receive this skill
+until they update their toolkit version and run `apm install`.
+
 ### MCP servers
 
 The toolkit also declares **MCP servers** under `dependencies.mcp:` in `apm.yml`.

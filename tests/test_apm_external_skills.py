@@ -6,11 +6,13 @@ Materialize removes them first and checks the result. Standard library only.
 
 import importlib.util
 import io
+import os
 from pathlib import Path
 import subprocess
 import tempfile
 import unittest
 from contextlib import redirect_stderr, redirect_stdout
+from unittest.mock import patch
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -73,6 +75,11 @@ class LockParsingTests(unittest.TestCase):
 
 class WorkTreeTests(unittest.TestCase):
     def setUp(self):
+        # Hook-exported Git variables must not redirect fixture operations to the real repo.
+        clean = {key: value for key, value in os.environ.items() if not key.startswith("GIT_")}
+        environment = patch.dict(os.environ, clean, clear=True)
+        environment.start()
+        self.addCleanup(environment.stop)
         tmp = tempfile.TemporaryDirectory()
         self.addCleanup(tmp.cleanup)
         self.root = Path(tmp.name)
@@ -162,6 +169,25 @@ class WorkTreeTests(unittest.TestCase):
         (self.root / f"{SKILL}/notes.md").unlink()
         deps = skills.locked_dependencies(LOCK.replace(f"  - {SKILL}/SKILL.md\n", ""))
         self.assertEqual(skills.check(self.root, deps, []), [f"{SKILL} from owner/skills/skills/audit has no deployed SKILL.md"])
+
+
+class FixtureIsolationTests(unittest.TestCase):
+    def test_fixture_commits_ignore_inherited_hook_git_environment(self):
+        with tempfile.TemporaryDirectory() as temp:
+            outside = Path(temp) / "outside"
+            hook_env = {
+                "GIT_DIR": str(outside / ".git"),
+                "GIT_WORK_TREE": str(outside),
+                "GIT_INDEX_FILE": str(outside / "index"),
+            }
+            with patch.dict(os.environ, hook_env):
+                fixture = WorkTreeTests("test_check_against_a_base_revision_flags_a_dropped_companion")
+                result = unittest.TestResult()
+                fixture.run(result)
+                self.assertTrue(result.wasSuccessful(), result.errors + result.failures)
+                self.assertEqual(result.skipped, [])
+                self.assertEqual(os.environ["GIT_DIR"], hook_env["GIT_DIR"])
+            self.assertFalse(outside.exists())
 
 
 class RepoTests(unittest.TestCase):
