@@ -51,6 +51,38 @@ for offline fixtures, clean-context scenarios and live-enforcement limitations.
 | `scripts/generate-index.sh`           | Generates `INDEX.md` + README index **from** `.apm/`.                         |
 | `INDEX.md` / README index             | Generated, human-browsable catalog.                                           |
 
+### Humanizer
+
+[`blader/humanizer`](https://github.com/blader/humanizer) is vendored in
+[`.apm/skills/humanizer/`](../.apm/skills/humanizer/) from commit
+`b48c832f0f809c1b5658edbb838c2521b72f2413` (`v4.0.0`).
+Only the unmodified upstream `SKILL.md` and MIT `LICENSE` are included.
+The copyright notice and license travel with the skill.
+
+Upstream keeps `SKILL.md` at the repository root, not in a dedicated skill
+subfolder. APM 0.35.0 cannot install it as a single-file primitive, and the
+root plugin metadata produces duplicate skill deployments. Vendoring avoids
+those duplicates and excludes upstream workflows, plugin files and scripts.
+The `.apm/` source is included in the existing SkillSpector scan.
+Its upstream formatting is preserved through a narrowly scoped dprint exclusion.
+
+Use it to edit AI-sounding prose after drafting a blog post, aiming to retain
+the author's voice and frontmatter. Review the result for accuracy: upstream
+patterns and examples can omit details or suggest unsupported specifics.
+The [writing-style instruction](../.apm/instructions/writing-style.instructions.md)
+requires read-only handling of review requests, verified support for factual
+additions, and a separate user decision on factual omissions or corrections.
+It also preserves safety-relevant caveats. Repository-specific writing
+instructions, including the preference for "recommended practices" over
+"best practices", still apply.
+Invoke it with `/humanizer` or ask to humanize a post by file path.
+
+Updates are manual: copy `SKILL.md` and `LICENSE` from a reviewed upstream
+commit, update the SHA above, and regenerate the index. Keep upstream text
+changes visible for external-primitives owner review.
+Consumers pinned to an older toolkit release will not receive this skill
+until they update their toolkit version and run `apm install`.
+
 ### MCP servers
 
 The toolkit also declares **MCP servers** under `dependencies.mcp:` in `apm.yml`.
@@ -327,7 +359,7 @@ workflow, which bumped `apm.yml` _after_ tagging and left the tag tree stale.)
 > line-folding change), which is fine because `apm.yml` is tool-formatted and
 > excluded from yamlfmt/yamllint. `tests/test_release_please_config.py` fails if
 > release-please can no longer find the version or it drifts from the manifest.
-
+>
 > **Never add `DevSecNinja/ai-toolkit` to its own `apm.yml`** (for example by
 > running the consumer `apm install DevSecNinja/ai-toolkit#vX.Y.Z` here). A
 > consumer pinning a newer tag would then also need the older ref of the same

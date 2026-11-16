@@ -5,6 +5,18 @@ redistributed under its own license, which is retained alongside the bundled
 files. This file is a convenience index — the authoritative license text travels
 with each bundled component.
 
+## humanizer skill
+
+- **Source:** [blader/humanizer](https://github.com/blader/humanizer/tree/b48c832f0f809c1b5658edbb838c2521b72f2413) (`v4.0.0`, commit `b48c832f0f809c1b5658edbb838c2521b72f2413`)
+- **Copyright:** © 2025 Siqi Chen
+- **License:** MIT
+- **Bundled at:** [`.apm/skills/humanizer/`](.apm/skills/humanizer/)
+- **License text:** [`.apm/skills/humanizer/LICENSE`](.apm/skills/humanizer/LICENSE)
+
+The `humanizer` skill includes only the unmodified upstream `SKILL.md` and
+`LICENSE`. Toolkit-specific editing safeguards are maintained separately in
+[the writing-style instruction](.apm/instructions/writing-style.instructions.md).
+
 ## obsidian skill
 
 - **Source:** [kepano/obsidian-skills](https://github.com/kepano/obsidian-skills) (the `obsidian-markdown` and `obsidian-bases` skills)

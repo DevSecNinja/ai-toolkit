@@ -5,6 +5,7 @@
     "**/node_modules",
     "**/CHANGELOG.md",
     "**/release-notes.md",
+    ".apm/skills/humanizer/**",
     "apm_modules/**",
     ".github/prompts/**",
     ".github/instructions/**",
