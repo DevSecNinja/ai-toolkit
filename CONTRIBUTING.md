@@ -121,6 +121,12 @@ What runs on **pre-commit**:
   — checks `apm.yml` doesn't list `ai-toolkit` as its own dependency.
 - `PYTHONDONTWRITEBYTECODE=1 sh scripts/py.sh -m unittest discover -s tests -p 'test_apm_overrides.py'`
   — checks vendored agents keep their `apm-overrides.json` pins.
+- `PYTHONDONTWRITEBYTECODE=1 sh scripts/py.sh -m unittest discover -s tests -p 'test_apm_external_skills.py'`
+  — checks every locked external dependency still deploys its files.
+- `PYTHONDONTWRITEBYTECODE=1 sh scripts/py.sh -m unittest discover -s tests -p 'test_hook_git_env.py'`
+  — runs the git-fixture tests with the `GIT_DIR` / `GIT_INDEX_FILE` a commit
+  in a linked worktree exports, and checks they don't touch that repo (such a
+  leak once wrote `core.bare = true` to the main checkout's config).
 - `PYTHONDONTWRITEBYTECODE=1 sh scripts/py.sh -m unittest discover -s tests -p 'test_skillspector*.py'`
   — checks the SkillSpector severity gate, reviewed acceptances and report rendering.
 - `bash scripts/stage-index.sh` — regenerates `INDEX.md` / `README.md` from the

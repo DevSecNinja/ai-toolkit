@@ -34,6 +34,10 @@ run = "PYTHONDONTWRITEBYTECODE=1 sh scripts/py.sh -m unittest discover -s tests 
 [pre-commit.commands.apm-external-skills]
 run = "PYTHONDONTWRITEBYTECODE=1 sh scripts/py.sh -m unittest discover -s tests -p 'test_apm_external_skills.py'"
 
+# Fixture repos must not touch the repo a commit hook points at (core.bare; #251).
+[pre-commit.commands.hook-git-env]
+run = "PYTHONDONTWRITEBYTECODE=1 sh scripts/py.sh -m unittest discover -s tests -p 'test_hook_git_env.py'"
+
 # SkillSpector gate and report: severity policy, reviewed acceptances, PR comment.
 [pre-commit.commands.skillspector-gate]
 run = "PYTHONDONTWRITEBYTECODE=1 sh scripts/py.sh -m unittest discover -s tests -p 'test_skillspector*.py'"
