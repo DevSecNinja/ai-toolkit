@@ -359,7 +359,7 @@ workflow, which bumped `apm.yml` _after_ tagging and left the tag tree stale.)
 > line-folding change), which is fine because `apm.yml` is tool-formatted and
 > excluded from yamlfmt/yamllint. `tests/test_release_please_config.py` fails if
 > release-please can no longer find the version or it drifts from the manifest.
-
+>
 > **Never add `DevSecNinja/ai-toolkit` to its own `apm.yml`** (for example by
 > running the consumer `apm install DevSecNinja/ai-toolkit#vX.Y.Z` here). A
 > consumer pinning a newer tag would then also need the older ref of the same
