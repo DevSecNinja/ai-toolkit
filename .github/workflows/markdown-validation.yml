@@ -102,6 +102,9 @@ jobs:
           git fetch --no-tags --depth=1 origin "${BASE_SHA}"
           python3 scripts/apm-external-skills.py check --base "${BASE_SHA}"
 
+      - name: Check test fixtures leave a commit hook's repo alone
+        run: PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -p 'test_hook_git_env.py' -v
+
       - name: Test SkillSpector gate and report
         run: PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -p 'test_skillspector*.py' -v
 

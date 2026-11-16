@@ -71,8 +71,13 @@ def hook_scripts():
     return sorted(scripts)
 
 
+def without_git_env():
+    # Drop the GIT_DIR / GIT_INDEX_FILE a commit hook exports (test_hook_git_env.py).
+    return {k: v for k, v in os.environ.items() if not k.startswith("GIT_")}
+
+
 def run_hook(script, payload, **env):
-    merged = {**os.environ, "SKIP_PUSH_APPROVAL": "", "SKIP_TOOL_GUARD": "", **env}
+    merged = {**without_git_env(), "SKIP_PUSH_APPROVAL": "", "SKIP_TOOL_GUARD": "", **env}
     return subprocess.run(
         [HOOK_BASH, str(script)],
         input=json.dumps(payload),
@@ -243,10 +248,9 @@ class FeatureBranchPushTest(unittest.TestCase):
         cls.tmp = tempfile.TemporaryDirectory()
         gitconfig = Path(cls.tmp.name) / "gitconfig"
         gitconfig.write_text("", encoding="utf-8")
-        cls.env = {"GIT_CONFIG_GLOBAL": str(gitconfig), "GIT_CONFIG_NOSYSTEM": "1"}
+        cls.env = {**without_git_env(), "GIT_CONFIG_GLOBAL": str(gitconfig), "GIT_CONFIG_NOSYSTEM": "1"}
         cls.repo = str(Path(cls.tmp.name) / "repo")
-        subprocess.run(["git", "init", "-q", "-b", "main", cls.repo], check=True,
-                       env={**os.environ, **cls.env})
+        subprocess.run(["git", "init", "-q", "-b", "main", cls.repo], check=True, env=cls.env)
         for args in (
             ["-c", "user.name=t", "-c", "user.email=t@example.com", "commit", "-q", "--allow-empty", "-m", "init"],
             ["remote", "add", "origin", "https://example.invalid/repo.git"],
@@ -269,8 +273,7 @@ class FeatureBranchPushTest(unittest.TestCase):
 
     @classmethod
     def git(cls, *args):
-        subprocess.run(["git", "-C", cls.repo, *args], check=True, capture_output=True,
-                       env={**os.environ, **cls.env})
+        subprocess.run(["git", "-C", cls.repo, *args], check=True, capture_output=True, env=cls.env)
 
     def setUp(self):
         self.git("checkout", "-q", "feat")
