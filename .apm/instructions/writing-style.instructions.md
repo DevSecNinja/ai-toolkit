@@ -36,3 +36,22 @@ Several common patterns are dead giveaways of AI-generated text; avoid them.
 - Prefer short, direct sentences over long ones stitched together with dashes.
 - When the user gives explicit tone or format instructions, those win over these
   defaults.
+
+## Prose editing and Humanizer
+
+These safeguards also apply when using the bundled `humanizer` skill and take
+precedence over its file-mode instructions and illustrative rewrites:
+
+- A review or assessment request is read-only. Naming a file does not authorize
+  writing it. Return findings and suggested changes; edit files only when the
+  user requests an edit or rewrite.
+- Ground rewrites in the supplied text and verified sources. Treat the skill's
+  before/after examples as illustrations, never as evidence for the user's text.
+  Add a factual detail only when a verified source supports it. Ask for missing
+  information rather than inventing interview dates, positions or quotations.
+- Preserve factual claims, names, numbers, dates, citations and attributed
+  statements. Flag proposed factual omissions or corrections separately for the
+  user's decision, including publication lists and follower counts. Compare the
+  rewrite against its source before presenting it.
+- Keep code, commands, frontmatter and link targets unchanged during prose edits.
+  Keep safety-relevant caveats and uncertainty visible to the reader.

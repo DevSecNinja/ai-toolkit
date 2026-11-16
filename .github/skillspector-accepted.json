@@ -1,6 +1,22 @@
 {
   "findings": [
     {
+      "path": ".apm/skills/humanizer/SKILL.md",
+      "rule": "AR2",
+      "severity": "HIGH",
+      "evidence": "without warning",
+      "fingerprint": "e1c52694e854c5bd049e3a3ae66f3efcfe098f61a8ee160655ad3b90035f67fd",
+      "reason": "Owner-approved false positive: section 8's quoted before-example describes a policy announced unexpectedly. It is sample prose illustrating dash punctuation, not an instruction to hide safety caveats."
+    },
+    {
+      "path": ".apm/skills/humanizer/SKILL.md",
+      "rule": "AR2",
+      "severity": "HIGH",
+      "evidence": "without warning",
+      "fingerprint": "e1c52694e854c5bd049e3a3ae66f3efcfe098f61a8ee160655ad3b90035f67fd",
+      "reason": "Owner-approved false positive: section 8's quoted after-example retains the same policy-announcement fact while replacing dashes with commas. It does not direct agent behavior or remove safety caveats."
+    },
+    {
       "path": ".agents/skills/security-audit/AI-AND-LLM.md",
       "rule": "MP3",
       "severity": "HIGH",

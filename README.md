@@ -108,6 +108,9 @@ apm install DevSecNinja/ai-toolkit#v0.11.1 --target copilot
 
 <!-- x-release-please-end -->
 
+The index reflects this checkout. Humanizer is not included in `v0.11.1`;
+install a newer release that includes it once available.
+
 > `apm install` resolves by GitHub repo name (`ai-toolkit`). Omit `#v0.1.0` to
 > install from the latest default branch, and omit `--target` to install into
 > every detected harness.

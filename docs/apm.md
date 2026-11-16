@@ -64,11 +64,17 @@ subfolder. APM 0.35.0 cannot install it as a single-file primitive, and the
 root plugin metadata produces duplicate skill deployments. Vendoring avoids
 those duplicates and excludes upstream workflows, plugin files and scripts.
 The `.apm/` source is included in the existing SkillSpector scan.
+Its upstream formatting is preserved through a narrowly scoped dprint exclusion.
 
-Use it to edit AI-sounding prose after drafting a blog post, while preserving
-the author's voice, factual claims, citations and frontmatter. It complements
-repository-specific writing instructions, including the preference for
-"recommended practices" over "best practices"; those instructions still apply.
+Use it to edit AI-sounding prose after drafting a blog post, aiming to retain
+the author's voice and frontmatter. Review the result for accuracy: upstream
+patterns and examples can omit details or suggest unsupported specifics.
+The [writing-style instruction](../.apm/instructions/writing-style.instructions.md)
+requires read-only handling of review requests, verified support for factual
+additions, and a separate user decision on factual omissions or corrections.
+It also preserves safety-relevant caveats. Repository-specific writing
+instructions, including the preference for "recommended practices" over
+"best practices", still apply.
 Invoke it with `/humanizer` or ask to humanize a post by file path.
 
 Updates are manual: copy `SKILL.md` and `LICENSE` from a reviewed upstream
