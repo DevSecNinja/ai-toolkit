@@ -1,5 +1,5 @@
 lockfile_version: '1'
-generated_at: '2026-11-13T10:52:08.556361+00:00'
+generated_at: '2026-11-15T20:35:34.690859+00:00'
 apm_version: 0.35.0
 dependencies:
 - repo_url: cloudflare/security-audit-skill
@@ -255,7 +255,7 @@ deployments:
   owners:
   - .
   active_owner: .
-  content_hash: sha256:a7405dfff20ef831ea4c91b1649723f2ad87fd3b45223f299aa364760311a5ac
+  content_hash: sha256:7ff5ba925c9e7dd8bfc220aeed4bf783c16c4da6f5988ac9f94617cba6b50eb8
 - kind: project-relative
   target: copilot
   value: .agents/skills/commitment-tracker
@@ -921,7 +921,7 @@ deployments:
   owners:
   - .
   active_owner: .
-  content_hash: sha256:ebe004f6416201b1c6869c6049931245fc62db407d6637a8a022e2d2766d2ac5
+  content_hash: sha256:b4cdfda56934eaa49498a1f78be4f2b1fd31d595efab2f61a71a47b179c9a1b4
 - kind: project-relative
   target: copilot
   value: .github/hooks/scripts/ai-toolkit/scripts/tool-guardian/guard-tool.sh
@@ -939,7 +939,7 @@ deployments:
   owners:
   - .
   active_owner: .
-  content_hash: sha256:8ced62d8d79f3bd41fdb2378dc1c38a04292039148c46b39df30f4adf8a628a5
+  content_hash: sha256:8e1936ded64c3e9c11b1e3377b573e5ad43409b222cdcf1c9253f19cf1e714c2
 - kind: project-relative
   target: copilot
   value: .github/instructions/untrusted-repositories.instructions.md
@@ -948,7 +948,7 @@ deployments:
   owners:
   - .
   active_owner: .
-  content_hash: sha256:894e27a4dcac80182d0f08506ce73631aaa0ed23f047185425592c21b32cd581
+  content_hash: sha256:e0f6c340dbeb6c254fa69e56f9394aa3e832897e3aec8565789412b0912be6cb
 - kind: project-relative
   target: copilot
   value: .github/instructions/writing-style.instructions.md
@@ -1048,7 +1048,7 @@ local_deployed_files:
 - .github/prompts/home-assistant-automation-renamer.prompt.md
 - .github/prompts/home-assistant-notification-optimizer.prompt.md
 local_deployed_file_hashes:
-  .agents/skills/commit-and-release/SKILL.md: sha256:a7405dfff20ef831ea4c91b1649723f2ad87fd3b45223f299aa364760311a5ac
+  .agents/skills/commit-and-release/SKILL.md: sha256:7ff5ba925c9e7dd8bfc220aeed4bf783c16c4da6f5988ac9f94617cba6b50eb8
   .agents/skills/commitment-tracker/SKILL.md: sha256:675f56e67ad756c0501806dbfb9e5d08466bda7daf202c3fbf7d72b22089cf36
   .agents/skills/email-follow-up-tracker/SKILL.md: sha256:79171aad8e4c17aa876a966015337b52d24c7c20c872001aa878066660b288c6
   .agents/skills/findmeetingtimes-timezone/SKILL.md: sha256:29a5d09945de8c6f8e5d04f71af6ba90eebf033db5b186b2bcfcd719b5cbe679
@@ -1077,10 +1077,10 @@ local_deployed_file_hashes:
   .github/agents/personal-assistant.agent.md: sha256:a48a53144bfc4bc62d2a20f2a984f1fb55ad9ec98d30dfeccff0276e86740b65
   .github/hooks/ai-toolkit-git-push-approval.json: sha256:e882ddb46538d7653a14b1e91273795c6c8023271fe1fb25ab371439f995839f
   .github/hooks/ai-toolkit-tool-guardian.json: sha256:ac518c3b22487e2ab72a2624262f7eb0739874853be30cf0db6184ff58d01e0b
-  .github/hooks/scripts/ai-toolkit/scripts/git-push-approval/require-push-approval.sh: sha256:ebe004f6416201b1c6869c6049931245fc62db407d6637a8a022e2d2766d2ac5
+  .github/hooks/scripts/ai-toolkit/scripts/git-push-approval/require-push-approval.sh: sha256:b4cdfda56934eaa49498a1f78be4f2b1fd31d595efab2f61a71a47b179c9a1b4
   .github/hooks/scripts/ai-toolkit/scripts/tool-guardian/guard-tool.sh: sha256:d500ad6b087dd2653d49590fc4926d21eaff66445f3057290808b63ea9440384
-  .github/instructions/devsecninja-conventions.instructions.md: sha256:8ced62d8d79f3bd41fdb2378dc1c38a04292039148c46b39df30f4adf8a628a5
-  .github/instructions/untrusted-repositories.instructions.md: sha256:894e27a4dcac80182d0f08506ce73631aaa0ed23f047185425592c21b32cd581
+  .github/instructions/devsecninja-conventions.instructions.md: sha256:8e1936ded64c3e9c11b1e3377b573e5ad43409b222cdcf1c9253f19cf1e714c2
+  .github/instructions/untrusted-repositories.instructions.md: sha256:e0f6c340dbeb6c254fa69e56f9394aa3e832897e3aec8565789412b0912be6cb
   .github/instructions/writing-style.instructions.md: sha256:4d3700565fafac3fa5f2a6ce8f7110b4716a81f44990bb71ccfd3f51d599452e
   .github/prompts/coding-copilot-onboarding.prompt.md: sha256:d629fb28e305b435fb016671ecdbc6f2fb2fe5be02b932d437fd7f0d1273129d
   .github/prompts/home-assistant-automation-renamer.prompt.md: sha256:46d8cb31d75f4ff73b1ace176ad52b523d5cf8feb6d8f9cbcf8e9b2ee74112f8

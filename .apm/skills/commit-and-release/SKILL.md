@@ -29,8 +29,9 @@ upstream PR triggers before opening a PR.
 For static-only work, report skipped runtime checks honestly. Do not bypass
 required hooks or protections to commit; stop if they require unauthorized
 execution. Normal checks still apply to trusted, execution-authorized work.
-All commits must use 1Password signing; halt if unavailable or denied, without
-substituting a signer or creating an unsigned commit.
+All local Git commits must use 1Password signing; halt if unavailable or
+denied, without substituting a signer or creating an unsigned commit. API-only
+commits use GitHub-signed GraphQL `createCommitOnBranch`.
 
 ## Conventional Commit format
 
