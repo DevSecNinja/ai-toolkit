@@ -56,5 +56,27 @@
       commitMessageSuffix: "",
       addLabels: ["external-primitives", "merge: manual"],
     },
+    {
+      // .python-version is the Python that mise installs for the hooks and CI
+      // sets up: the latest stable minor once it has been out for 90 days, so
+      // its first patches and tooling support have landed. The file holds
+      // major.minor; mise installs that minor's latest patch, so patches need
+      // no PR. The pyenv manager looks Python up as the `python` Docker image,
+      // whose `3.x` tag is re-pushed with every patch and image rebuild, so its
+      // timestamp never ages 90 days. endoflife.date dates each minor by its
+      // x.y.0 release instead; extractVersion turns its latest patch (3.14.10)
+      // into the minor (3.14). Its own PR keeps the 90-day bump separate from
+      // the weekly non-major group; the shared autoMerge preset merges a minor
+      // bump once CI, including the Windows hooks on the new Python, passes
+      // (a major, Python 4, stays manual like every major).
+      description: "Track the latest stable Python minor in .python-version, adopted 90 days after its release and auto-merged",
+      matchManagers: ["pyenv"],
+      matchFileNames: [".python-version"],
+      overrideDatasource: "endoflife-date",
+      overridePackageName: "python",
+      extractVersion: "^(?<version>\\d+\\.\\d+)",
+      minimumReleaseAge: "90 days",
+      groupName: null,
+    },
   ],
 }

@@ -14,3 +14,8 @@ trivy = "0.76.1"
 uv = "0.13.5"
 yamlfmt = "0.21.0"
 zizmor = "1.31.1"
+
+[settings]
+# Install Python from .python-version, its single source (#246). The file holds
+# major.minor, so mise installs that minor's latest patch.
+idiomatic_version_file_enable_tools = ["python"]

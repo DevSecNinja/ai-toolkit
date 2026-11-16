@@ -12,6 +12,7 @@ on:
     paths:
       - '.lefthook.toml'
       - '.mise.toml'
+      - '.python-version'
       - 'scripts/**'
       - 'tests/**'
       - '.apm/skills/*/scripts/**'
@@ -20,6 +21,7 @@ on:
     paths:
       - '.lefthook.toml'
       - '.mise.toml'
+      - '.python-version'
       - 'scripts/**'
       - 'tests/**'
       - '.apm/skills/*/scripts/**'
@@ -44,21 +46,15 @@ jobs:
         with:
           persist-credentials: false
 
-      # The floor scripts/py.sh accepts; tests/test_py_launcher.py keeps them equal.
-      - name: Set up Python
-        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
-        with:
-          python-version: "3.12"
-
-      - name: Install lefthook
+      # Python comes from .python-version via .mise.toml, as for contributors, and
+      # scripts/py.sh picks mise's Python first (#246); test_py_launcher.py fails
+      # if this step stops installing it.
+      - name: Install lefthook and Python
         uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
         with:
           # renovate: datasource=github-releases depName=jdx/mise
           version: "2026.10.19"
-          install_args: lefthook
+          install_args: lefthook python
 
       - name: Run pre-commit hooks
-        env:
-          # Make `py -3` pick the Python set up above, not a newer preinstalled one.
-          PY_PYTHON3: "3.12"
         run: '& (mise which lefthook) run pre-commit --all-files'
