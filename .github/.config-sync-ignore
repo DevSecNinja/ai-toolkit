@@ -1,6 +1,6 @@
-# Paths (relative to repo root) excluded from central config sync.
-# One path per line. Blank lines and `#` comments are allowed.
+# Paths config-sync must not overwrite (one per line, relative to the repo root).
+# Blank lines and `#` comments are allowed.
 
-# Renovate config is managed locally (extends the shared DevSecNinja/.github
-# preset); do not let config-sync overwrite it.
-renovate.json5
+# dprint.json excludes the vendored .apm/skills/humanizer/** skill, which must
+# keep its upstream formatting (#260).
+dprint.json
