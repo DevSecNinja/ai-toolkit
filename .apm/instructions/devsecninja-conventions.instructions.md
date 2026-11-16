@@ -29,9 +29,14 @@ API-only commits use the GitHub-signed path under "Signed commits".
   - Use `feat!:` / `fix!:` (or a `BREAKING CHANGE:` footer) for breaking changes.
     A new required input to a centralized/reusable workflow IS breaking, so
     Renovate does not automerge a change that breaks downstream CI.
-- For execution-authorized work, run lint and tests before opening a PR and fix anything that fails:
-  `mise exec -- lefthook run pre-commit` plus the repo's test command. Never open
-  a PR with known-failing checks. For static-only work, disclose skipped runtime
+- For execution-authorized work, run lint and tests before opening a PR and fix
+  anything that fails. If the repo configures Lefthook (a Lefthook config such
+  as `lefthook.yml` or `.lefthook.toml`), run
+  `mise exec -- lefthook run pre-commit` plus the repo's test command. Otherwise
+  run the lint, hook and test commands the repo documents (for example in
+  `CONTRIBUTING.md` or its `.github/copilot-instructions.md`); don't add or
+  install Lefthook just to satisfy this rule. Never open a PR with
+  known-failing checks. For static-only work, disclose skipped runtime
   checks instead of claiming they passed, and do not open a PR if doing so
   would trigger unauthorized workflows.
 - Update documentation in the same PR as the code it describes — READMEs, inline
@@ -122,9 +127,11 @@ and prefer reuse over duplication.
 ## Tooling and files
 
 - Tools are managed by [mise](https://mise.jdx.dev/) (`.mise.toml`); run them via
-  `mise exec -- <tool>` only within the authorized execution scope. Run
-  `mise exec -- lefthook run pre-commit` before committing when authorized;
-  otherwise stop before any commit that would run unapproved hooks or filters.
+  `mise exec -- <tool>` only within the authorized execution scope. When
+  authorized, run `mise exec -- lefthook run pre-commit` before committing in a
+  repo that configures Lefthook, or the repo's documented pre-commit checks in
+  one that doesn't. Without authorization, stop before any commit that would
+  run unapproved hooks or filters.
 - LF line endings; always end files with a trailing newline.
 - Don't hand-edit generated files (`CHANGELOG.md`, release-please manifests,
   lockfiles) — regenerate them via their owning tool.

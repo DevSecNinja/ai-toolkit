@@ -118,12 +118,18 @@ reproducible commands. Record the context identifier and results; after a fix,
 start a new tester rather than reusing its conversation. A fresh task/subagent
 is sufficient; no orchestration framework is needed.
 
+If the repo configures Lefthook (a Lefthook config such as `lefthook.yml` or
+`.lefthook.toml`), run:
+
 ```sh
 mise exec -- lefthook run pre-commit
 ```
 
-Plus the repo's own test command, if any. If anything fails, **stop and report**
-— do not commit or open a PR with known-failing checks.
+Otherwise run the lint and hook checks the repo documents (for example in
+`CONTRIBUTING.md`); don't add or install Lefthook just for this step.
+
+Either way, also run the repo's own test command, if any. If anything fails,
+**stop and report** — do not commit or open a PR with known-failing checks.
 
 ### 5. Commit and push
 
