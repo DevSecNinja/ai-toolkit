@@ -31,7 +31,7 @@ def without_git_env():
 
 def git(*args):
     return subprocess.run(["git", "-c", "user.name=t", "-c", "user.email=t@t", "-c", "commit.gpgsign=false", *args],
-                          env=without_git_env(), check=True, capture_output=True, text=True, timeout=60).stdout
+                          env=without_git_env(), check=True, capture_output=True, encoding="utf-8", timeout=60).stdout
 
 
 def snapshot(main, gitdir):
