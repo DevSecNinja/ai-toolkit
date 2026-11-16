@@ -101,10 +101,11 @@ for commands and clean-context behavior scenarios.
 This repo uses [lefthook](https://lefthook.dev) to run the same quality gates as
 CI before each commit. Inside the **Dev Container / Codespaces** the hooks are
 installed for you by `.devcontainer/post-create.sh`. For a local setup, install
-the pinned lefthook (see [`.mise.toml`](/.mise.toml)) and wire up the hooks:
+the pinned lefthook and the repo's Python (see [`.mise.toml`](/.mise.toml)) and
+wire up the hooks:
 
 ```bash
-mise install                    # installs the pinned lefthook
+mise install                    # installs the pinned lefthook and Python
 mise exec -- lefthook install   # wires up the git hooks
 ```
 
@@ -112,7 +113,8 @@ What runs on **pre-commit**:
 
 - `bash tests/validate-prompts.sh` — validates every primitive's frontmatter.
 - `PYTHONDONTWRITEBYTECODE=1 sh scripts/py.sh -m unittest discover -s tests -p 'test_py_launcher.py'`
-  — checks the Python launcher the other hooks use (see below).
+  — checks the Python launcher the other hooks use and that it, mise and CI
+  take the Python version from `.python-version` (see below).
 - `PYTHONDONTWRITEBYTECODE=1 sh scripts/py.sh -m unittest discover -s tests -p 'test_renovate_prs.py'`
   — exercises the Renovate helper with offline GitHub fixtures.
 - `PYTHONDONTWRITEBYTECODE=1 sh scripts/py.sh -m unittest discover -s tests -p 'test_release_please_config.py'`
@@ -133,17 +135,32 @@ What runs on **pre-commit**:
   **staged** primitives and stages only that result (unstaged README edits and
   untracked primitives stay out of the commit), so the index never drifts.
 
-The Python hooks run through [`scripts/py.sh`](/scripts/py.sh), which uses the
-first of `python3`, `py -3` (the Windows launcher) and `python` that is
-**Python 3.12 or newer**, the version CI tests. It skips the Microsoft Store
-`python3` stub and fails with a clear message when no suitable Python is found.
+The Python hooks run on the version in [`.python-version`](/.python-version)
+(major.minor, e.g. `3.14`), which `mise install` installs (with that minor's
+latest patch). [`scripts/py.sh`](/scripts/py.sh) uses mise's Python, or else
+the first of `python3`, `py -3` (the Windows launcher) and `python` that is at
+least that version. It skips the Microsoft Store `python3` stub and, when no
+suitable Python is found, fails with a clear message that says to run
+`mise install`.
+
+`.python-version` is the only place the version lives: mise installs it
+(`idiomatic_version_file_enable_tools` in `.mise.toml`), `py.sh` reads it, the
+**Windows Hooks** workflow installs it with mise, the other CI jobs set it up
+with `actions/setup-python`'s `python-version-file`, and
+`tests/test_py_launcher.py` fails if any of them stops doing so. It holds the
+**latest stable Python minor that has been out for 90 days**. Renovate dates
+each minor by its x.y.0 release on [endoflife.date](https://endoflife.date/python)
+and opens its own PR for a newer minor once it is 90 days old. That PR
+auto-merges when CI, including the Windows hooks on the new Python, passes.
+After it lands, run `mise install` to get the new Python.
 
 ### Windows
 
 The hooks run natively on Windows: lefthook runs them with Git for Windows'
 `sh`, so you don't need WSL. You need [Git for Windows](https://gitforwindows.org/)
-and Python 3.12+ (`winget install Python.Python.3.12`); the `py` launcher finds
-it even when `python3` is the Store stub. Clone with LF line endings
+and [mise](https://mise.jdx.dev/) (`winget install jdx.mise`); `mise install`
+downloads a prebuilt Python, and `py.sh` finds it even when `python3` is the
+Store stub. Clone with LF line endings
 (`git config --global core.autocrlf false` or `input`) because the shell hooks
 break on CRLF. The **Windows Hooks** workflow runs the same suite on
 `windows-latest` for changes to hooks, scripts and tests.
