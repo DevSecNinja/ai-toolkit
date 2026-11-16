@@ -4,6 +4,8 @@ name: SkillSpector
 # Static NVIDIA SkillSpector scan of every AI primitive. "Scan AI primitives"
 # reports on every PR so it can be a required check; it only builds and scans
 # when the PR touches AI primitives or the scanner (scripts/skillspector-changes.sh).
+# Findings surface as checks only: this job's gate, the Code Scanning "SkillSpector"
+# check from the SARIF upload, and the run summary. Nothing is posted as a PR comment.
 on:
   pull_request:
   push:
@@ -31,8 +33,6 @@ jobs:
     permissions:
       contents: read
       security-events: write
-    outputs:
-      scanned: ${{ steps.changes.outputs.relevant }}
     steps:
       - name: Harden runner
         uses: DevSecNinja/.github/actions/harden-runner@27fd66740c629ea38380dcd3bf93e7bc74c54247 # v1.9.0
@@ -98,52 +98,3 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
 
-  comment:
-    name: Post SkillSpector report
-    needs: scan
-    # Always reports on PRs: a skipped job blocks tools that require every check to succeed.
-    if: ${{ !cancelled() && github.event_name == 'pull_request' }}
-    runs-on: ubuntu-24.04
-    timeout-minutes: 5
-    permissions:
-      contents: read
-      pull-requests: write
-    env:
-      # Only same-repository PRs that were scanned get a comment; fork PRs have a read-only token.
-      POST: ${{ needs.scan.outputs.scanned == 'true' && !github.event.pull_request.head.repo.fork }}
-      # A PR that stopped changing AI primitives marks its earlier comment as stale instead.
-      CLEAR: ${{ needs.scan.outputs.scanned == 'false' && !github.event.pull_request.head.repo.fork }}
-    steps:
-      - name: Harden runner
-        uses: DevSecNinja/.github/actions/harden-runner@27fd66740c629ea38380dcd3bf93e7bc74c54247 # v1.9.0
-
-      - name: Checkout toolkit
-        if: env.POST == 'true' || env.CLEAR == 'true'
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-
-      - name: Download reports
-        if: env.POST == 'true'
-        # A missing artifact still produces a "no readable results" comment below.
-        continue-on-error: true
-        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
-        with:
-          name: skillspector-reports
-          path: ${{ runner.temp }}/skillspector-reports
-
-      - name: Create or update the PR comment
-        if: env.POST == 'true'
-        env:
-          GH_TOKEN: ${{ github.token }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-        run: >-
-          python3 scripts/skillspector-report.py "$RUNNER_TEMP/skillspector-reports/repository/summary.json"
-          --comment-pr "$PR_NUMBER"
-
-      - name: Mark an earlier PR comment as not needed
-        if: env.CLEAR == 'true'
-        env:
-          GH_TOKEN: ${{ github.token }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-        run: python3 scripts/skillspector-report.py --not-needed-pr "$PR_NUMBER"
