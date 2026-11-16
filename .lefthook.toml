@@ -39,7 +39,7 @@ run = "PYTHONDONTWRITEBYTECODE=1 sh scripts/py.sh -m unittest discover -s tests 
 [pre-commit.commands.hook-git-env]
 run = "PYTHONDONTWRITEBYTECODE=1 sh scripts/py.sh -m unittest discover -s tests -p 'test_hook_git_env.py'"
 
-# SkillSpector gate and report: severity policy, reviewed acceptances, PR comment.
+# SkillSpector gate and report: severity policy, reviewed acceptances, run summary and SARIF.
 [pre-commit.commands.skillspector-gate]
 run = "PYTHONDONTWRITEBYTECODE=1 sh scripts/py.sh -m unittest discover -s tests -p 'test_skillspector*.py'"
 

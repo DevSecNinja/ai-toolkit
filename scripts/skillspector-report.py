@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Render SkillSpector gate results: Actions summary, PR comment and SARIF.
+"""Render SkillSpector gate results: Actions run summary and SARIF for Code Scanning.
 
 Reads summary.json from scripts/scan-skills.py. Never changes the gate result.
 """
@@ -11,18 +11,15 @@ import json
 import os
 from pathlib import Path
 import re
-import subprocess
 import sys
 from urllib.parse import quote, urlsplit
 
 
 SEVERITIES = ("CRITICAL", "HIGH", "MEDIUM", "LOW")
 BLOCKING = ("CRITICAL", "HIGH")
-MARKER = "<!-- skillspector-report -->"
 SECURITY_SCORES = {"LOW": "3.0", "MEDIUM": "5.0", "HIGH": "8.0", "CRITICAL": "9.5"}
 LEVELS = {"LOW": "note", "MEDIUM": "warning", "HIGH": "error", "CRITICAL": "error"}
 VERDICTS = {0: "✅ Passed", 1: "❌ Blocked: HIGH/CRITICAL findings", 2: "⚠️ Failed: scan errors"}
-NOT_NEEDED = "➖ Not needed"
 
 
 ESCAPES = {ord(character): f"&#{ord(character)};" for character in "\\`*_{}[]()!|<>&\"'"}
@@ -95,12 +92,11 @@ def finding_table(items: list[dict], limit: int) -> list[str]:
     return lines
 
 
-def render(summary: dict, limit: int, pr: int | None = None) -> str:
+def render(summary: dict, limit: int) -> str:
     code = summary["exit_code"]
     version = summary.get("skillspector_version") or "unknown"
     revision = (os.environ.get("GITHUB_SHA") or "")[:7]
     lines = [
-        MARKER,
         f"## SkillSpector report: {VERDICTS.get(code, VERDICTS[2])}",
         "",
         f"SkillSpector {cell(version, 32)} static scan (no LLM, no network) of "
@@ -112,7 +108,7 @@ def render(summary: dict, limit: int, pr: int | None = None) -> str:
     ]
     items = findings(summary)
     if items:
-        lines.extend(["", "### Top findings" if limit <= 10 else "### Findings", "", *finding_table(items, limit)])
+        lines.extend(["", "### Findings", "", *finding_table(items, limit)])
     if summary["errors"]:
         lines.extend(["", "### Errors", ""])
         lines.extend(f"- {cell(item['target'], 120)}: {cell(item['error'], 600)}" for item in summary["errors"][:limit])
@@ -139,7 +135,7 @@ def render(summary: dict, limit: int, pr: int | None = None) -> str:
     links = []
     alerts = github_url("security", "code-scanning")
     if alerts:
-        query = quote(f"is:open tool:SkillSpector{f' pr:{pr}' if pr else ''}")
+        query = quote("is:open tool:SkillSpector")
         links.append(f"[Code Scanning alerts]({alerts}?query={query})")
     run = os.environ.get("GITHUB_RUN_ID")
     if run and github_url():
@@ -226,66 +222,14 @@ def analysis_complete(summary: dict) -> bool:
     )
 
 
-def gh(*args: str, payload: dict | None = None) -> str:
-    result = subprocess.run(
-        ["gh", "api", *args], input=json.dumps(payload) if payload else None,
-        capture_output=True, text=True, check=False, timeout=60,
-    )
-    if result.returncode:
-        raise RuntimeError(f"gh api {args[0]} failed: {result.stderr.strip()[:500]}")
-    return result.stdout
-
-
-def upsert_comment(pr: int, body: str, create: bool = True) -> None:
-    """Create the report comment or update the bot's previous one in place."""
-    repository = os.environ["GITHUB_REPOSITORY"]
-    existing = gh(
-        "--paginate", f"repos/{repository}/issues/{pr}/comments", "--jq",
-        f'.[] | select(.user.login == "github-actions[bot]" and (.body | startswith("{MARKER}"))) | .id',
-    ).split()
-    if existing:
-        gh("--method", "PATCH", f"repos/{repository}/issues/comments/{existing[0]}", "--input", "-",
-           payload={"body": body})
-    elif create:
-        gh("--method", "POST", f"repos/{repository}/issues/{pr}/comments", "--input", "-",
-           payload={"body": body})
-
-
-def not_needed() -> str:
-    revision = (os.environ.get("GITHUB_SHA") or "")[:7]
-    return (f"{MARKER}\n## SkillSpector report: {NOT_NEEDED}\n\n"
-            "This PR no longer changes AI primitives or the scanner"
-            + (f" at `{revision}`" if revision else "") + ", so it wasn't scanned. "
-            "Earlier results in this comment no longer apply.\n")
-
-
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("summary", type=Path, nargs="?", help="summary.json written by scan-skills.py")
+    parser.add_argument("summary", type=Path, help="summary.json written by scan-skills.py")
     parser.add_argument("--markdown", type=Path, help="Append the detailed Markdown summary here.")
     parser.add_argument("--sarif", type=Path, help="Write SARIF 2.1.0 for GitHub Code Scanning here.")
-    parser.add_argument("--comment-pr", type=int, help="Create or update the PR summary comment.")
-    parser.add_argument("--not-needed-pr", type=int,
-                        help="Mark an existing PR comment as not needed after the PR stops changing AI primitives.")
     args = parser.parse_args()
-    if args.not_needed_pr:
-        if args.summary or args.markdown or args.sarif or args.comment_pr:
-            parser.error("--not-needed-pr takes no summary or other outputs.")
-        try:
-            upsert_comment(args.not_needed_pr, not_needed(), create=False)
-        except (KeyError, RuntimeError, subprocess.TimeoutExpired) as error:
-            print(f"SkillSpector report failed: {error}", file=sys.stderr)
-            return 2
-        return 0
-    if not args.summary:
-        parser.error("a summary path is required.")
     try:
         if not args.summary.is_file():
-            if args.comment_pr:
-                # The scan job has already failed; say so on the PR instead of going silent.
-                run = github_url("actions", "runs", quote(os.environ.get("GITHUB_RUN_ID", ""), safe=""))
-                upsert_comment(args.comment_pr, f"{MARKER}\n## SkillSpector report: {VERDICTS[2]}\n\n"
-                               f"The scan produced no readable results; see the [workflow run]({run}).\n")
             raise ValueError(f"No summary at {args.summary}.")
         summary = json.loads(args.summary.read_text(encoding="utf-8"))
         if args.markdown:
@@ -293,9 +237,7 @@ def main() -> int:
                 stream.write(render(summary, limit=100))
         if args.sarif:
             args.sarif.write_text(json.dumps(build_sarif(summary), indent=2) + "\n", encoding="utf-8")
-        if args.comment_pr:
-            upsert_comment(args.comment_pr, render(summary, limit=10, pr=args.comment_pr))
-    except (OSError, KeyError, ValueError, RuntimeError, subprocess.TimeoutExpired) as error:
+    except (OSError, KeyError, ValueError) as error:
         print(f"SkillSpector report failed: {error}", file=sys.stderr)
         return 2
     return 0

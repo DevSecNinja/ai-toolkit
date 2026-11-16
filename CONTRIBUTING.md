@@ -206,19 +206,17 @@ Scans run in a non-root, read-only container with no network, no credentials,
 no LLM and bounded resources, with a three-minute timeout per target. A passing
 static scan is not a safety guarantee: OSV lookups use the offline fallback.
 
-**Where to read the report.**
+**Where to read the report.** Findings show up as checks, not as a PR comment.
 
-- A **PR comment** (updated in place on every re-run) shows counts by severity,
-  the top findings with file/line links, accepted items and links to the run.
-  Comments are posted only on PRs from this repository; fork PRs get a read-only
-  token. If a later push stops changing AI primitives, the comment is marked
-  "Not needed" so stale results don't linger.
-- The **Actions run summary** lists up to 100 findings and every analysis
-  limitation.
-- **Security > Code scanning** (tool: SkillSpector) holds every finding as
-  SARIF. GitHub ignores SARIF suppressions, so accepted findings are uploaded
-  as `<rule>/accepted` notes without a security severity. They stay visible but
-  can't trip Code Scanning's own severity threshold.
+- The **Scan AI primitives** check is the severity gate described above.
+- The **SkillSpector** check (Code Scanning, from the SARIF upload) annotates
+  findings on the PR's changed lines. **Security > Code scanning** (tool:
+  SkillSpector) holds every finding. GitHub ignores SARIF suppressions, so
+  accepted findings are uploaded as `<rule>/accepted` notes without a security
+  severity. They stay visible but can't trip Code Scanning's own severity
+  threshold, so an accepted finding fails neither check.
+- The **Actions run summary** shows counts by severity, up to 100 findings with
+  file/line links, and every analysis limitation.
 - The `skillspector-reports` artifact keeps raw JSON, scanner logs, `summary.json`
   and `findings.sarif` for 14 days. Reports can quote source text.
 
@@ -246,9 +244,7 @@ just to get a green check.
 **Making it a required check.** In **Settings > Rules > Rulesets**, add a status
 check rule for the default branch requiring **Scan AI primitives** (source:
 GitHub Actions). Because the job always reports, PRs that don't touch AI
-primitives aren't left waiting. Don't require **Post SkillSpector report**: it
-only posts on same-repository PRs that were scanned, and passes as a no-op
-otherwise. First, stop the
+primitives aren't left waiting. First, stop the
 [Generate Index workflow](.github/workflows/generate-index.yml) from pushing
 `[skip ci]` commits to PR branches with `GITHUB_TOKEN`. Those commits don't
 trigger CI, so a required check would stay pending on the new head.

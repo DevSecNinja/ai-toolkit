@@ -1,4 +1,4 @@
-"""Tests for SkillSpector report rendering, SARIF export and PR comment upserts."""
+"""Tests for SkillSpector run-summary rendering and SARIF export."""
 
 import importlib.util
 import json
@@ -47,14 +47,13 @@ class RenderTests(unittest.TestCase):
         patcher.start()
         self.addCleanup(patcher.stop)
 
-    def test_comment_counts_orders_blocking_first_and_links_sources(self):
+    def test_summary_counts_orders_blocking_first_and_links_sources(self):
         data = summary(
             finding("MEDIUM", "M1"), finding("HIGH", "H1", accepted="Reviewed deny-list."),
             finding("CRITICAL", "C1", line=9), finding("LOW", "L1"), exit_code=1,
         )
-        body = report.render(data, limit=10, pr=7)
-        self.assertTrue(body.startswith(report.MARKER))
-        self.assertIn("❌ Blocked", body)
+        body = report.render(data, limit=10)
+        self.assertTrue(body.startswith("## SkillSpector report: ❌ Blocked"))
         self.assertIn("| CRITICAL | 1 | 0 | 1 |", body)
         self.assertIn("| HIGH | 1 | 1 | 0 |", body)
         self.assertIn("| MEDIUM | 1 | - | - |", body)
@@ -63,7 +62,7 @@ class RenderTests(unittest.TestCase):
         self.assertIn("Accepted: Reviewed deny-list.", rows[3])
         self.assertTrue([line for line in body.splitlines() if line.startswith("| ")][-1].startswith("| LOW | L1"))
         self.assertIn("https://github.com/owner/repo/blob/abc1234def/.apm/skills/x/SKILL.md#L9", body)
-        self.assertIn("security/code-scanning?query=is%3Aopen%20tool%3ASkillSpector%20pr%3A7", body)
+        self.assertIn("security/code-scanning?query=is%3Aopen%20tool%3ASkillSpector)", body)
         self.assertIn("https://github.com/owner/repo/actions/runs/42", body)
 
     def test_untrusted_text_cannot_inject_markup_mentions_or_links(self):
@@ -156,43 +155,11 @@ class SarifTests(unittest.TestCase):
         self.assertIn("t: boom", invocation["toolExecutionNotifications"][0]["message"]["text"])
 
 
-class CommentTests(unittest.TestCase):
-    def setUp(self):
-        patcher = patch.dict(os.environ, ENV)
-        patcher.start()
-        self.addCleanup(patcher.stop)
-
-    def test_existing_bot_comment_is_updated_in_place(self):
-        with patch.object(report, "gh", side_effect=["101\n", ""]) as gh:
-            report.upsert_comment(7, "body")
-        self.assertIn("repos/owner/repo/issues/7/comments", gh.call_args_list[0].args)
-        self.assertEqual(gh.call_args_list[1].args[:3], ("--method", "PATCH", "repos/owner/repo/issues/comments/101"))
-        self.assertEqual(gh.call_args_list[1].kwargs["payload"], {"body": "body"})
-
-    def test_first_run_creates_a_comment(self):
-        with patch.object(report, "gh", side_effect=["", ""]) as gh:
-            report.upsert_comment(7, "body")
-        self.assertEqual(gh.call_args_list[1].args[:3], ("--method", "POST", "repos/owner/repo/issues/7/comments"))
-
-    def test_not_needed_updates_only_an_existing_comment(self):
-        with patch.object(report, "gh", side_effect=["101\n", ""]) as gh, \
-                patch("sys.argv", ["report", "--not-needed-pr", "7"]):
-            self.assertEqual(report.main(), 0)
-        self.assertEqual(gh.call_args_list[1].args[:2], ("--method", "PATCH"))
-        body = gh.call_args_list[1].kwargs["payload"]["body"]
-        self.assertTrue(body.startswith(report.MARKER))
-        self.assertIn("➖ Not needed", body)
-        with patch.object(report, "gh", side_effect=[""]) as gh, \
-                patch("sys.argv", ["report", "--not-needed-pr", "7"]):
-            self.assertEqual(report.main(), 0)
-        self.assertEqual(gh.call_count, 1)
-
-    def test_missing_summary_still_comments_and_fails(self):
-        with tempfile.TemporaryDirectory() as temporary, \
-                patch.object(report, "upsert_comment") as upsert, patch("sys.stderr"), \
-                patch("sys.argv", ["report", str(Path(temporary) / "summary.json"), "--comment-pr", "7"]):
+class CliTests(unittest.TestCase):
+    def test_missing_summary_fails(self):
+        with tempfile.TemporaryDirectory() as temporary, patch("sys.stderr"), \
+                patch("sys.argv", ["report", str(Path(temporary) / "summary.json")]):
             self.assertEqual(report.main(), 2)
-        self.assertIn("no readable results", upsert.call_args.args[1])
 
     def test_cli_writes_markdown_and_sarif(self):
         with tempfile.TemporaryDirectory() as temporary:
