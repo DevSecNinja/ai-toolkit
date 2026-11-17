@@ -29,24 +29,15 @@ STEPS:
 
 2. Classify each mail with the 11 ordered rules into the 9 numbered subfolders:
 
--
-  1. Follow-Up Today
--
-  2. Follow-Up Later
--
-  3. Waiting For
--
-  4. Read Later
--
-  5. External Newsletter
--
-  6. Internal Comms
--
-  7. Reference
--
-  8. Archive
--
-  9. Expenses.
+   1. Follow-Up Today
+   2. Follow-Up Later
+   3. Waiting For
+   4. Read Later
+   5. External Newsletter
+   6. Internal Comms
+   7. Reference
+   8. Archive
+   9. Expenses.
 
 - Move by folder ID, never by display name.
 - A move re-issues a new message ID. Always use the new ID for any later operation on that message.
