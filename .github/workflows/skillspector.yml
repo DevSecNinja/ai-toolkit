@@ -35,7 +35,7 @@ jobs:
       security-events: write
     steps:
       - name: Harden runner
-        uses: DevSecNinja/.github/actions/harden-runner@27fd66740c629ea38380dcd3bf93e7bc74c54247 # v1.9.0
+        uses: DevSecNinja/.github/actions/harden-runner@24acc67adf1be33089e73b2fdbdb4be8c12d145b # v3.2.0
 
       - name: Checkout toolkit
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
