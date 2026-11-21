@@ -20,6 +20,6 @@
     ".agents/**"
   ],
   "plugins": [
-    "https://plugins.dprint.dev/markdown-0.21.1.wasm"
+    "https://plugins.dprint.dev/markdown-0.29.0.wasm"
   ]
 }
