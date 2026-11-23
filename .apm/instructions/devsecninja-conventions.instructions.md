@@ -133,9 +133,12 @@ and prefer reuse over duplication.
   versions. Let Renovate keep them current thereafter.
 - Dependency provenance: prefer first-party/official sources (the vendor's own
   package or feed) over third-party or community-maintained wrappers. Before
-  introducing a community-owned package, devcontainer feature, or action,
-  evaluate its trustworthiness (maintainer, adoption, activity); when in doubt,
-  install from the official source (e.g. via a script) instead. For simple tasks
+  suggesting any third-party library, extension, plugin, action or devcontainer
+  feature, vet it and state the findings in the suggestion: adoption (stars,
+  downloads or dependents), maintenance (last release and commit; flag archived
+  repos or ones idle for ~12 months) and security risk (OSV/GitHub advisories,
+  maintainer count, what it can access, build-time vs runtime). When the risk is
+  unclear, prefer a no-dependency option or the official source. For simple tasks
   such as releases, issues or labels, prefer a small own script or plain `gh`
   over a third-party GitHub Action, and keep the Actions allowlist short.
 - Pin versions precisely: pin every external dependency, tool, and action to an
