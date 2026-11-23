@@ -1,5 +1,5 @@
 ---
-description: "DevSecNinja org-wide engineering conventions for AI agents: Conventional-Commit PR titles, an issue per PR, reviewable PR size, stacked PRs, PR readiness, pre-PR checks, docs, signed commits, and no force-push."
+description: "DevSecNinja org-wide engineering conventions for AI agents: Conventional-Commit PR titles, an issue per PR, reviewable PR size, stacked PRs, PR readiness, pre-PR checks, docs, signed commits, no force-push, tests, CI cost and simplicity."
 applyTo: "**"
 ---
 
@@ -133,15 +133,33 @@ and prefer reuse over duplication.
   versions. Let Renovate keep them current thereafter.
 - Dependency provenance: prefer first-party/official sources (the vendor's own
   package or feed) over third-party or community-maintained wrappers. Before
-  introducing a community-owned package, devcontainer feature, or action,
-  evaluate its trustworthiness (maintainer, adoption, activity); when in doubt,
-  install from the official source (e.g. via a script) instead.
+  suggesting any third-party library, extension, plugin, action or devcontainer
+  feature, vet it and state the findings in the suggestion: adoption (stars,
+  downloads or dependents), maintenance (last release and commit; flag archived
+  repos or ones idle for ~12 months) and security risk (OSV/GitHub advisories,
+  maintainer count, what it can access, build-time vs runtime). When the risk is
+  unclear, prefer a no-dependency option or the official source. For simple tasks
+  such as releases, issues or labels, prefer a small own script or plain `gh`
+  over a third-party GitHub Action, and keep the Actions allowlist short.
 - Pin versions precisely: pin every external dependency, tool, and action to an
   exact version — prefer a full commit SHA where the ecosystem supports it (e.g.
   GitHub Actions) — and let Renovate manage the bumps. Avoid floating refs like
   `latest`, `main`, or unpinned ranges. Consuming repos pin the tool versions
   they use (e.g. in `mise.toml`) rather than relying on a central default.
+- Tests: name each test after the behavior it covers, not the review round or
+  ticket. Have test runners write JUnit XML and publish it with the shared
+  `DevSecNinja/.github/actions/test-report` composite action (pinned by SHA,
+  `if: always()`) instead of third-party reporters.
+- Simplicity: prefer the simplest change that works and is verified. Avoid
+  extra automation, abstraction or configuration unless it's clearly needed.
 - Security: never commit plaintext secrets. Use SOPS, Vault, or GitHub Secrets.
+
+## CI cost
+
+Private repos run on GitHub Free's limited Actions minutes. Don't trigger
+unnecessary runs, re-runs or Copilot reviews on them. When the private minutes
+are used up, pause private-repo CI work until the monthly reset; never raise
+spending limits.
 
 ## Tooling and files
 
@@ -151,6 +169,10 @@ and prefer reuse over duplication.
   repo that configures Lefthook, or the repo's documented pre-commit checks in
   one that doesn't. Without authorization, stop before any commit that would
   run unapproved hooks or filters.
-- LF line endings; always end files with a trailing newline.
+- LF line endings, enforced via `.gitattributes` (`* text=auto eol=lf`), with
+  explicit, documented exceptions for files that must stay CRLF (e.g. `.ics`).
+  Always end files with a trailing newline.
+- Only commit files with a lasting purpose: no ad-hoc review notes, summaries or
+  scratch files.
 - Don't hand-edit generated files (`CHANGELOG.md`, release-please manifests,
   lockfiles) — regenerate them via their owning tool.
