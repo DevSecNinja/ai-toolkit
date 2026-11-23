@@ -1,5 +1,5 @@
 ---
-description: "DevSecNinja org-wide engineering conventions for AI agents: Conventional-Commit PR titles, an issue per PR, reviewable PR size, pre-PR checks, docs, signed commits, and no force-push."
+description: "DevSecNinja org-wide engineering conventions for AI agents: Conventional-Commit PR titles, an issue per PR, reviewable PR size, stacked PRs, PR readiness, pre-PR checks, docs, signed commits, and no force-push."
 applyTo: "**"
 ---
 
@@ -50,6 +50,25 @@ API-only commits use the GitHub-signed path under "Signed commits".
   build, test and make sense on their own, but don't split so finely that a PR
   can't be understood or tested alone. See Google's
   [small CL guidance](https://google.github.io/eng-practices/review/developer/small-cls.html).
+- Register dependent PRs as a GitHub native stack, bottom to top. Also stack PRs
+  in the same repo that touch the same files, to avoid merge conflicts. Merge a
+  stack from its top PR with **Merge stack**, which merges every PR below it, so
+  first check each of them is ready (see below). Where a native stack isn't
+  possible (cross-repo or fork PRs), merge in dependency order and rebase the
+  next PR onto its new base first: squash-merging a lower PR of a plain branch
+  chain leaves the higher PRs carrying its old commits, and they conflict.
+- Before pushing to a PR's branch, check that the PR isn't already merged. With
+  delete-branch-on-merge, a push after the merge recreates the branch and the
+  change never reaches `main`.
+- A PR is ready only when all checks are green and every reviewer is done with
+  all findings resolved. Public repos: request a Copilot review
+  (`gh pr edit <n> --add-reviewer @copilot`). Private repos: use the local
+  code-review agent instead, because Copilot reviews run on Actions minutes. Ask
+  CodeRabbit at most once and don't retry when it's rate-limited. Re-check
+  unresolved threads from all bots right before calling a PR ready.
+- Never recommend merging a PR, especially a bot PR, based on its title. Inspect
+  the actual diff, summarize what it changes, and flag unexpected deletions or
+  large rewrites.
 - Never force-push to `main` or any shared/protected branch. All changes land via
   PR through normal CI; branch protection is always respected.
 
