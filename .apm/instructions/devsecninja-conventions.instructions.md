@@ -52,8 +52,11 @@ API-only commits use the GitHub-signed path under "Signed commits".
   [small CL guidance](https://google.github.io/eng-practices/review/developer/small-cls.html).
 - Register dependent PRs as a GitHub native stack, bottom to top. Also stack PRs
   in the same repo that touch the same files, to avoid merge conflicts. Merge a
-  stack from its top PR with **Merge stack**: merging a lower PR on its own
-  leaves the higher PRs carrying its old commits, and they conflict.
+  stack from its top PR with **Merge stack**, which merges every PR below it, so
+  first check each of them is ready (see below). Where a native stack isn't
+  possible (cross-repo or fork PRs), merge in dependency order and rebase the
+  next PR onto its new base first: squash-merging a lower PR of a plain branch
+  chain leaves the higher PRs carrying its old commits, and they conflict.
 - Before pushing to a PR's branch, check that the PR isn't already merged. With
   delete-branch-on-merge, a push after the merge recreates the branch and the
   change never reaches `main`.
