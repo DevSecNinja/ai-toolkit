@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.12.0](https://github.com/DevSecNinja/ai-toolkit/compare/v0.11.1...v0.12.0) (2026-11-23)
+
+
+### Features
+
+* **skills:** vendor SHA-pinned Humanizer ([#249](https://github.com/DevSecNinja/ai-toolkit/issues/249)) ([cd8f83a](https://github.com/DevSecNinja/ai-toolkit/commit/cd8f83a2b3afcee9abb961053fc7011b452a39c0))
+
+
+### Bug Fixes
+
+* **hooks:** keep test fixtures from rewriting a worktree's shared git config ([#252](https://github.com/DevSecNinja/ai-toolkit/issues/252)) ([6a4be95](https://github.com/DevSecNinja/ai-toolkit/commit/6a4be953c9dfbb909abd0e905a1c0b1e26fe58d4))
+* **instructions:** require Lefthook only where the repo configures it ([#263](https://github.com/DevSecNinja/ai-toolkit/issues/263)) ([b4ff3e4](https://github.com/DevSecNinja/ai-toolkit/commit/b4ff3e46fb36f271b5c6ea9a25af836c3bc6b2d1))
+
 ## [0.11.1](https://github.com/DevSecNinja/ai-toolkit/compare/v0.11.0...v0.11.1) (2026-11-15)
 
 
