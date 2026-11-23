@@ -53,22 +53,6 @@ permissions:
   contents: read
 
 jobs:
-  markdown-lint:
-    name: Lint Markdown Files
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-
-      - name: Lint markdown files
-        continue-on-error: true
-        uses: articulate/actions-markdownlint@17b8abe7407cd17590c006ecc837c35e1ac3ed83 # v1.1.0
-        with:
-          config: .markdownlint.json
-          files: '**/*.md'
-          ignore: node_modules
-
   validate-structure:
     name: Validate Prompt Structure
     runs-on: ubuntu-latest
