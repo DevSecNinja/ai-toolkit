@@ -1,5 +1,5 @@
 lockfile_version: '1'
-generated_at: '2026-11-15T20:35:34.690859+00:00'
+generated_at: '2026-11-23T20:22:25.790042+00:00'
 apm_version: 0.35.0
 dependencies:
 - repo_url: cloudflare/security-audit-skill
@@ -255,7 +255,7 @@ deployments:
   owners:
   - .
   active_owner: .
-  content_hash: sha256:7ff5ba925c9e7dd8bfc220aeed4bf783c16c4da6f5988ac9f94617cba6b50eb8
+  content_hash: sha256:ab864b3cd572d46b573638dc3c11bf9eefdbec35c5ff09aa4b0bbed050de63ad
 - kind: project-relative
   target: copilot
   value: .agents/skills/commitment-tracker
@@ -330,6 +330,33 @@ deployments:
   content_hash: sha256:b08ff79cc3683176f458ecbc0daec4f3ef358f9ce3453022ce90ac5a2404ef22
 - kind: project-relative
   target: copilot
+  value: .agents/skills/humanizer
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: null
+- kind: project-relative
+  target: copilot
+  value: .agents/skills/humanizer/LICENSE
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:4ac4810254ab36d45419141aeb8e69bf50652cfafe5b2dab947d06d44e5cbf96
+- kind: project-relative
+  target: copilot
+  value: .agents/skills/humanizer/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:804a119e924ac30295b298213e0b71b3e38b2667b8ef4fb7b69e9246369b9045
+- kind: project-relative
+  target: copilot
   value: .agents/skills/inbox-triage-pass
   runtime: null
   scope: project
@@ -345,7 +372,7 @@ deployments:
   owners:
   - .
   active_owner: .
-  content_hash: sha256:cd4045ad38e5b50e8db41c3de7baa8ca8936ea98fa25cccb84328bd220efe52b
+  content_hash: sha256:80ecc16993f986fd710e3a2159cbf80fd74abe98c1a46eaf51b77a360847b0a3
 - kind: project-relative
   target: copilot
   value: .agents/skills/meeting-transcript-creation
@@ -939,7 +966,7 @@ deployments:
   owners:
   - .
   active_owner: .
-  content_hash: sha256:8e1936ded64c3e9c11b1e3377b573e5ad43409b222cdcf1c9253f19cf1e714c2
+  content_hash: sha256:e99e783b412d8b0892803bcd9c0de8f51c3d10e810471f3edf034ae69888809c
 - kind: project-relative
   target: copilot
   value: .github/instructions/untrusted-repositories.instructions.md
@@ -957,7 +984,7 @@ deployments:
   owners:
   - .
   active_owner: .
-  content_hash: sha256:4d3700565fafac3fa5f2a6ce8f7110b4716a81f44990bb71ccfd3f51d599452e
+  content_hash: sha256:9ab65d64aa2086a366cd414e6b2830f483383e889811c37e9aecb6ec2686f3e7
 - kind: project-relative
   target: copilot
   value: .github/prompts/coding-copilot-onboarding.prompt.md
@@ -966,7 +993,7 @@ deployments:
   owners:
   - .
   active_owner: .
-  content_hash: sha256:d629fb28e305b435fb016671ecdbc6f2fb2fe5be02b932d437fd7f0d1273129d
+  content_hash: sha256:c3ac9c4d9d8f135d9eb8a960f555825d41713efb3629c3597919ec27ba515510
 - kind: project-relative
   target: copilot
   value: .github/prompts/home-assistant-automation-renamer.prompt.md
@@ -1008,6 +1035,9 @@ local_deployed_files:
 - .agents/skills/findmeetingtimes-timezone/SKILL.md
 - .agents/skills/focus-time-blocker
 - .agents/skills/focus-time-blocker/SKILL.md
+- .agents/skills/humanizer
+- .agents/skills/humanizer/LICENSE
+- .agents/skills/humanizer/SKILL.md
 - .agents/skills/inbox-triage-pass
 - .agents/skills/inbox-triage-pass/SKILL.md
 - .agents/skills/meeting-transcript-creation
@@ -1048,12 +1078,14 @@ local_deployed_files:
 - .github/prompts/home-assistant-automation-renamer.prompt.md
 - .github/prompts/home-assistant-notification-optimizer.prompt.md
 local_deployed_file_hashes:
-  .agents/skills/commit-and-release/SKILL.md: sha256:7ff5ba925c9e7dd8bfc220aeed4bf783c16c4da6f5988ac9f94617cba6b50eb8
+  .agents/skills/commit-and-release/SKILL.md: sha256:ab864b3cd572d46b573638dc3c11bf9eefdbec35c5ff09aa4b0bbed050de63ad
   .agents/skills/commitment-tracker/SKILL.md: sha256:675f56e67ad756c0501806dbfb9e5d08466bda7daf202c3fbf7d72b22089cf36
   .agents/skills/email-follow-up-tracker/SKILL.md: sha256:79171aad8e4c17aa876a966015337b52d24c7c20c872001aa878066660b288c6
   .agents/skills/findmeetingtimes-timezone/SKILL.md: sha256:29a5d09945de8c6f8e5d04f71af6ba90eebf033db5b186b2bcfcd719b5cbe679
   .agents/skills/focus-time-blocker/SKILL.md: sha256:b08ff79cc3683176f458ecbc0daec4f3ef358f9ce3453022ce90ac5a2404ef22
-  .agents/skills/inbox-triage-pass/SKILL.md: sha256:cd4045ad38e5b50e8db41c3de7baa8ca8936ea98fa25cccb84328bd220efe52b
+  .agents/skills/humanizer/LICENSE: sha256:4ac4810254ab36d45419141aeb8e69bf50652cfafe5b2dab947d06d44e5cbf96
+  .agents/skills/humanizer/SKILL.md: sha256:804a119e924ac30295b298213e0b71b3e38b2667b8ef4fb7b69e9246369b9045
+  .agents/skills/inbox-triage-pass/SKILL.md: sha256:80ecc16993f986fd710e3a2159cbf80fd74abe98c1a46eaf51b77a360847b0a3
   .agents/skills/meeting-transcript-creation/SKILL.md: sha256:f8eae3f425e927765db6cad00744f53824ed0ab2d6bc66842ea64b508995cae3
   .agents/skills/morning-briefing/SKILL.md: sha256:6891d49b2391d4f4dd1e8ac0b536995a22750edd987a9db280c1ee3c19a9a63b
   .agents/skills/obsidian/LICENSE: sha256:64c64d48361edfe8610016441bf593256ea9b67f133b00f47c55aa29ee878567
@@ -1079,9 +1111,9 @@ local_deployed_file_hashes:
   .github/hooks/ai-toolkit-tool-guardian.json: sha256:ac518c3b22487e2ab72a2624262f7eb0739874853be30cf0db6184ff58d01e0b
   .github/hooks/scripts/ai-toolkit/scripts/git-push-approval/require-push-approval.sh: sha256:b4cdfda56934eaa49498a1f78be4f2b1fd31d595efab2f61a71a47b179c9a1b4
   .github/hooks/scripts/ai-toolkit/scripts/tool-guardian/guard-tool.sh: sha256:d500ad6b087dd2653d49590fc4926d21eaff66445f3057290808b63ea9440384
-  .github/instructions/devsecninja-conventions.instructions.md: sha256:8e1936ded64c3e9c11b1e3377b573e5ad43409b222cdcf1c9253f19cf1e714c2
+  .github/instructions/devsecninja-conventions.instructions.md: sha256:e99e783b412d8b0892803bcd9c0de8f51c3d10e810471f3edf034ae69888809c
   .github/instructions/untrusted-repositories.instructions.md: sha256:e0f6c340dbeb6c254fa69e56f9394aa3e832897e3aec8565789412b0912be6cb
-  .github/instructions/writing-style.instructions.md: sha256:4d3700565fafac3fa5f2a6ce8f7110b4716a81f44990bb71ccfd3f51d599452e
-  .github/prompts/coding-copilot-onboarding.prompt.md: sha256:d629fb28e305b435fb016671ecdbc6f2fb2fe5be02b932d437fd7f0d1273129d
+  .github/instructions/writing-style.instructions.md: sha256:9ab65d64aa2086a366cd414e6b2830f483383e889811c37e9aecb6ec2686f3e7
+  .github/prompts/coding-copilot-onboarding.prompt.md: sha256:c3ac9c4d9d8f135d9eb8a960f555825d41713efb3629c3597919ec27ba515510
   .github/prompts/home-assistant-automation-renamer.prompt.md: sha256:46d8cb31d75f4ff73b1ace176ad52b523d5cf8feb6d8f9cbcf8e9b2ee74112f8
   .github/prompts/home-assistant-notification-optimizer.prompt.md: sha256:bef7b8a47605fd61dcdd6eb1e60b8294e9f25f5bf2a60662e1cfa7a8c7e2b64a
