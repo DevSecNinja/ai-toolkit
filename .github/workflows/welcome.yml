@@ -9,6 +9,8 @@ on:
     types:
       - opened
 
+permissions: {}
+
 jobs:
   welcome:
     runs-on: ubuntu-latest
