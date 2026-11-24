@@ -92,8 +92,9 @@ bash scripts/generate-index.sh   # regenerate INDEX.md + README index (~1s)
 - **Generate Index** (`generate-index.yml`): on pull requests, `check-index.sh`
   fails if `INDEX.md` / `README.md` are stale (it never pushes to PR branches);
   on `main` it regenerates and commits the index (`[skip ci]`).
-- **Markdown Validation** (`markdown-validation.yml`): markdownlint + link check
-  (informational) and `validate-prompts.sh` (MUST pass).
+- **Markdown Validation** (`markdown-validation.yml`): `validate-prompts.sh`,
+  the unit tests and the consumer install check (MUST pass). Markdown formatting
+  is checked by the shared lint's dprint (`lint.yml`).
 - **Release Please** (`release-please.yml`): on push to `main` (or
   `workflow_dispatch`), calls the central `DevSecNinja/.github` reusable workflow
   to open/update a release PR. Merging it bumps `apm.yml` (via the config's
@@ -135,6 +136,9 @@ helper, run `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -p
 ## Markdown Configuration
 
 ### Linting Rules (`.markdownlint.json`)
+
+The VS Code markdownlint extension (recommended in `.vscode/extensions.json`)
+reads these rules; CI doesn't run markdownlint.
 
 - **MD013**: Line length - DISABLED
 - **MD033**: HTML tags - DISABLED
