@@ -46,7 +46,7 @@ jobs:
     steps:
       - name: Harden runner
         # renovate: datasource=github-tags depName=DevSecNinja/.github
-        uses: DevSecNinja/.github/actions/harden-runner@27fd66740c629ea38380dcd3bf93e7bc74c54247 # v1.9.0
+        uses: DevSecNinja/.github/actions/harden-runner@eadb4f166f27d0864147189741c7596560be39dd # v3.6.0
 
       - name: Generate App token
         id: app-token
@@ -149,7 +149,7 @@ jobs:
         id: open-pr
         if: steps.precheck.outputs.skip != 'true'
         # renovate: datasource=github-tags depName=DevSecNinja/.github
-        uses: DevSecNinja/.github/actions/open-pr@27fd66740c629ea38380dcd3bf93e7bc74c54247 # v1.9.0
+        uses: DevSecNinja/.github/actions/open-pr@eadb4f166f27d0864147189741c7596560be39dd # v3.6.0
         with:
           branch: chore/apm-materialize
           base: main
